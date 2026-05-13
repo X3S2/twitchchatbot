@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Response, Cookie, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -58,21 +59,20 @@ async def login(db: AsyncSession = Depends(get_db)):
 async def callback(
     code: str,
     state: str,
-    response: Response,
     db: AsyncSession = Depends(get_db),
 ):
-    """Verarbeitet den Twitch-OAuth-Callback."""
+    """Verarbeitet den Twitch-OAuth-Callback und leitet zum Frontend weiter."""
     result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
     app_cfg = result.scalar_one_or_none()
     if not app_cfg:
-        raise HTTPException(status_code=500, detail="Konfiguration fehlt")
+        return RedirectResponse(url="/login?error=config_missing")
 
     from ..core.security import decrypt_value
     client_id = decrypt_value(app_cfg.client_id_enc)
     client_secret = decrypt_value(app_cfg.client_secret_enc)
 
     if not client_id or not client_secret:
-        raise HTTPException(status_code=400, detail="Twitch-App nicht konfiguriert")
+        return RedirectResponse(url="/login?error=not_configured")
 
     async with httpx.AsyncClient() as client:
         # Code gegen Token tauschen
@@ -87,7 +87,7 @@ async def callback(
             },
         )
         if token_resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Token-Exchange fehlgeschlagen")
+            return RedirectResponse(url="/login?error=token_exchange_failed")
 
         token_data = token_resp.json()
         access_token = token_data["access_token"]
@@ -98,7 +98,7 @@ async def callback(
             headers={"Authorization": f"Bearer {access_token}", "Client-Id": client_id},
         )
         if user_resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Nutzerprofil nicht abrufbar")
+            return RedirectResponse(url="/login?error=profile_fetch_failed")
 
         twitch_user = user_resp.json()["data"][0]
 
@@ -127,9 +127,9 @@ async def callback(
         await db.flush()
     else:
         if user.is_banned:
-            raise HTTPException(status_code=403, detail="Account gesperrt")
+            return RedirectResponse(url="/login?error=banned")
         if user.soft_delete_at is not None:
-            raise HTTPException(status_code=403, detail="Account gelöscht")
+            return RedirectResponse(url="/login?error=deleted")
         user.twitch_username = twitch_username
         user.display_name = display_name
         user.avatar_url = avatar_url
@@ -152,12 +152,12 @@ async def callback(
     db.add(db_session)
     await db.commit()
 
-    # Cookies setzen (HttpOnly, SameSite=Strict)
+    # Cookies setzen + zum Dashboard weiterleiten
     is_prod = not settings.app_public_url.startswith("http://localhost")
-    response.set_cookie("access_token", access_jwt, httponly=True, samesite="strict", secure=is_prod, max_age=60 * 15)
-    response.set_cookie("refresh_token", refresh_jwt, httponly=True, samesite="strict", secure=is_prod, max_age=60 * 60 * 24 * 30)
-
-    return {"ok": True, "user_id": str(user.id), "role": user.role}
+    redirect = RedirectResponse(url="/", status_code=302)
+    redirect.set_cookie("access_token", access_jwt, httponly=True, samesite="lax", secure=is_prod, max_age=60 * 15)
+    redirect.set_cookie("refresh_token", refresh_jwt, httponly=True, samesite="lax", secure=is_prod, max_age=60 * 60 * 24 * 30)
+    return redirect
 
 
 @router.post("/refresh")
