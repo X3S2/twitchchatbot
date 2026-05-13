@@ -192,7 +192,11 @@
     "last_seen": "Zuletzt gesehen",
     "ban_history": "Ban-Verlauf (alle Kanäle)",
     "no_bans": "Keine Bans gefunden",
-    "no_results": "Keine Benutzer gefunden"
+    "no_results": "Keine Benutzer gefunden",
+    "exclusions": "Filter-Ausschlüsse",
+    "globally_excluded": "Global ausgeschlossen",
+    "exclude_global_all": "Global von allen Filtern ausschließen",
+    "excluded_tenants": "{{count}} Kanal-spezifische Ausschlüsse"
   },
   "mtb": {
     "title": "Multi-Twitch-Banner",

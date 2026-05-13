@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.14.0-blue)
+  ![Version](https://img.shields.io/badge/version-0.15.0-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -211,6 +211,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | Token-Validierung & User-Lookup | `v0.12.0` | ✅ Fertig | validate_token(), test-credentials Endpoint, echte Twitch-User-ID bei Multi-Ban |
 | AdminSettings Test-Credentials | `v0.13.0` | ✅ Fertig | Test-Button in AdminSettings, Code-Cleanup, i18n-Erweiterung |
 | SharedBans API-Alignment | `v0.14.0` | ✅ Fertig | Vollständiges Einladungssystem, Frontend-Backend-API-Abgleich |
+| TwitchUser-Ausschlüsse | `v0.15.0` | ✅ Fertig | Globaler/Tenant-Ausschluss, Admin-UI in TwitchUserSearch |
 
 ---
 

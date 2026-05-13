@@ -7,6 +7,17 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.15.0] — Twitch-User-Datenbank Ausschlüsse, TwitchUserSearch Erweiterung
+
+### Hinzugefügt
+- `backend/app/routers/twitch_users.py` — Neue Endpoints:
+  - `POST /{twitch_id}/exclude` — Tenant- oder global User von Filtern ausschließen
+  - `GET /{twitch_id}/exclusions` — Vorhandene Ausschlüsse abrufen
+- `frontend/src/pages/TwitchUserSearch.tsx` — Ausschluss-Panel für Admins: globaler Ausschluss mit einem Klick, Anzeige von bestehenden Ausschlüssen
+- `frontend/src/i18n/de.json` + `en.json` — neue Keys: `exclusions`, `globally_excluded`, `exclude_global_all`, `excluded_tenants`
+
+---
+
 ## [0.14.0] — SharedBans API-Alignment, Einladungssystem vollständig
 
 ### Hinzugefügt
