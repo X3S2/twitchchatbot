@@ -7,6 +7,20 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.10.0] — Twitch-Moderator-Check, Twitch-Client, Failover-Schutz
+
+### Hinzugefügt
+- `backend/app/core/twitch_client.py` — Neue Twitch Helix API Hilfsbibliothek: App-Access-Token (Client-Credentials), Moderatoren-Liste abrufen, User-Lookup
+- `backend/app/tasks/__init__.py` + `backend/app/tasks/mod_check.py` — Background-Task: alle 5 Minuten Twitch-Moderationsrechte aller Tenants prüfen; bei verlorenem Mod-Recht `revoked_at` setzen + Benachrichtigung an Streamer
+- `backend/app/routers/admin.py` — `POST /api/admin/mod-check` Endpoint zum manuellen Auslösen des Moderator-Checks
+- `backend/app/main.py` — `mod_check_loop()` als asyncio.Task beim App-Start
+
+### Geändert/Korrigiert
+- `backend/app/routers/bans.py` — `DELETE /{ban_id}?add_to_whitelist=true`: Setzt `failover_protected=True` statt zu löschen → verhindert erneutes automatisches Bannen durch Filter
+- `backend/app/main.py` — Shutdown-Logik für mehrere Background-Tasks generalisiert
+
+---
+
 ## [0.9.0] — Multi-Ban Backend, README-Aktualisierung
 
 ### Hinzugefügt

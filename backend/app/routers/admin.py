@@ -273,3 +273,14 @@ async def update_profile(
 
     await db.commit()
     return {"ok": True}
+
+
+# ── Moderator-Check ───────────────────────────────────────────
+
+@router.post("/mod-check", dependencies=[Depends(require_admin)])
+async def trigger_mod_check():
+    """Löst manuell einen vollständigen Moderator-Check für alle Tenants aus."""
+    from ..tasks.mod_check import run_mod_check
+    import asyncio
+    asyncio.create_task(run_mod_check())
+    return {"ok": True, "message": "Mod-Check wird im Hintergrund ausgeführt"}

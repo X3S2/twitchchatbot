@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 import asyncio
+import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -17,28 +18,34 @@ from .routers import (
     commands, stats, name_scan, twitch_users,
     multi_ban,
 )
+from .tasks.mod_check import mod_check_loop
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 limiter = Limiter(key_func=get_remote_address)
 
 _redis_task: asyncio.Task | None = None
+_mod_check_task: asyncio.Task | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _redis_task
+    global _redis_task, _mod_check_task
     redis = await get_redis()
     await redis.ping()
     # Redis-Subscriber als Background-Task starten
     _redis_task = asyncio.create_task(ws.redis_subscriber())
+    # Mod-Check Background-Task (alle 5 Minuten)
+    _mod_check_task = asyncio.create_task(mod_check_loop())
     yield
     # Shutdown
-    if _redis_task and not _redis_task.done():
-        _redis_task.cancel()
-        try:
-            await _redis_task
-        except asyncio.CancelledError:
-            pass
+    for task in (_redis_task, _mod_check_task):
+        if task and not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
     await close_redis()
 
 

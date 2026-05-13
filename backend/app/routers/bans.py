@@ -154,8 +154,14 @@ async def delete_ban(
     ban = result.scalar_one_or_none()
     if not ban:
         raise HTTPException(status_code=404)
-    await db.delete(ban)
-    await db.commit()
+    if add_to_whitelist:
+        # Failover-Schutz: Neuen Eintrag mit failover_protected=True anlegen statt löschen
+        ban.failover_protected = True
+        ban.note = (ban.note or "") + " [manuell entsperrt]"
+        await db.commit()
+    else:
+        await db.delete(ban)
+        await db.commit()
     return {"ok": True}
 
 
