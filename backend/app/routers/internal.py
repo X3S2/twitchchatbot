@@ -252,3 +252,28 @@ async def unban_notification(
     await db.commit()
 
     return {"ok": True, "protected": len(bans)}
+
+
+class BotPauseRequest(BaseModel):
+    tenant_id: str
+    paused: bool
+
+
+@router.post("/bot-pause")
+async def bot_pause(
+    data: BotPauseRequest,
+    _: None = Depends(_check_key),
+    db: AsyncSession = Depends(get_db),
+):
+    """Broadcaster setzt via !tcbstop/!tcbstart den Pause-Status des Bots."""
+    result = await db.execute(select(BotInstance).where(BotInstance.tenant_id == data.tenant_id))
+    instance = result.scalar_one_or_none()
+    if instance:
+        instance.status = "paused" if data.paused else "online"
+        await db.commit()
+    redis = await get_redis()
+    await redis.publish(
+        "tcb:tenants",
+        json.dumps({"type": "bot_pause", "tenant_id": data.tenant_id, "paused": data.paused}),
+    )
+    return {"ok": True}

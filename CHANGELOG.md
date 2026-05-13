@@ -7,6 +7,20 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.16.0] — Bot-Commands !tcbinfo, !tcbstats, !tcbstop, !tcbstart
+
+### Hinzugefügt
+- `bot-manager/app/bot_instance.py`:
+  - `!tcbinfo [term]` — zeigt aktive Filter-Infos oder sucht einen Filterbegriff (Mods)
+  - `!tcbstats` — zeigt Filter-Trefferstatistik der aktuellen Session (Mods)
+  - `!tcbstop` / `!tcbstart` — pausiert/reaktiviert den Bot im Kanal (nur Broadcaster)
+  - Neue Hilfsmethoden: `_cmd_tcbinfo`, `_cmd_tcbstats`, `_cmd_bot_pause`
+- `backend/app/routers/internal.py`:
+  - `POST /internal/bot-pause` mit `{tenant_id, paused}` — aktualisiert Bot-Status + Redis-Event
+  - Neues Pydantic-Model `BotPauseRequest`
+
+---
+
 ## [0.15.0] — Twitch-User-Datenbank Ausschlüsse, TwitchUserSearch Erweiterung
 
 ### Hinzugefügt

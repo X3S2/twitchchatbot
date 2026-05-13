@@ -100,6 +100,27 @@ class TwitchBotInstance(twitch_commands.Bot):
                     target_username = parts[1].lstrip("@")
                     await self._report_unban(target_username)
 
+            # !tcbinfo <term> — Infos über einen Chat-Filter-Begriff
+            if text.lower().startswith("!tcbinfo") and is_mod:
+                parts = text.split(maxsplit=1)
+                term = parts[1].strip() if len(parts) > 1 else ""
+                reply = await self._cmd_tcbinfo(term)
+                await message.channel.send(reply)
+
+            # !tcbstats — Filter-Trefferstatistik für diesen Kanal
+            elif text.lower() == "!tcbstats" and is_mod:
+                reply = await self._cmd_tcbstats()
+                await message.channel.send(reply)
+
+            # !tcbstop / !tcbstart — Bot für diesen Kanal pausieren/fortsetzen (nur Broadcaster)
+            elif text.lower() == "!tcbstop" and is_owner:
+                await self._cmd_bot_pause(True)
+                await message.channel.send("TCB-Bot pausiert. Tippe !tcbstart zum Fortsetzen.")
+
+            elif text.lower() == "!tcbstart" and is_owner:
+                await self._cmd_bot_pause(False)
+                await message.channel.send("TCB-Bot läuft wieder.")
+
             response = await handle_command(
                 message_text=text, user_id=user_id, username=username,
                 user_roles=user_roles, commands_config=self.config.get("commands", []),
@@ -191,6 +212,42 @@ class TwitchBotInstance(twitch_commands.Bot):
                 await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
         except Exception as exc:
             logger.warning("[%s] Unban-Meldung fehlgeschlagen: %s", self.channel_name, exc)
+
+    async def _cmd_tcbinfo(self, term: str) -> str:
+        """Gibt Infos über einen Filterbegriff oder allgemeine Bot-Infos aus."""
+        if not term:
+            filters = self.config.get("chat_filters", [])
+            name_filters = self.config.get("name_filters", [])
+            return f"TCB aktiv | Chat-Filter: {len(filters)} | Name-Filter: {len(name_filters)} | Modus: {self.config.get('bot_mode', 'shared')}"
+        # Suche den Begriff in allen Chat-Filtern
+        for f in self.config.get("chat_filters", []):
+            terms = [t.lower() if isinstance(t, str) else t.get("term", "").lower() for t in f.get("terms", [])]
+            if term.lower() in terms:
+                return f"'{term}' gefunden in Filter '{f.get('name', f['id'])}' | Aktion: {f.get('action', '?')} | Test-Modus: {'ja' if f.get('test_mode') else 'nein'}"
+        return f"'{term}' in keinem aktiven Filter gefunden."
+
+    async def _cmd_tcbstats(self) -> str:
+        """Gibt Filter-Trefferstatistik für diesen Tenant zurück."""
+        vmap = _violation_counts.get(self.tenant_id, {})
+        if not vmap:
+            return "Keine Filter-Treffer in dieser Session."
+        parts = []
+        for fid, users in vmap.items():
+            total = sum(users.values())
+            fname = next((f.get("name", fid) for f in self.config.get("chat_filters", []) if f["id"] == fid), fid)
+            parts.append(f"{fname}: {total}x")
+        return "TCB-Stats: " + " | ".join(parts[:5])  # max 5 filter
+
+    async def _cmd_bot_pause(self, pause: bool) -> None:
+        """Informiert das Backend über Pause/Fortsetzen."""
+        url = f"{settings.api_url}/api/internal/bot-pause"
+        payload = {"tenant_id": self.tenant_id, "paused": pause}
+        headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
+        except Exception as exc:
+            logger.warning("[%s] Bot-Pause-Meldung fehlgeschlagen: %s", self.channel_name, exc)
 
     def get_status(self) -> dict[str, Any]:
         return {"tenant_id": self.tenant_id, "channel": self.channel_name, "running": self._running, "reconnect_attempts": self._reconnect_attempts}
