@@ -7,6 +7,16 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.2] — Setup-Weiterleitung, README Bot-Token-Doku
+
+### Neu
+- **README: Bot OAuth-Token Anleitung** — Schritt-für-Schritt-Erklärung wie man den Bot-Token über twitchtokengenerator.com generiert, welche Scopes benötigt werden, und wo der Token eingetragen wird (Setup-Wizard oder Admin → Einstellungen).
+
+### Behoben
+- **Setup-Wizard: keine Weiterleitung nach Ersteinrichtung** — Nach erfolgreichem Abschicken des Setup-Formulars blieb man auf `/setup` stehen. Jetzt erfolgt nach 1,5 Sekunden automatisch eine Weiterleitung zu `/login`.
+
+---
+
 ## [0.22.1] — Filter-Nachrichtentext, Encoding-Fix, Bot-Fehleranzeige
 
 ### Neu

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 export default function Setup() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [clientId, setClientId] = useState('')
   const [clientSecret, setClientSecret] = useState('')
   const [botUsername, setBotUsername] = useState('')
@@ -29,6 +31,7 @@ export default function Setup() {
 
       if (res.ok) {
         setMessage({ type: 'success', text: t('setup.success') })
+        setTimeout(() => navigate('/login'), 1500)
       } else {
         const data = await res.json()
         if (data.detail?.includes('bereits')) {

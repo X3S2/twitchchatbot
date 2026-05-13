@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.19.0-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.2-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -154,6 +154,29 @@ Browser ──► tcb-nginx (Port 3080)
 3. OAuth Redirect URL: `http://localhost:3080/auth/callback` (oder deine öffentliche URL)
 4. Client-ID und Client-Secret notieren
 5. Im Setup-Wizard auf `/setup` eintragen
+
+### Bot OAuth-Token generieren
+
+Der Bot braucht einen eigenen OAuth-Token, mit dem er sich bei Twitch authentifiziert und dem Chat beitreten kann.
+
+**Schritt-für-Schritt:**
+
+1. Mit dem **Bot-Account** (z. B. ChatiBotii) bei Twitch einloggen — *nicht mit dem Haupt-Account*
+2. https://twitchtokengenerator.com aufrufen
+3. **„Bot Chat Token"** auswählen
+4. Diese Scopes aktivieren:
+   - `chat:read`
+   - `chat:edit`
+   - `channel:moderate`
+   - `moderator:manage:banned_users`
+5. „Generate Token!" klicken und bei Twitch autorisieren
+6. Den angezeigten **Access Token** kopieren — *(Prefix `oauth:` weglassen, falls vorhanden)*
+
+**Token eintragen:**
+- Beim **Setup-Wizard** (`/setup`): optionales Feld „Bot OAuth-Token (optional)" — empfohlen für die Ersteinrichtung
+- Oder nachträglich unter **Admin → Einstellungen → Shared Bot → Bot OAuth-Token**
+
+> Token verfällt nach 60 Tagen Inaktivität oder bei Passwortänderung des Bot-Accounts. In diesem Fall einfach neu generieren und eintragen.
 
 ### Wichtige .env-Variablen
 
