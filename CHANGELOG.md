@@ -7,6 +7,20 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.14.0] — SharedBans API-Alignment, Einladungssystem vollständig
+
+### Hinzugefügt
+- `backend/app/routers/bans.py` — Neue Endpoints passend zum Frontend:
+  - `GET /bans/shared` — Verbindungen mit `partner_channel_name`
+  - `DELETE /bans/shared/{id}` — Verbindung einseitig auflösen
+  - `GET /bans/invitations` — Eingehende Einladungen (pending)
+  - `POST /bans/invitations` — Einladung per Kanalname senden (`target_channel_name`)
+  - `POST /bans/invitations/{id}/accept` — Einladung annehmen
+  - `POST /bans/invitations/{id}/reject` — Einladung ablehnen
+  - Legacy-Alias `GET /bans/shared/connections` für Rückwärtskompatibilität
+
+---
+
 ## [0.13.0] — AdminSettings Test-Credentials Button, Code-Cleanup
 
 ### Hinzugefügt

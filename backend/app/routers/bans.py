@@ -279,36 +279,114 @@ async def _run_import_job(job_id: str, tenant_id: str, entries: list[ImportRow])
 
 # ── Shared Bans ───────────────────────────────────────────────
 
-@router.get("/shared/connections")
+@router.get("/shared")
 async def list_shared_connections(
     tenant_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    """Gibt alle geteilten Banlisten-Verbindungen für diesen Tenant zurück."""
     await _check_access(tenant_id, current_user, db, require_editor=False)
     result = await db.execute(
         select(SharedBanConnection).where(
             (SharedBanConnection.tenant_a_id == tenant_id) | (SharedBanConnection.tenant_b_id == tenant_id)
         )
     )
-    return [{"id": str(c.id), "tenant_a_id": str(c.tenant_a_id), "tenant_b_id": str(c.tenant_b_id), "status": c.status} for c in result.scalars().all()]
+    connections = result.scalars().all()
+    out = []
+    for c in connections:
+        partner_id = str(c.tenant_b_id) if str(c.tenant_a_id) == tenant_id else str(c.tenant_a_id)
+        role = "source" if str(c.tenant_a_id) == tenant_id else "target"
+        # Partner Kanal-Name laden
+        partner = await db.execute(select(Tenant).where(Tenant.id == partner_id))
+        partner_tenant = partner.scalar_one_or_none()
+        out.append({
+            "id": str(c.id),
+            "partner_channel_name": partner_tenant.channel_name if partner_tenant else partner_id,
+            "role": role,
+            "status": c.status,
+            "created_at": str(c.created_at),
+        })
+    return out
 
 
-@router.post("/shared/invite")
-async def send_invitation(
+@router.delete("/shared/{connection_id}")
+async def remove_shared_connection(
     tenant_id: str,
-    to_tenant_id: str,
+    connection_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
+    """Entfernt eine Banlisten-Sharing-Verbindung (beidseitig)."""
     await _check_access(tenant_id, current_user, db)
-    inv = BanInvitation(from_tenant_id=tenant_id, to_tenant_id=to_tenant_id)
+    result = await db.execute(
+        select(SharedBanConnection).where(
+            SharedBanConnection.id == connection_id,
+            (SharedBanConnection.tenant_a_id == tenant_id) | (SharedBanConnection.tenant_b_id == tenant_id)
+        )
+    )
+    conn = result.scalar_one_or_none()
+    if not conn:
+        raise HTTPException(status_code=404)
+    await db.delete(conn)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.get("/invitations")
+async def list_invitations(
+    tenant_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    """Listet eingehende Einladungen (pending) für diesen Tenant."""
+    await _check_access(tenant_id, current_user, db, require_editor=False)
+    result = await db.execute(
+        select(BanInvitation).where(
+            BanInvitation.to_tenant_id == tenant_id,
+            BanInvitation.status == "pending",
+        )
+    )
+    invs = result.scalars().all()
+    out = []
+    for inv in invs:
+        sender = await db.execute(select(Tenant).where(Tenant.id == inv.from_tenant_id))
+        sender_tenant = sender.scalar_one_or_none()
+        out.append({
+            "id": str(inv.id),
+            "sender_channel": sender_tenant.channel_name if sender_tenant else str(inv.from_tenant_id),
+            "created_at": str(inv.created_at),
+        })
+    return out
+
+
+class InvitationRequest(BaseModel):
+    target_channel_name: str
+
+
+@router.post("/invitations")
+async def send_invitation(
+    tenant_id: str,
+    data: InvitationRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    """Sendet eine Einladung zur geteilten Banliste an einen anderen Kanal."""
+    await _check_access(tenant_id, current_user, db)
+    # Ziel-Tenant suchen
+    target = await db.execute(select(Tenant).where(Tenant.channel_name == data.target_channel_name.lower().strip()))
+    target_tenant = target.scalar_one_or_none()
+    if not target_tenant:
+        raise HTTPException(status_code=404, detail="Kanal nicht gefunden")
+    if str(target_tenant.id) == tenant_id:
+        raise HTTPException(status_code=400, detail="Einladung an sich selbst nicht möglich")
+    inv = BanInvitation(from_tenant_id=tenant_id, to_tenant_id=str(target_tenant.id))
     db.add(inv)
     await db.commit()
     return {"ok": True}
 
 
-@router.post("/shared/invite/{invitation_id}/accept")
+@router.post("/invitations/{invitation_id}/accept")
 async def accept_invitation(
     tenant_id: str,
     invitation_id: str,
@@ -327,6 +405,36 @@ async def accept_invitation(
     db.add(conn)
     await db.commit()
     return {"ok": True}
+
+
+@router.post("/invitations/{invitation_id}/reject")
+async def reject_invitation(
+    tenant_id: str,
+    invitation_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    from datetime import datetime, timezone
+    await _check_access(tenant_id, current_user, db)
+    result = await db.execute(select(BanInvitation).where(BanInvitation.id == invitation_id, BanInvitation.to_tenant_id == tenant_id))
+    inv = result.scalar_one_or_none()
+    if not inv:
+        raise HTTPException(status_code=404)
+    inv.status = "rejected"
+    inv.resolved_at = datetime.now(timezone.utc)
+    await db.commit()
+    return {"ok": True}
+
+
+# Legacy-Alias
+@router.get("/shared/connections")
+async def list_shared_connections_legacy(
+    tenant_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    return await list_shared_connections(tenant_id, current_user, db)
+
 
 
 def _ban_dict(b: Ban) -> dict:
