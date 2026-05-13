@@ -1,8 +1,8 @@
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Plus, Trash2, Search } from 'lucide-react'
 
 interface Moderator {
   id: string
@@ -11,9 +11,21 @@ interface Moderator {
   role: string
 }
 
+interface TwitchUserSuggestion {
+  twitch_id: string
+  current_username: string
+}
+
 async function fetchMods(tenantId: string): Promise<Moderator[]> {
   const res = await fetch(`/api/tenants/${tenantId}/moderators`, { credentials: 'include' })
   if (!res.ok) throw new Error('Fehler')
+  return res.json()
+}
+
+async function searchTwitchUsers(q: string): Promise<TwitchUserSuggestion[]> {
+  if (q.length < 2) return []
+  const res = await fetch(`/api/twitch-users?q=${encodeURIComponent(q)}`, { credentials: 'include' })
+  if (!res.ok) return []
   return res.json()
 }
 
@@ -30,9 +42,9 @@ async function removeMod(tenantId: string, modId: string) {
   await fetch(`/api/tenants/${tenantId}/moderators/${modId}`, { method: 'DELETE', credentials: 'include' })
 }
 
-const ROLES = ['viewer', 'moderator', 'manager']
+const ROLES = ['viewer', 'editor']
 const roleBadge = (r: string) => {
-  const m: Record<string, string> = { viewer: 'bg-gray-100 text-gray-600', moderator: 'bg-green-100 text-green-700', manager: 'bg-blue-100 text-blue-700' }
+  const m: Record<string, string> = { viewer: 'bg-gray-100 text-gray-600', editor: 'bg-blue-100 text-blue-700' }
   return m[r] || 'bg-gray-100 text-gray-600'
 }
 
@@ -42,15 +54,43 @@ export default function TenantModerators() {
   const qc = useQueryClient()
   const { data: mods = [], isLoading } = useQuery({ queryKey: ['mods', id], queryFn: () => fetchMods(id!) })
   const [showForm, setShowForm] = useState(false)
-  const [userId, setUserId] = useState('')
   const [username, setUsername] = useState('')
-  const [role, setRole] = useState('moderator')
+  const [userId, setUserId] = useState('')
+  const [role, setRole] = useState('viewer')
+  const [suggestions, setSuggestions] = useState<TwitchUserSuggestion[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleUsernameChange = (val: string) => {
+    setUsername(val)
+    setUserId('')
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    if (val.length >= 2) {
+      searchTimer.current = setTimeout(async () => {
+        const results = await searchTwitchUsers(val)
+        setSuggestions(results)
+        setShowSuggestions(results.length > 0)
+      }, 300)
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }
+
+  const selectSuggestion = (s: TwitchUserSuggestion) => {
+    setUsername(s.current_username)
+    setUserId(s.twitch_id)
+    setSuggestions([])
+    setShowSuggestions(false)
+  }
 
   const addMut = useMutation({
     mutationFn: () => addMod(id!, { twitch_user_id: userId, twitch_username: username, role }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['mods', id] }); setShowForm(false); setUserId(''); setUsername('') },
   })
   const removeMut = useMutation({ mutationFn: (modId: string) => removeMod(id!, modId), onSuccess: () => qc.invalidateQueries({ queryKey: ['mods', id] }) })
+
+  const resetForm = () => { setShowForm(false); setUsername(''); setUserId(''); setSuggestions([]); setShowSuggestions(false) }
 
   return (
     <div className="p-6 space-y-4">
@@ -65,15 +105,46 @@ export default function TenantModerators() {
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
           <h2 className="font-semibold">{t('mods.add')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder={t('mods.user_id')} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
-            <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t('mods.username')} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
+            <div className="relative">
+              <div className="flex items-center gap-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent">
+                <Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <input
+                  value={username}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  placeholder={t('mods.username')}
+                  className="flex-1 bg-transparent text-sm outline-none"
+                />
+              </div>
+              {showSuggestions && (
+                <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
+                  {suggestions.map((s) => (
+                    <button key={s.twitch_id} onMouseDown={() => selectSuggestion(s)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between">
+                      <span>{s.current_username}</span>
+                      <span className="text-xs text-gray-400 font-mono">{s.twitch_id}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {userId && <p className="text-xs text-green-600 mt-1 font-mono">ID: {userId}</p>}
+              {!userId && username.length > 1 && suggestions.length === 0 && (
+                <p className="text-xs text-gray-400 mt-1">{t('mods.not_in_db')}</p>
+              )}
+            </div>
+            <div>
+              <input value={userId} onChange={(e) => setUserId(e.target.value)}
+                placeholder="Twitch ID (manuell)"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
+            </div>
             <select value={role} onChange={(e) => setRole(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm">
               {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => addMut.mutate()} disabled={!userId.trim()} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm disabled:opacity-50">{t('save')}</button>
-            <button onClick={() => setShowForm(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm">{t('cancel')}</button>
+            <button onClick={() => addMut.mutate()} disabled={!userId.trim() || !username.trim() || addMut.isPending}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm disabled:opacity-50">{t('save')}</button>
+            <button onClick={resetForm} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm">{t('cancel')}</button>
           </div>
         </div>
       )}

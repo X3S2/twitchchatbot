@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, and_
+from sqlalchemy import select, desc, and_, func
 from pydantic import BaseModel
 
 from ..core.database import get_db
@@ -407,19 +407,47 @@ async def get_audit_log(
     tenant_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
-    limit: int = 100,
+    limit: int = 50,
     offset: int = 0,
+    action: str = "",
 ):
     await _get_tenant_or_403(tenant_id, current_user, db)
+    query = select(AuditLog).where(AuditLog.tenant_id == tenant_id)
+    if action:
+        query = query.where(AuditLog.action.ilike(f"%{action}%"))
+
+    count_result = await db.execute(
+        select(func.count()).select_from(query.subquery())
+    )
+    total = count_result.scalar_one()
+
     result = await db.execute(
-        select(AuditLog)
-        .where(AuditLog.tenant_id == tenant_id)
-        .order_by(desc(AuditLog.created_at))
-        .limit(limit)
-        .offset(offset)
+        query.order_by(desc(AuditLog.created_at)).limit(limit).offset(offset)
     )
     logs = result.scalars().all()
-    return [{"id": str(l.id), "actor_id": str(l.actor_id) if l.actor_id else None, "action": l.action, "detail_json": l.detail_json, "created_at": l.created_at} for l in logs]
+
+    # Resolve actor usernames
+    actor_ids = [l.actor_id for l in logs if l.actor_id]
+    actor_map: dict = {}
+    if actor_ids:
+        user_result = await db.execute(
+            select(User).where(User.id.in_(actor_ids))
+        )
+        for u in user_result.scalars().all():
+            actor_map[str(u.id)] = u.twitch_username or u.display_name or str(u.id)
+
+    items = [
+        {
+            "id": str(l.id),
+            "actor_id": str(l.actor_id) if l.actor_id else None,
+            "actor_username": actor_map.get(str(l.actor_id)) if l.actor_id else None,
+            "action": l.action,
+            "detail": l.detail_json,
+            "created_at": l.created_at,
+        }
+        for l in logs
+    ]
+    return {"items": items, "total": total}
 
 
 # ── Dashboard-Widgets ─────────────────────────────────────────

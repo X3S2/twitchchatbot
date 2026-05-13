@@ -91,7 +91,8 @@
     "empty": "Keine Filter vorhanden",
     "terms": "Begriffe",
     "patterns": "Muster",
-    "tiers": "Stufen"
+    "tiers": "Stufen",
+    "name_placeholder": "Filter-Name"
   },
   "commands": {
     "title": "Bot-Befehle",
@@ -110,7 +111,8 @@
     "add": "Moderator hinzufügen",
     "empty": "Keine Moderatoren vorhanden",
     "user_id": "Twitch-User-ID",
-    "username": "Benutzername"
+    "username": "Benutzername suchen",
+    "not_in_db": "Nicht in der Datenbank – Twitch-ID manuell eingeben"
   },
   "audit": {
     "title": "Audit-Log",

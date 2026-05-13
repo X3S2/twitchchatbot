@@ -128,7 +128,7 @@ export default function AdminSettings() {
         <p className="text-xs text-gray-500">{t('admin.credentials_hint')}</p>
         <Field label="Client ID">
           <input value={form.client_id} onChange={(e) => set('client_id', e.target.value)}
-            placeholder={data.client_id_set ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' : ''} className={inputCls} />
+            placeholder={data.client_id_set ? '••••••••••••••••' : ''} className={inputCls} />
           {data.client_id_set && !form.client_id && (
             <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
           )}
@@ -136,7 +136,7 @@ export default function AdminSettings() {
         <Field label="Client Secret">
           <div className="relative">
             <input type={showClientSecret ? 'text' : 'password'} value={form.client_secret} onChange={(e) => set('client_secret', e.target.value)}
-              placeholder={data.client_secret_set ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' : ''} className={`${inputCls} pr-10`} />
+              placeholder={data.client_secret_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
             <button type="button" onClick={() => setShowClientSecret((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
               {showClientSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -154,8 +154,8 @@ export default function AdminSettings() {
           {testResult && (
             <span className={`text-xs font-medium ${testResult.ok ? 'text-green-600' : 'text-red-500'}`}>
               {testResult.ok
-                ? `âœ“ ${t('admin.credentials_ok')} (${Math.round((testResult.expires_in ?? 0) / 3600)}h)`
-                : `âœ— ${testResult.error || t('admin.credentials_fail')}`}
+                ? `✓ ${t('admin.credentials_ok')} (${Math.round((testResult.expires_in ?? 0) / 3600)}h)`
+                : `✗ ${testResult.error || t('admin.credentials_fail')}`}
             </span>
           )}
         </div>
@@ -169,7 +169,7 @@ export default function AdminSettings() {
         <Field label={t('admin.bot_token')}>
           <div className="relative">
             <input type={showBotToken ? 'text' : 'password'} value={form.bot_token} onChange={(e) => set('bot_token', e.target.value)}
-              placeholder={data.bot_token_set ? 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢' : ''} className={`${inputCls} pr-10`} />
+              placeholder={data.bot_token_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
             <button type="button" onClick={() => setShowBotToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
               {showBotToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>

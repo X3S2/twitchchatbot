@@ -7,6 +7,18 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.20.0] — UI-Bugfixes nach erstem Login
+
+### Behoben
+- **nginx**: `charset utf-8;` ergänzt — behebt Zeichendarstellungsfehler (â€¢ statt •) in Firefox
+- **AdminSettings.tsx**: Hardcodierte Platzhalter-Zeichen `â€¢` → `•`, `âœ"` → `✓`, `âœ—` → `✗` korrigiert (falsche Latin-1-Codierung in der Quelldatei)
+- **Audit-Log**: Backend-Endpoint `/api/tenants/{id}/audit` gab ein flaches Array zurück; Frontend erwartet `{items, total}` — nun korrekte Struktur inkl. `actor_username` (JOIN auf Users-Tabelle), `detail` (statt `detail_json`) und Unterstützung des `action`-Filterparameters
+- **ChatFilters**: „+ Filter erstellen"-Button hatte keinen `onClick`-Handler — Inline-Formular mit Name-Feld und API-Anbindung (`POST /filters/chat`) hinzugefügt
+- **NameFilters**: Gleicher Fix wie ChatFilters für `POST /filters/name`
+- **TenantModerators**: Rollen-Mismatch korrigiert (`moderator`/`manager` → `viewer`/`editor`, passend zum Backend); Username-Suche in lokaler DB mit Autocomplete-Dropdown hinzugefügt; Twitch-ID wird automatisch befüllt wenn User gefunden
+
+---
+
 ## [0.19.0] — Docker-Bugfixes, erster funktionaler Stack-Start
 
 ### Behoben

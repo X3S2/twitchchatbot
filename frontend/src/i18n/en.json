@@ -91,7 +91,8 @@
     "empty": "No filters found",
     "terms": "Terms",
     "patterns": "Patterns",
-    "tiers": "Tiers"
+    "tiers": "Tiers",
+    "name_placeholder": "Filter name"
   },
   "commands": {
     "title": "Bot Commands",
@@ -110,7 +111,8 @@
     "add": "Add Moderator",
     "empty": "No moderators found",
     "user_id": "Twitch User ID",
-    "username": "Username"
+    "username": "Search username",
+    "not_in_db": "Not in database – enter Twitch ID manually"
   },
   "audit": {
     "title": "Audit Log",
