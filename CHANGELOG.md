@@ -7,6 +7,18 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.0] — Dark-Mode-Dropdowns, Auth-Session, Stats-Tooltip, Bot-Token-Validierung
+
+### Behoben
+- **Dark Mode: `<select>`-Elemente** — `bg-transparent` führte in dark-mode zu weißem Hintergrund mit weißem Text (unsichtbar). Betroffene Dateien: `ChatFilters.tsx`, `NameFilters.tsx`, `TenantSettings.tsx`, `Commands.tsx`, `MultiTwitchBanner.tsx`. Fix: explizites `bg-white dark:bg-gray-800 dark:text-gray-100`.
+- **Stats-Seite: Tooltip-Overlay** — Recharts `<Tooltip />` hatte weißen Hintergrund ohne dark-mode-Styling (erschien als überlagerndes weißes Feld). Fix: `contentStyle` prop mit dynamischer Farbauswahl (hell/dunkel je nach `<html class="dark">`). `CartesianGrid`-Linienfarbe ebenfalls theme-abhängig.
+- **Auth-Session „Halb-ausgeloggt"** — Access-Token (15 min) lief ab, aber TanStack-Query-Cache (`staleTime: 5min`) lieferte noch `isAuthenticated=true`. API-Calls schlugen lautlos mit 401 fehl. Fixes: (1) `fetchMe` versucht jetzt automatisch `POST /api/auth/refresh` bei 401, bevor der Fehler geworfen wird; (2) `staleTime` auf 1 min reduziert; (3) `refetchInterval: 10min` — hält Token aktiv (vor 15-min-Ablauf). 
+- **Filter-Toggle 401 stumme Fehler** — `toggleFilter` in `ChatFilters` und `NameFilters` prüfte `res.ok` nicht → 401-Fehler wurden verschluckt, Toggle wirkte scheinbar erfolgreich. Fix: `res.ok`-Check und `throw new Error(status)`. `toggleMut` invalidiert jetzt bei 401 die Auth-Query → startet automatischen Refresh-Versuch.
+- **Bot: leeres Token → kein klarer Fehler** — Wenn kein Shared-Bot-Token konfiguriert war, startete die TwitchIO-Instanz kommentarlos und hing ohne je `event_ready` zu feuern. Bot-Manager meldet jetzt `status=error` mit Meldung „Kein Bot-Token konfiguriert", wenn nach Config-Load kein Token vorhanden ist.
+- **Bot-Start: fehlender Token-Check im Backend** — `POST /tenants/{id}/bot/start` prüfte nicht, ob ein Bot-Token in den App-Settings (shared mode) oder Tenant-Settings (own mode) eingetragen ist. Endpoint gibt jetzt `400` mit klarer Fehlermeldung zurück, bevor Bot-Manager kontaktiert wird.
+
+---
+
 ## [0.21.0] — Filter-Bearbeitung, Kanal-Verwaltung, Legal-Editor
 
 ### Neu

@@ -79,10 +79,14 @@ export default function StatsPage() {
             <h2 className="font-semibold mb-4">{t('stats.bans_over_time')}</h2>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke={typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'} />
                 <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
+                <Tooltip
+                  contentStyle={typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+                    ? { background: '#111827', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }
+                    : { background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#111827' }}
+                />
                 <Legend />
                 <Bar dataKey="bans" fill="#ef4444" name={t('stats.bans')} />
                 <Bar dataKey="timeouts" fill="#f59e0b" name={t('stats.timeouts')} />

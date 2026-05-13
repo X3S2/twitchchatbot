@@ -91,13 +91,13 @@ export default function Commands() {
             </div>
             <div>
               <label className="block text-xs font-medium mb-1">{t('commands.permission')}</label>
-              <select value={form.permission_level} onChange={(e) => setForm((f) => ({ ...f, permission_level: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm focus:outline-none">
+              <select value={form.permission_level} onChange={(e) => setForm((f) => ({ ...f, permission_level: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 text-sm focus:outline-none">
                 {PERMISSION_LEVELS.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium mb-1">{t('commands.action')}</label>
-              <select value={form.action_type} onChange={(e) => setForm((f) => ({ ...f, action_type: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm focus:outline-none">
+              <select value={form.action_type} onChange={(e) => setForm((f) => ({ ...f, action_type: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 text-sm focus:outline-none">
                 {ACTION_TYPES.map((a) => <option key={a} value={a}>{a}</option>)}
               </select>
             </div>

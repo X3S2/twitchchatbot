@@ -13,7 +13,13 @@ interface User {
 }
 
 async function fetchMe(): Promise<User> {
-  const res = await fetch('/api/auth/me', { credentials: 'include' })
+  let res = await fetch('/api/auth/me', { credentials: 'include' })
+  if (res.status === 401) {
+    // Try silent token refresh before giving up
+    const refreshRes = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })
+    if (!refreshRes.ok) throw new Error('unauthenticated')
+    res = await fetch('/api/auth/me', { credentials: 'include' })
+  }
   if (!res.ok) throw new Error('unauthenticated')
   return res.json()
 }
@@ -34,7 +40,9 @@ export function useAuth() {
     queryKey: ['auth', 'me'],
     queryFn: fetchMe,
     retry: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,          // 1 min — revalidates frequently
+    refetchInterval: 10 * 60 * 1000, // poll every 10 min (access token is 15 min)
+    refetchOnWindowFocus: true,
   })
 
   const logoutMutation = useMutation({

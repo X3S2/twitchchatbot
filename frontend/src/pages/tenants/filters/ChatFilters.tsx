@@ -22,7 +22,7 @@ interface EditState {
   terms: EditTerm[]; tiers: EditTier[]
 }
 
-const iCls = 'px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-purple-500'
+const iCls = 'px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 dark:text-gray-100 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500'
 
 async function fetchFilters(tenantId: string): Promise<ChatFilter[]> {
   const res = await fetch(`/api/tenants/${tenantId}/filters/chat`, { credentials: 'include' })
@@ -33,10 +33,11 @@ async function deleteFilter(tenantId: string, filterId: string) {
   await fetch(`/api/tenants/${tenantId}/filters/chat/${filterId}`, { method: 'DELETE', credentials: 'include' })
 }
 async function toggleFilter(tenantId: string, filterId: string, filter: ChatFilter) {
-  await fetch(`/api/tenants/${tenantId}/filters/chat/${filterId}`, {
+  const res = await fetch(`/api/tenants/${tenantId}/filters/chat/${filterId}`, {
     method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ enabled: !filter.enabled }),
   })
+  if (!res.ok) throw new Error(`${res.status}`)
 }
 async function duplicateFilter(tenantId: string, filterId: string) {
   await fetch(`/api/tenants/${tenantId}/filters/chat/${filterId}/duplicate`, { method: 'POST', credentials: 'include' })
@@ -71,7 +72,7 @@ export default function ChatFilters() {
   const [editing, setEditing] = useState<EditState | null>(null)
 
   const deleteMut = useMutation({ mutationFn: (fid: string) => deleteFilter(id!, fid), onSuccess: () => qc.invalidateQueries({ queryKey: ['chat-filters', id] }) })
-  const toggleMut = useMutation({ mutationFn: (filter: ChatFilter) => toggleFilter(id!, filter.id, filter), onSuccess: () => qc.invalidateQueries({ queryKey: ['chat-filters', id] }) })
+  const toggleMut = useMutation({ mutationFn: (filter: ChatFilter) => toggleFilter(id!, filter.id, filter), onSuccess: () => qc.invalidateQueries({ queryKey: ['chat-filters', id] }), onError: (e: Error) => { if (e.message === '401') qc.invalidateQueries({ queryKey: ['auth', 'me'] }) } })
   const dupMut = useMutation({ mutationFn: (fid: string) => duplicateFilter(id!, fid), onSuccess: () => qc.invalidateQueries({ queryKey: ['chat-filters', id] }) })
   const createMut = useMutation({ mutationFn: () => createFilter(id!, createName), onSuccess: () => { qc.invalidateQueries({ queryKey: ['chat-filters', id] }); setShowCreate(false); setCreateName('') } })
   const updateMut = useMutation({ mutationFn: () => updateFilter(id!, editing!.id, editing!), onSuccess: () => { qc.invalidateQueries({ queryKey: ['chat-filters', id] }); setEditing(null) } })

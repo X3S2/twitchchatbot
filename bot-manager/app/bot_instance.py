@@ -301,6 +301,24 @@ class BotInstance:
     async def start(self) -> None:
         if not self._config:
             await self._load_config()
+
+        # Validate that a token is available before trying to connect
+        mode = self._config.get("bot_mode", "shared")
+        if mode in ("own_bot", "own_full"):
+            token = self._config.get("own_bot_token", "")
+        else:
+            token = self._config.get("shared_bot_token", "")
+
+        if not token:
+            logger.error(
+                "Kein Bot-Token für channel=%s mode=%s — Bot kann nicht starten. "
+                "Bitte OAuth-Token in den Admin-Einstellungen eintragen.",
+                self.channel, mode,
+            )
+            # Report error status to the API so the dashboard shows a clear error
+            await self._report_start_error("Kein Bot-Token konfiguriert")
+            return
+
         self._bot = TwitchBotInstance(self.tenant_id, self.channel, self._config)
         self._task = asyncio.create_task(self._bot.start(), name=f"bot-{self.channel}")
         logger.info("BotInstance gestartet: channel=%s", self.channel)
@@ -327,6 +345,22 @@ class BotInstance:
         except Exception as exc:
             logger.warning("Config-Load fehlgeschlagen: %s", exc)
             self._config = {}
+
+    async def _report_start_error(self, message: str) -> None:
+        """Report an error status to the API when the bot cannot start."""
+        url = f"{settings.api_url}/api/internal/heartbeat"
+        headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+        payload = {
+            "tenant_id": self.tenant_id,
+            "status": "error",
+            "reconnect_attempts": 0,
+            "error_message": message,
+        }
+        try:
+            async with aiohttp.ClientSession() as session:
+                await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
+        except Exception as exc:
+            logger.warning("Fehler-Status konnte nicht gemeldet werden: %s", exc)
 
     def status(self) -> dict[str, Any]:
         return {

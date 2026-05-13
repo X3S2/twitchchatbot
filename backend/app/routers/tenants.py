@@ -286,10 +286,29 @@ async def start_bot(
     db: AsyncSession = Depends(get_db),
 ):
     from ..core.config import get_settings
+    from ..models.settings import AppSettings
     import httpx
     tenant = await _get_tenant_or_403(tenant_id, current_user, db)
     if not tenant.approved:
         raise HTTPException(status_code=400, detail="Tenant noch nicht genehmigt")
+
+    # Check that the required bot token is configured
+    bot_mode = tenant.bot_mode or "shared"
+    if bot_mode in ("own_bot", "own_full"):
+        if not tenant.own_bot_token_enc:
+            raise HTTPException(
+                status_code=400,
+                detail="Kein eigener Bot-Token konfiguriert. Bitte erst in Einstellungen → Eigener Bot den Token eintragen."
+            )
+    else:
+        # shared mode — check global app settings
+        cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+        app_cfg = cfg_result.scalar_one_or_none()
+        if not app_cfg or not app_cfg.bot_token_enc:
+            raise HTTPException(
+                status_code=400,
+                detail="Kein Shared-Bot-Token konfiguriert. Bitte erst in Admin → Einstellungen den Bot OAuth-Token eintragen."
+            )
 
     s = get_settings()
     async with httpx.AsyncClient() as client:

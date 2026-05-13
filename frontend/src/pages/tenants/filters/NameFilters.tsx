@@ -20,7 +20,7 @@ interface EditState {
   patterns: EditPattern[]; tiers: EditTier[]
 }
 
-const iCls = 'px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-transparent text-sm focus:outline-none focus:ring-1 focus:ring-purple-500'
+const iCls = 'px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 dark:text-gray-100 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500'
 
 async function fetchFilters(tenantId: string): Promise<NameFilter[]> {
   const res = await fetch(`/api/tenants/${tenantId}/filters/name`, { credentials: 'include' })
@@ -31,10 +31,11 @@ async function deleteFilter(tenantId: string, filterId: string) {
   await fetch(`/api/tenants/${tenantId}/filters/name/${filterId}`, { method: 'DELETE', credentials: 'include' })
 }
 async function toggleFilter(tenantId: string, filterId: string, current: boolean) {
-  await fetch(`/api/tenants/${tenantId}/filters/name/${filterId}`, {
+  const res = await fetch(`/api/tenants/${tenantId}/filters/name/${filterId}`, {
     method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ enabled: !current }),
   })
+  if (!res.ok) throw new Error(`${res.status}`)
 }
 async function createFilter(tenantId: string, name: string) {
   const res = await fetch(`/api/tenants/${tenantId}/filters/name`, {
@@ -65,7 +66,7 @@ export default function NameFilters() {
   const [editing, setEditing] = useState<EditState | null>(null)
 
   const deleteMut = useMutation({ mutationFn: (fid: string) => deleteFilter(id!, fid), onSuccess: () => qc.invalidateQueries({ queryKey: ['name-filters', id] }) })
-  const toggleMut = useMutation({ mutationFn: ({ fid, cur }: { fid: string; cur: boolean }) => toggleFilter(id!, fid, cur), onSuccess: () => qc.invalidateQueries({ queryKey: ['name-filters', id] }) })
+  const toggleMut = useMutation({ mutationFn: ({ fid, cur }: { fid: string; cur: boolean }) => toggleFilter(id!, fid, cur), onSuccess: () => qc.invalidateQueries({ queryKey: ['name-filters', id] }), onError: (e: Error) => { if (e.message === '401') qc.invalidateQueries({ queryKey: ['auth', 'me'] }) } })
   const createMut = useMutation({ mutationFn: () => createFilter(id!, createName), onSuccess: () => { qc.invalidateQueries({ queryKey: ['name-filters', id] }); setShowCreate(false); setCreateName('') } })
   const updateMut = useMutation({ mutationFn: () => updateFilter(id!, editing!.id, editing!), onSuccess: () => { qc.invalidateQueries({ queryKey: ['name-filters', id] }); setEditing(null) } })
 
