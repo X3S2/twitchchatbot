@@ -198,6 +198,19 @@
     "exclude_global_all": "Global von allen Filtern ausschließen",
     "excluded_tenants": "{{count}} Kanal-spezifische Ausschlüsse"
   },
+  "name_scan": {
+    "title": "Name-Scan",
+    "active_filters": "Aktive Filter",
+    "available_filters": "Verfügbare Filter",
+    "no_optins": "Keine aktiven Name-Scan-Filter. Aktiviere einen Filter unten.",
+    "auto_ban": "Auto-Ban",
+    "activate": "Aktivieren",
+    "apply_all": "Alle jetzt bannen",
+    "apply_now": "Jetzt bannen",
+    "apply_result": "{{banned}} Benutzer gebannt, {{skipped}} bereits gebannt oder übersprungen.",
+    "confirm_apply": "Achtung: Diese Aktion bannt alle gefundenen Nutzer sofort!",
+    "confirm_checkbox": "Ich bestätige diesen Massen-Ban"
+  },
   "mtb": {
     "title": "Multi-Twitch-Banner",
     "description": "Benutzer auf mehreren Kanälen gleichzeitig bannen.",

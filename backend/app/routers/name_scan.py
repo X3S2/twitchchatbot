@@ -194,3 +194,63 @@ def _sf_dict(f: NameScanFilter) -> dict:
         "enabled": f.enabled,
         "created_at": f.created_at,
     }
+
+
+# ── Bulk-Apply für Tenant ─────────────────────────────────────
+
+@router.post("/tenants/{tenant_id}/filters/{filter_id}/apply-all")
+async def apply_all_scan_results(
+    tenant_id: str,
+    filter_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Bannt alle noch nicht gebannten Benutzer aus dem NameScan-Filter im Tenant.
+    Doppelte Bestätigung im Frontend erforderlich.
+    """
+    from ..models.ban import Ban
+
+    # Prüfen ob opt-in vorhanden
+    optin_result = await db.execute(
+        select(NameScanTenantOptin).where(
+            NameScanTenantOptin.tenant_id == tenant_id,
+            NameScanTenantOptin.scan_filter_id == filter_id,
+        )
+    )
+    if not optin_result.scalar_one_or_none():
+        raise HTTPException(status_code=403, detail="Kein Opt-in für diesen Filter")
+
+    # Alle Scan-Ergebnisse dieses Filters laden
+    results_q = await db.execute(
+        select(NameScanResult).where(NameScanResult.scan_filter_id == filter_id)
+    )
+    scan_results = results_q.scalars().all()
+
+    # Bereits gebannte User ermitteln (im Tenant)
+    existing_ban_q = await db.execute(
+        select(Ban.twitch_user_id).where(
+            Ban.tenant_id == tenant_id,
+            Ban.type == "permanent",
+        )
+    )
+    already_banned = {row[0] for row in existing_ban_q.all()}
+
+    new_bans = 0
+    for sr in scan_results:
+        if sr.twitch_user_id in already_banned:
+            continue
+        ban = Ban(
+            tenant_id=tenant_id,
+            twitch_user_id=sr.twitch_user_id,
+            twitch_username=sr.twitch_username,
+            type="permanent",
+            reason=f"[NameScan] {filter_id}",
+            source="name_scan_bulk",
+            created_by=current_user.id,
+        )
+        db.add(ban)
+        new_bans += 1
+
+    await db.commit()
+    return {"ok": True, "banned": new_bans, "skipped": len(scan_results) - new_bans}

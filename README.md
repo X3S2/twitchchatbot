@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.16.0-blue)
+  ![Version](https://img.shields.io/badge/version-0.17.0-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -213,6 +213,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | SharedBans API-Alignment | `v0.14.0` | ✅ Fertig | Vollständiges Einladungssystem, Frontend-Backend-API-Abgleich |
 | TwitchUser-Ausschlüsse | `v0.15.0` | ✅ Fertig | Globaler/Tenant-Ausschluss, Admin-UI in TwitchUserSearch |
 | Bot-Commands !tcbinfo/!tcbstats/!tcbstop/!tcbstart | `v0.16.0` | ✅ Fertig | Vollständige Chat-Befehle für Mods und Broadcaster |
+| Name-Scan Bulk-Apply | `v0.17.0` | ✅ Fertig | Massen-Ban aus NameScan-Filter mit doppelter Bestätigung |
 
 ---
 

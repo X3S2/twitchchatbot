@@ -30,6 +30,8 @@ import NameFilters from '../pages/tenants/filters/NameFilters'
 // Bans
 import BanList from '../pages/tenants/bans/BanList'
 import SharedBans from '../pages/tenants/bans/SharedBans'
+// Name Scan
+import TenantNameScan from '../pages/tenants/NameScan'
 // Commands
 import Commands from '../pages/tenants/commands/Commands'
 
@@ -79,6 +81,7 @@ export default function App() {
             <Route path="tenants/:id/filters/name" element={<NameFilters />} />
             <Route path="tenants/:id/bans" element={<BanList />} />
             <Route path="tenants/:id/bans/shared" element={<SharedBans />} />
+            <Route path="tenants/:id/name-scan" element={<TenantNameScan />} />
             <Route path="tenants/:id/commands" element={<Commands />} />
 
             {/* Utility routes */}

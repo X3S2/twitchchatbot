@@ -7,6 +7,21 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.17.0] — Name-Scan Bulk-Apply, Tenant-NameScan-Seite
+
+### Hinzugefügt
+- `backend/app/routers/name_scan.py`:
+  - `POST /name-scan/tenants/{tenant_id}/filters/{filter_id}/apply-all` — bannt alle noch nicht gebannten User aus einem Scan-Filter auf einmal (doppelte Bestätigung im Frontend)
+- `frontend/src/pages/tenants/NameScan.tsx` (NEU):
+  - Übersicht aktiver Opt-ins mit "Alle jetzt bannen"-Button
+  - Zweistufige Bestätigung (Text + Checkbox) vor Massen-Ban
+  - Opt-in/Opt-out für verfügbare Scan-Filter
+  - Ergebnisanzeige nach dem Bulk-Ban
+- `frontend/src/App.tsx` — Route `tenants/:id/name-scan` registriert
+- `frontend/src/i18n/de.json` + `en.json` — `name_scan`-Namespace hinzugefügt
+
+---
+
 ## [0.16.0] — Bot-Commands !tcbinfo, !tcbstats, !tcbstop, !tcbstart
 
 ### Hinzugefügt
