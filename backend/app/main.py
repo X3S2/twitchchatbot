@@ -15,6 +15,7 @@ from .routers import (
     ws, internal, notifications, tenants,
     chat_filters, name_filters, bans, jobs,
     commands, stats, name_scan, twitch_users,
+    multi_ban,
 )
 
 settings = get_settings()
@@ -97,6 +98,7 @@ app.include_router(commands.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(name_scan.router, prefix="/api")
 app.include_router(twitch_users.router, prefix="/api")
+app.include_router(multi_ban.router, prefix="/api")
 
 
 # ── Health-Check ──────────────────────────────────────────────

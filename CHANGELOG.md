@@ -7,6 +7,17 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.9.0] — Multi-Ban Backend, README-Aktualisierung
+
+### Hinzugefügt
+- `backend/app/routers/multi_ban.py` — Neuer `POST /api/multi-ban` Endpoint: bannt einen User auf einem Kanal; prüft Editor-Rechte, verhindert Selbst-Ban, legt Ban-Eintrag mit `source=multi_banner` an
+- `backend/app/main.py` — `multi_ban` Router registriert
+
+### Geändert
+- `README.md` — Vollständige Aktualisierung: Version auf v0.8.0, Entwicklungsstatus-Tabelle auf alle Phasen abgeschlossen, Architektur-Diagramm erweitert (WebSocket-Rooms, Router-Tabelle), Sicherheits-Abschnitt, Synology-NAS-Anleitung, wichtige `.env`-Variablen
+
+---
+
 ## [0.8.0] — API-Fixes, Tenant-Sub-Navigation, TwitchUser-Suche, Multi-Banner
 
 ### Hinzugefügt
