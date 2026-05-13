@@ -89,7 +89,17 @@ class TwitchBotInstance(twitch_commands.Bot):
         # 3. Befehle
         if text.startswith("!"):
             user_roles = _extract_roles(author)
+            is_mod = "moderator" in user_roles or is_broadcaster(author, self.channel_name)
+            is_owner = is_broadcaster(author, self.channel_name)
             cooldowns = _cooldown_stores.setdefault(self.tenant_id, {})
+
+            # Eingebauter !unban-Befehl — nur für Mods/Streamer
+            if text.lower().startswith("!unban ") and is_mod:
+                parts = text.split()
+                if len(parts) >= 2:
+                    target_username = parts[1].lstrip("@")
+                    await self._report_unban(target_username)
+
             response = await handle_command(
                 message_text=text, user_id=user_id, username=username,
                 user_roles=user_roles, commands_config=self.config.get("commands", []),
@@ -165,6 +175,22 @@ class TwitchBotInstance(twitch_commands.Bot):
                 await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
         except Exception as exc:
             logger.warning("[%s] Filter-Hit fehlgeschlagen: %s", self.channel_name, exc)
+
+    async def _report_unban(self, twitch_username: str) -> None:
+        """Meldet eine manuelle Entbannung — setzt failover_protected."""
+        url = f"{settings.api_url}/api/internal/unban-notification"
+        payload = {
+            "tenant_id": self.tenant_id,
+            "twitch_user_id": twitch_username,  # Username als ID-Fallback
+            "twitch_username": twitch_username,
+            "reason": "!unban command",
+        }
+        headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
+        except Exception as exc:
+            logger.warning("[%s] Unban-Meldung fehlgeschlagen: %s", self.channel_name, exc)
 
     def get_status(self) -> dict[str, Any]:
         return {"tenant_id": self.tenant_id, "channel": self.channel_name, "running": self._running, "reconnect_attempts": self._reconnect_attempts}
@@ -245,3 +271,10 @@ def _extract_roles(author) -> list[str]:
     if getattr(author, "is_mod", False):
         roles.append("moderator")
     return roles
+
+
+def is_broadcaster(author, channel_name: str) -> bool:
+    """Prüft ob der Nachrichtenautor der Kanal-Owner (Broadcaster) ist."""
+    if not author:
+        return False
+    return author.name.lower() == channel_name.lower()

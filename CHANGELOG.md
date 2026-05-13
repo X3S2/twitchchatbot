@@ -7,6 +7,18 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.11.0] — Failover-Schutz, Unban-Benachrichtigung, Bot !unban-Befehl
+
+### Hinzugefügt
+- `backend/app/routers/internal.py` — `POST /api/internal/unban-notification`: Bot meldet manuelle Entbannung → setzt `failover_protected=True` für alle Bans des Users im Tenant
+- `bot-manager/app/bot_instance.py` — Erkennung von Twitch-`!unban`-Befehlen durch Mods/Broadcaster: sendet automatisch Unban-Benachrichtigung an Backend
+- `bot-manager/app/bot_instance.py` — Hilfsfunktion `is_broadcaster()` für Kanal-Owner-Erkennung
+
+### Geändert
+- `backend/app/routers/bans.py` — `DELETE /{ban_id}?add_to_whitelist=true` setzt `failover_protected=True` statt physischem Löschen (verhindert Auto-Reban)
+
+---
+
 ## [0.10.0] — Twitch-Moderator-Check, Twitch-Client, Failover-Schutz
 
 ### Hinzugefügt

@@ -216,3 +216,39 @@ async def get_tenant_config(
         "chat_filters": chat_filter_data,
         "name_filters": name_filter_data,
     }
+
+
+class UnbanNotificationRequest(BaseModel):
+    tenant_id: str
+    twitch_user_id: str
+    twitch_username: str | None = None
+    reason: str | None = None  # Optional: "!unban command" | "twitch_unban"
+
+
+@router.post("/unban-notification")
+async def unban_notification(
+    data: UnbanNotificationRequest,
+    _: None = Depends(_check_key),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Bot meldet, dass ein User manuell entbannt wurde.
+    Setzt failover_protected=True für alle aktiven Bans dieses Users im Tenant,
+    damit er nicht erneut automatisch gebannt wird.
+    """
+    from ..models.ban import Ban
+
+    result = await db.execute(
+        select(Ban).where(
+            Ban.tenant_id == data.tenant_id,
+            Ban.twitch_user_id == data.twitch_user_id,
+            Ban.failover_protected.is_(False),
+        )
+    )
+    bans = result.scalars().all()
+    for ban in bans:
+        ban.failover_protected = True
+
+    await db.commit()
+
+    return {"ok": True, "protected": len(bans)}
