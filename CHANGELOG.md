@@ -7,6 +7,17 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.13.0] — AdminSettings Test-Credentials Button, Code-Cleanup
+
+### Hinzugefügt
+- `frontend/src/pages/admin/AdminSettings.tsx` — "Credentials testen"-Button: prüft gespeicherte App-Credentials live gegen Twitch-API und zeigt Token-Ablaufzeit an
+- `frontend/src/i18n/de.json` + `en.json` — neue Keys: `test_credentials`, `testing`, `credentials_ok`, `credentials_fail`
+
+### Geändert/Korrigiert
+- `frontend/src/pages/admin/AdminSettings.tsx` — duplizierten Legacy-Code entfernt (alter Komponentenentwurf war versehentlich am Ende der Datei verblieben)
+
+---
+
 ## [0.12.0] — Token-Validierung, Twitch-User-ID-Lookup, Test-Credentials
 
 ### Hinzugefügt

@@ -174,7 +174,11 @@
     "bot_username": "Bot Username",
     "bot_token": "Bot OAuth Token",
     "credentials_hint": "Leave fields blank to keep existing values",
-    "global_retention_days": "Global Data Retention (days)"
+    "global_retention_days": "Global Data Retention (days)",
+    "test_credentials": "Test Credentials",
+    "testing": "Testing…",
+    "credentials_ok": "Connection successful",
+    "credentials_fail": "Connection failed"
   },
   "users": {
     "search_title": "Twitch User Search",

@@ -174,7 +174,11 @@
     "maintenance_message": "Wartungsnachricht",
     "bot_username": "Bot-Benutzername",
     "bot_token": "Bot OAuth-Token",
-    "global_retention_days": "Globale Datenhaltung (Tage)"
+    "global_retention_days": "Globale Datenhaltung (Tage)",
+    "test_credentials": "Credentials testen",
+    "testing": "Teste…",
+    "credentials_ok": "Verbindung erfolgreich",
+    "credentials_fail": "Verbindung fehlgeschlagen"
   },
   "user": {
     "username": "Benutzername",
