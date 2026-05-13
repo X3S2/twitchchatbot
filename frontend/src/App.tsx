@@ -9,6 +9,27 @@ import Login from '../pages/Login'
 import Dashboard from '../pages/Dashboard'
 import LegalPage from '../pages/LegalPage'
 import { useTheme } from '../hooks/useTheme'
+// Admin pages
+import AdminIndex from '../pages/admin/Index'
+import TenantApproval from '../pages/admin/TenantApproval'
+import UserManagement from '../pages/admin/UserManagement'
+import NameScan from '../pages/admin/NameScan'
+import AdminSettings from '../pages/admin/AdminSettings'
+// Tenant pages
+import TenantList from '../pages/tenants/TenantList'
+import TenantDashboard from '../pages/tenants/TenantDashboard'
+import TenantSettings from '../pages/tenants/TenantSettings'
+import TenantModerators from '../pages/tenants/TenantModerators'
+import AuditLog from '../pages/tenants/AuditLog'
+import Stats from '../pages/tenants/Stats'
+// Filters
+import ChatFilters from '../pages/tenants/filters/ChatFilters'
+import NameFilters from '../pages/tenants/filters/NameFilters'
+// Bans
+import BanList from '../pages/tenants/bans/BanList'
+import SharedBans from '../pages/tenants/bans/SharedBans'
+// Commands
+import Commands from '../pages/tenants/commands/Commands'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,11 +64,59 @@ export default function App() {
             }
           >
             <Route index element={<Dashboard />} />
+
+            {/* Tenant routes */}
+            <Route path="tenants" element={<TenantList />} />
+            <Route path="tenants/:id" element={<TenantDashboard />} />
+            <Route path="tenants/:id/settings" element={<TenantSettings />} />
+            <Route path="tenants/:id/moderators" element={<TenantModerators />} />
+            <Route path="tenants/:id/audit" element={<AuditLog />} />
+            <Route path="tenants/:id/stats" element={<Stats />} />
+            <Route path="tenants/:id/filters" element={<ChatFilters />} />
+            <Route path="tenants/:id/filters/chat" element={<ChatFilters />} />
+            <Route path="tenants/:id/filters/name" element={<NameFilters />} />
+            <Route path="tenants/:id/bans" element={<BanList />} />
+            <Route path="tenants/:id/bans/shared" element={<SharedBans />} />
+            <Route path="tenants/:id/commands" element={<Commands />} />
+
+            {/* Admin routes */}
             <Route
               path="admin"
               element={
                 <ProtectedRoute requireAdmin>
-                  <Dashboard />
+                  <AdminIndex />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/approval"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <TenantApproval />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/users"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/name-scan"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <NameScan />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/settings"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
                 </ProtectedRoute>
               }
             />
