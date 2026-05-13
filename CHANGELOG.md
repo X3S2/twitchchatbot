@@ -7,6 +7,36 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.2.0] — Backend-API-Vollständigkeit + TwitchIO-Bot
+
+### Hinzugefügt
+- `backend/app/models/` — vollständige SQLAlchemy-Modelle für alle Phasen: `Tenant`, `BotInstance`, `TenantModerator`, `AuditLog`, `ChatFilter`, `ChatFilterTerm`, `ChatFilterTier`, `ChatFilterViolation`, `ChatFilterHit`, `NameFilter`, `NameFilterPattern`, `NameFilterTier`, `Ban`, `SharedBanConnection`, `BanInvitation`, `BatchJob`, `TwitchUser`, `TenantUserExclusion`, `GlobalUserExclusion`, `ChatCommand`, `CommandCooldownTracking`, `NameScanFilter`, `NameScanResult`, `NameScanTenantOptin`, `FilterTemplate`
+- `backend/app/routers/ws.py` — WebSocket-Endpunkte (`/ws/admin`, `/ws/tenant/{id}`) mit Redis Pub/Sub Integration und `WsManager`-Klasse
+- `backend/app/routers/internal.py` — interne API für Bot-Manager (`/internal/heartbeat`, `/internal/filter-hit`, `/internal/tenant/{id}/config`) mit Bearer-Token-Auth
+- `backend/app/routers/notifications.py` — vollständige Notifications-API (GET, Unread-Count, als gelesen markieren, löschen)
+- `backend/app/routers/tenants.py` — vollständige Tenant-API: CRUD, Admin-Genehmigung, Bot-Steuerung, Moderatoren, Audit-Log, Widgets, Datenexport, Admin-Instanzübersicht
+- `backend/app/routers/chat_filters.py` — vollständige Chat-Filter-API: Filter CRUD, Terms, Tiers, Hits-Log, Duplikation
+- `backend/app/routers/name_filters.py` — vollständige Name-Filter-API analog zu chat_filters
+- `backend/app/routers/bans.py` — vollständige Bans-API: CRUD, Export (JSON/CSV), Import-Vorschau + Bestätigung, Bulk-Unban, Shared-Bans, Einladungen
+- `backend/app/routers/jobs.py` — Batch-Job-Status-API
+- `backend/app/routers/commands.py` — vollständige Chat-Command-API mit eingebauten TCB-Befehlen
+- `backend/app/routers/stats.py` — Statistiken-API (Bans/Timeouts pro Tag, Top-Filter, Top-Terms, Totals)
+- `backend/app/routers/name_scan.py` — Name-Scan-Filter CRUD, Ergebnisse, Tenant-Opt-Ins
+- `backend/app/routers/twitch_users.py` — Twitch-User-Suche, Username-History, Cross-Tenant-Ban-History
+- `backend/app/core/config.py` — Neues Feld `internal_api_key` für Bot-Manager-Kommunikation
+- `backend/app/main.py` — Alle neuen Router eingebunden; `redis_subscriber()` als asyncio-Background-Task im Lifespan; Version auf 0.2.0
+- `backend/alembic/env.py` — Alle neuen Modelle importiert für Autogenerate
+- `bot-manager/app/config.py` — Pydantic Settings für `api_url`, `internal_api_key`, `redis_url`
+- `bot-manager/app/redis_bus.py` — Redis Pub/Sub Publisher-Helper
+- `bot-manager/app/bot_instance.py` — Vollständige TwitchIO 2.x Bot-Instanz mit Chat-Filter, Name-Filter, Commands, Heartbeat (30s), Config-Refresh (5min)
+- `bot-manager/app/filter_engine.py` — Chat-Filter-Engine: Keyword, Wildcard, Regex, Ähnlichkeit (difflib), Whitelist, Tier-Auswahl
+- `bot-manager/app/name_filter_engine.py` — Name-Filter-Engine analog
+- `bot-manager/app/command_handler.py` — Command-Handler mit Permission-Level, Cooldowns, eingebauten TCB-Befehlen
+- `bot-manager/app/main.py` — Beim Start: Redis verbinden, aktive Tenants laden und Bot-Instanzen starten; Version auf 0.2.0
+- `.env.example` — Neues Feld `INTERNAL_API_KEY`
+
+---
+
 ## [0.1.1] — 13.05.2026 17:00 Uhr
 
 ### Hinzugefügt

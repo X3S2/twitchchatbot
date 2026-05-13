@@ -1,51 +1,247 @@
 """
-Bot Instance — einzelne TwitchIO-Verbindung für einen Channel.
-Stub für Phase 1: Grundgerüst ohne aktive IRC-Verbindung.
+TwitchIO Bot-Instanz — eine vollständige Bot-Verbindung pro Tenant.
+Phase 2: TwitchIO-Integration mit Chat-Filter, Name-Filter und Commands.
 """
 from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import dataclass, field
 from typing import Any
 
+import aiohttp
+import twitchio
+from twitchio.ext import commands as twitch_commands
+
+from .config import get_settings
+from .filter_engine import check_message, FilterAction
+from .name_filter_engine import check_username
+from .command_handler import handle_command
+from .redis_bus import publish
+
 logger = logging.getLogger(__name__)
+settings = get_settings()
+
+# In-Memory-Violation-Counter: {tenant_id: {filter_id: {user_id: count}}}
+_violation_counts: dict[str, dict[str, dict[str, int]]] = {}
+# Bereits gesehene Chatter: {tenant_id: set(user_ids)}
+_seen_chatters: dict[str, set[str]] = {}
+# Command-Cooldowns: {tenant_id: {key: timestamp}}
+_cooldown_stores: dict[str, dict[str, float]] = {}
 
 
-@dataclass
+class TwitchBotInstance(twitch_commands.Bot):
+    def __init__(self, tenant_id: str, channel: str, config: dict) -> None:
+        self.tenant_id = tenant_id
+        self.channel_name = channel
+        self.config = config
+        self._running = False
+        self._heartbeat_task: asyncio.Task | None = None
+        self._config_refresh_task: asyncio.Task | None = None
+        self._reconnect_attempts = 0
+
+        token = self._resolve_token()
+        super().__init__(token=token, prefix="!", initial_channels=[channel])
+
+    def _resolve_token(self) -> str:
+        mode = self.config.get("bot_mode", "shared")
+        if mode in ("own_bot", "own_full"):
+            return self.config.get("own_bot_token", "")
+        return self.config.get("shared_bot_token", "")
+
+    # ── TwitchIO-Events ───────────────────────────────────────
+
+    async def event_ready(self) -> None:
+        logger.info("[%s] Bot verbunden", self.channel_name)
+        self._running = True
+        self._reconnect_attempts = 0
+        await self._report_status("online")
+        self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
+        self._config_refresh_task = asyncio.create_task(self._config_refresh_loop())
+
+    async def event_message(self, message: twitchio.Message) -> None:
+        if message.echo:
+            return
+
+        author = message.author
+        user_id = str(author.id) if author else ""
+        username = author.name if author else "unknown"
+        text = message.content or ""
+
+        # 1. Name-Filter (einmalig pro Chatter)
+        if user_id and user_id not in _seen_chatters.get(self.tenant_id, set()):
+            _seen_chatters.setdefault(self.tenant_id, set()).add(user_id)
+            nf_action = check_username(username, user_id, self.config.get("name_filters", []))
+            if nf_action and not self.config.get("test_mode_global"):
+                await self._apply_action(message.channel, username, user_id, nf_action.action, nf_action.duration_seconds, nf_action.message_template)
+
+        # 2. Chat-Filter
+        vmap = _violation_counts.setdefault(self.tenant_id, {})
+        violation_counts = {fid: counts.get(user_id, 0) for fid, counts in vmap.items()}
+        cf_action = check_message(text, user_id, username, self.config.get("chat_filters", []), violation_counts)
+        if cf_action:
+            vmap.setdefault(cf_action.filter_id, {})
+            vmap[cf_action.filter_id][user_id] = vmap[cf_action.filter_id].get(user_id, 0) + 1
+            await self._report_filter_hit(cf_action, username, user_id, text)
+            filter_cfg = next((f for f in self.config.get("chat_filters", []) if f["id"] == cf_action.filter_id), {})
+            if not filter_cfg.get("test_mode", False):
+                await self._apply_action(message.channel, username, user_id, cf_action.action, cf_action.duration_seconds, cf_action.message_template)
+
+        # 3. Befehle
+        if text.startswith("!"):
+            user_roles = _extract_roles(author)
+            cooldowns = _cooldown_stores.setdefault(self.tenant_id, {})
+            response = await handle_command(
+                message_text=text, user_id=user_id, username=username,
+                user_roles=user_roles, commands_config=self.config.get("commands", []),
+                cooldown_store=cooldowns,
+            )
+            if response:
+                await message.channel.send(response)
+
+        await self.handle_commands(message)
+
+    # ── Aktionen ──────────────────────────────────────────────
+
+    async def _apply_action(self, channel, username: str, user_id: str, action: str, duration: int, template: str | None) -> None:
+        try:
+            if action == "ban" and user_id:
+                await channel.ban(user_id, reason="TCB Auto-Ban")
+            elif action == "timeout" and user_id:
+                await channel.timeout(user_id, max(1, duration), reason="TCB Timeout")
+            if template:
+                await channel.send(template.replace("{user}", username))
+        except Exception as exc:
+            logger.warning("[%s] Aktion fehlgeschlagen: %s", self.channel_name, exc)
+
+    # ── Background-Tasks ──────────────────────────────────────
+
+    async def _heartbeat_loop(self) -> None:
+        while self._running:
+            try:
+                await asyncio.sleep(30)
+                await self._report_status("online")
+            except asyncio.CancelledError:
+                break
+            except Exception as exc:
+                logger.warning("[%s] Heartbeat-Fehler: %s", self.channel_name, exc)
+
+    async def _config_refresh_loop(self) -> None:
+        while self._running:
+            try:
+                await asyncio.sleep(300)
+                await self._fetch_config()
+            except asyncio.CancelledError:
+                break
+            except Exception as exc:
+                logger.warning("[%s] Config-Refresh-Fehler: %s", self.channel_name, exc)
+
+    async def _fetch_config(self) -> None:
+        url = f"{settings.api_url}/api/internal/tenant/{self.tenant_id}/config"
+        headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                    if resp.status == 200:
+                        self.config = await resp.json()
+        except Exception as exc:
+            logger.warning("[%s] Config-Fetch fehlgeschlagen: %s", self.channel_name, exc)
+
+    async def _report_status(self, status: str, error: str | None = None) -> None:
+        url = f"{settings.api_url}/api/internal/heartbeat"
+        payload = {"tenant_id": self.tenant_id, "status": status, "reconnect_attempts": self._reconnect_attempts, "error_message": error}
+        headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
+        except Exception as exc:
+            logger.warning("[%s] Heartbeat fehlgeschlagen: %s", self.channel_name, exc)
+
+    async def _report_filter_hit(self, action: FilterAction, username: str, user_id: str, text: str) -> None:
+        url = f"{settings.api_url}/api/internal/filter-hit"
+        payload = {"tenant_id": self.tenant_id, "filter_id": action.filter_id, "twitch_user_id": user_id, "twitch_username": username, "message_text": text, "matched_term": action.matched_term, "action_taken": action.action, "test_mode": False}
+        headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
+        except Exception as exc:
+            logger.warning("[%s] Filter-Hit fehlgeschlagen: %s", self.channel_name, exc)
+
+    def get_status(self) -> dict[str, Any]:
+        return {"tenant_id": self.tenant_id, "channel": self.channel_name, "running": self._running, "reconnect_attempts": self._reconnect_attempts}
+
+    async def shutdown(self) -> None:
+        self._running = False
+        if self._heartbeat_task:
+            self._heartbeat_task.cancel()
+        if self._config_refresh_task:
+            self._config_refresh_task.cancel()
+        await self._report_status("offline")
+        try:
+            await self.close()
+        except Exception:
+            pass
+
+
+# ── Legacy-Wrapper für InstanceManager-Kompatibilität ────────
+
 class BotInstance:
-    tenant_id: str
-    channel: str
-    bot_username: str
-    _running: bool = field(default=False, init=False, repr=False)
-    _task: asyncio.Task[None] | None = field(default=None, init=False, repr=False)
+    """Thin wrapper so InstanceManager kann TwitchBotInstance nutzen."""
+
+    def __init__(self, tenant_id: str, channel: str, bot_username: str, config: dict | None = None) -> None:
+        self.tenant_id = tenant_id
+        self.channel = channel
+        self.bot_username = bot_username
+        self._config = config or {}
+        self._bot: TwitchBotInstance | None = None
+        self._task: asyncio.Task | None = None
 
     async def start(self) -> None:
-        if self._running:
-            return
-        self._running = True
-        self._task = asyncio.create_task(self._run(), name=f"bot-{self.channel}")
-        logger.info("BotInstance started for channel=%s tenant=%s", self.channel, self.tenant_id)
+        if not self._config:
+            await self._load_config()
+        self._bot = TwitchBotInstance(self.tenant_id, self.channel, self._config)
+        self._task = asyncio.create_task(self._bot.start(), name=f"bot-{self.channel}")
+        logger.info("BotInstance gestartet: channel=%s", self.channel)
 
     async def stop(self) -> None:
-        self._running = False
+        if self._bot:
+            await self._bot.shutdown()
         if self._task and not self._task.done():
             self._task.cancel()
             try:
                 await self._task
-            except asyncio.CancelledError:
+            except (asyncio.CancelledError, Exception):
                 pass
-        logger.info("BotInstance stopped for channel=%s", self.channel)
+        logger.info("BotInstance gestoppt: channel=%s", self.channel)
 
-    async def _run(self) -> None:
-        """Hauptschleife — in Phase 2 durch TwitchIO-Bot ersetzt."""
-        while self._running:
-            await asyncio.sleep(60)
+    async def _load_config(self) -> None:
+        url = f"{settings.api_url}/api/internal/tenant/{self.tenant_id}/config"
+        headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                    if resp.status == 200:
+                        self._config = await resp.json()
+        except Exception as exc:
+            logger.warning("Config-Load fehlgeschlagen: %s", exc)
+            self._config = {}
 
     def status(self) -> dict[str, Any]:
         return {
             "tenant_id": self.tenant_id,
             "channel": self.channel,
             "bot_username": self.bot_username,
-            "running": self._running,
+            "running": self._bot._running if self._bot else False,
         }
+
+
+def _extract_roles(author) -> list[str]:
+    roles = ["everyone"]
+    if not author:
+        return roles
+    if getattr(author, "is_subscriber", False):
+        roles.append("subscriber")
+    if getattr(author, "is_vip", False):
+        roles.append("vip")
+    if getattr(author, "is_mod", False):
+        roles.append("moderator")
+    return roles

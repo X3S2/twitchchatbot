@@ -1,21 +1,69 @@
 from contextlib import asynccontextmanager
+import logging
+
+import aiohttp
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from .config import get_settings
 from .instance_manager import get_manager
+from .redis_bus import get_redis, close_redis
+
+logger = logging.getLogger(__name__)
+settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Redis-Verbindung starten
+    redis = await get_redis()
+    await redis.ping()
+
+    # Aktive Tenants beim Start laden
+    await _load_active_tenants()
+
     yield
-    # Shutdown: alle Instanzen stoppen
+
+    # Shutdown
     manager = get_manager()
     await manager.shutdown_all()
+    await close_redis()
+
+
+async def _load_active_tenants() -> None:
+    """Lädt alle genehmigten Tenants aus der API und startet Bot-Instanzen."""
+    url = f"{settings.api_url}/api/tenants/admin/instances"
+    headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                if resp.status != 200:
+                    logger.warning("Konnte Tenant-Liste nicht laden: HTTP %d", resp.status)
+                    return
+                tenants = await resp.json()
+    except Exception as exc:
+        logger.warning("Tenant-Liste Abruf fehlgeschlagen: %s", exc)
+        return
+
+    manager = get_manager()
+    for t in tenants:
+        if not t.get("approved"):
+            continue
+        try:
+            await manager.start_instance(
+                tenant_id=t["tenant_id"],
+                channel=t["channel_name"],
+                bot_username="",
+            )
+        except Exception as exc:
+            logger.warning("Fehler beim Starten von %s: %s", t.get("channel_name"), exc)
+
+    logger.info("Bot-Manager: %d Instanzen geladen", len(manager.list_instances()))
 
 
 app = FastAPI(
     title="TCB Bot-Manager",
-    version="0.1.0",
+    version="0.2.0",
     docs_url="/docs",
     lifespan=lifespan,
 )
@@ -34,7 +82,7 @@ class StopRequest(BaseModel):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.1.0", "service": "bot-manager"}
+    return {"status": "ok", "version": "0.2.0", "service": "bot-manager"}
 
 
 @app.get("/instances")

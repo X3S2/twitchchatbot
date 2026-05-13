@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # Bot-Manager (intern)
     bot_manager_url: str = "http://tcb-botmanager:8001"
 
+    # Interner API-Key (Bot-Manager → Backend, Docker-Netzwerk)
+    internal_api_key: str = "changeme"
+
     # CORS
     @property
     def cors_origins(self) -> list[str]:

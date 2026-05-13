@@ -16,7 +16,16 @@ if config.config_file_name is not None:
 
 # SQLAlchemy-Modelle importieren (für autogenerate)
 from app.core.database import Base
-from app.models import User, AppSettings, LegalPage, Notification
+from app.models import (
+    User, AppSettings, LegalPage, Notification,
+    Tenant, BotInstance, TenantModerator, AuditLog,
+    ChatFilter, ChatFilterTerm, ChatFilterTier, ChatFilterViolation, ChatFilterHit,
+    NameFilter, NameFilterPattern, NameFilterTier,
+    Ban, SharedBanConnection, BanInvitation, BatchJob,
+    TwitchUser, TenantUserExclusion, GlobalUserExclusion,
+    ChatCommand, CommandCooldownTracking,
+    NameScanFilter, NameScanResult, NameScanTenantOptin, FilterTemplate,
+)
 from app.models.session import Session
 
 target_metadata = Base.metadata

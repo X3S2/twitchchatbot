@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import asyncio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -10,24 +11,39 @@ from .core.config import get_settings
 from .core.database import engine
 from .core.redis_client import get_redis, close_redis
 from .routers import auth, admin, legal
+from .routers import (
+    ws, internal, notifications, tenants,
+    chat_filters, name_filters, bans, jobs,
+    commands, stats, name_scan, twitch_users,
+)
 
 settings = get_settings()
 limiter = Limiter(key_func=get_remote_address)
 
+_redis_task: asyncio.Task | None = None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Redis-Verbindung testen
+    global _redis_task
     redis = await get_redis()
     await redis.ping()
+    # Redis-Subscriber als Background-Task starten
+    _redis_task = asyncio.create_task(ws.redis_subscriber())
     yield
     # Shutdown
+    if _redis_task and not _redis_task.done():
+        _redis_task.cancel()
+        try:
+            await _redis_task
+        except asyncio.CancelledError:
+            pass
     await close_redis()
 
 
 app = FastAPI(
     title="TwitchChatBot API",
-    version="0.1.0",
+    version="0.2.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     lifespan=lifespan,
@@ -69,9 +85,21 @@ async def maintenance_middleware(request: Request, call_next):
 app.include_router(auth.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(legal.router, prefix="/api")
+app.include_router(ws.router, prefix="/api")
+app.include_router(internal.router, prefix="/api")
+app.include_router(notifications.router, prefix="/api")
+app.include_router(tenants.router, prefix="/api")
+app.include_router(chat_filters.router, prefix="/api")
+app.include_router(name_filters.router, prefix="/api")
+app.include_router(bans.router, prefix="/api")
+app.include_router(jobs.router, prefix="/api")
+app.include_router(commands.router, prefix="/api")
+app.include_router(stats.router, prefix="/api")
+app.include_router(name_scan.router, prefix="/api")
+app.include_router(twitch_users.router, prefix="/api")
 
 
 # ── Health-Check ──────────────────────────────────────────────
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.1.0"}
+    return {"status": "ok", "version": "0.2.0"}
