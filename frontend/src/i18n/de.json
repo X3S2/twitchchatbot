@@ -18,6 +18,7 @@
     "filters_chat": "Chat-Filter",
     "filters_name": "Namens-Filter",
     "shared_bans": "Geteilte Bans",
+    "name_scan": "Name-Scan",
     "audit": "Audit-Log",
     "user_search": "User-Suche",
     "multi_ban": "Multi-Banner"

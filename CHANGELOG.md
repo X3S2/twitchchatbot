@@ -7,6 +7,20 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.18.0] — README-Bereinigung, NameScan-Navigation, !tcbrejoin
+
+### Hinzugefügt
+- `frontend/src/layouts/AppLayout.tsx` — Nav-Link `Name-Scan` (→ `tenants/:id/name-scan`) in der Tenant-Sidebar
+- `bot-manager/app/bot_instance.py`:
+  - `!tcbrejoin` Befehl für Mods/Broadcaster — lässt den Bot den Kanal verlassen und sofort wieder beitreten
+  - Neue Methode `_cmd_rejoin()` mit Rückstatus-Meldung an Backend
+- `frontend/src/i18n/de.json` + `en.json` — `nav.name_scan` Key
+
+### Geändert
+- `README.md` — duplizierten Block (alter Stand v0.7.0) entfernt; nur noch ein sauberer, aktueller Inhalt
+
+---
+
 ## [0.17.0] — Name-Scan Bulk-Apply, Tenant-NameScan-Seite
 
 ### Hinzugefügt

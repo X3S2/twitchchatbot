@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { LangToggle } from '../components/LangToggle'
 import { NotificationBell } from '../components/NotificationBell'
-import { LayoutDashboard, Settings, Shield, LogOut, Tv, BarChart2, Filter, Ban, Terminal, Users, BookOpen, ChevronLeft, Search } from 'lucide-react'
+import { LayoutDashboard, Settings, Shield, LogOut, Tv, BarChart2, Filter, Ban, Terminal, Users, BookOpen, ChevronLeft, Search, ShieldAlert } from 'lucide-react'
 
 export default function AppLayout() {
   const { t } = useTranslation()
@@ -45,6 +45,7 @@ export default function AppLayout() {
               <NavItem to={`/tenants/${tenantId}/filters/name`} icon={<Filter className="w-5 h-5" />} label={t('nav.filters_name')} />
               <NavItem to={`/tenants/${tenantId}/bans`} icon={<Ban className="w-5 h-5" />} label={t('nav.bans')} />
               <NavItem to={`/tenants/${tenantId}/bans/shared`} icon={<Ban className="w-5 h-5" />} label={t('nav.shared_bans')} />
+              <NavItem to={`/tenants/${tenantId}/name-scan`} icon={<ShieldAlert className="w-5 h-5" />} label={t('nav.name_scan')} />
               <NavItem to={`/tenants/${tenantId}/commands`} icon={<Terminal className="w-5 h-5" />} label={t('nav.commands')} />
               <NavItem to={`/tenants/${tenantId}/stats`} icon={<BarChart2 className="w-5 h-5" />} label={t('nav.stats')} />
               <NavItem to={`/tenants/${tenantId}/moderators`} icon={<Users className="w-5 h-5" />} label={t('nav.moderators')} />

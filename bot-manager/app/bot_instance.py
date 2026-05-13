@@ -121,6 +121,11 @@ class TwitchBotInstance(twitch_commands.Bot):
                 await self._cmd_bot_pause(False)
                 await message.channel.send("TCB-Bot läuft wieder.")
 
+            # !tcbrejoin — Bot verlässt und betritt den Kanal neu (Mods/Broadcaster)
+            elif text.lower() == "!tcbrejoin" and is_mod:
+                await message.channel.send("TCB-Bot verlässt den Chat und tritt gleich wieder bei...")
+                await self._cmd_rejoin()
+
             response = await handle_command(
                 message_text=text, user_id=user_id, username=username,
                 user_roles=user_roles, commands_config=self.config.get("commands", []),
@@ -248,6 +253,21 @@ class TwitchBotInstance(twitch_commands.Bot):
                 await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
         except Exception as exc:
             logger.warning("[%s] Bot-Pause-Meldung fehlgeschlagen: %s", self.channel_name, exc)
+
+    async def _cmd_rejoin(self) -> None:
+        """Verlässt den Kanal und tritt sofort wieder bei (Reconnect)."""
+        try:
+            await self.part_channels([self.channel_name])
+        except Exception:
+            pass
+        await asyncio.sleep(2)
+        try:
+            await self.join_channels([self.channel_name])
+            self._reconnect_attempts = 0
+            await self._report_status("online")
+        except Exception as exc:
+            logger.warning("[%s] Rejoin fehlgeschlagen: %s", self.channel_name, exc)
+            await self._report_status("error", str(exc))
 
     def get_status(self) -> dict[str, Any]:
         return {"tenant_id": self.tenant_id, "channel": self.channel_name, "running": self._running, "reconnect_attempts": self._reconnect_attempts}
