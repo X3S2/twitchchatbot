@@ -13,7 +13,14 @@
     "logout": "Abmelden",
     "tenants": "Meine Kanäle",
     "moderators": "Moderatoren",
-    "stats": "Statistiken"
+    "stats": "Statistiken",
+    "tenant_section": "Kanal",
+    "filters_chat": "Chat-Filter",
+    "filters_name": "Namens-Filter",
+    "shared_bans": "Geteilte Bans",
+    "audit": "Audit-Log",
+    "user_search": "User-Suche",
+    "multi_ban": "Multi-Banner"
   },
   "notifications": {
     "label": "Benachrichtigungen",
@@ -130,7 +137,10 @@
     "reconnect": "Verbindungswiederherstellung",
     "reconnect_mode": "Modus",
     "reconnect_max_attempts": "Max. Versuche",
-    "saved": "Gespeichert!"
+    "saved": "Gespeichert!",
+    "already_set": "Bereits gesetzt (leer lassen zum Behalten)",
+    "token_placeholder": "oauth:... eingeben",
+    "new_mod_default_role": "Standard-Rolle für neue Moderatoren"
   },
   "admin": {
     "title": "Administration",
@@ -156,18 +166,48 @@
     "twitch_app": "Twitch-App",
     "shared_bot": "Shared Bot",
     "platform": "Plattform",
+    "credentials_hint": "Felder leer lassen, um vorhandene Werte zu behalten",
     "require_approval": "Freigabe erforderlich",
     "require_approval_hint": "Neue Kanäle müssen manuell freigegeben werden",
     "maintenance_mode": "Wartungsmodus",
     "maintenance_mode_hint": "Wartungsseite für alle Benutzer anzeigen",
     "maintenance_message": "Wartungsnachricht",
     "bot_username": "Bot-Benutzername",
-    "bot_token": "Bot OAuth-Token"
+    "bot_token": "Bot OAuth-Token",
+    "global_retention_days": "Globale Datenhaltung (Tage)"
   },
   "user": {
     "username": "Benutzername",
     "role": "Rolle",
     "status": "Status"
+  },
+  "users": {
+    "search_title": "Twitch-User-Suche",
+    "search_placeholder": "Benutzernamen suchen...",
+    "first_seen": "Erstmals gesehen",
+    "last_seen": "Zuletzt gesehen",
+    "ban_history": "Ban-Verlauf (alle Kanäle)",
+    "no_bans": "Keine Bans gefunden",
+    "no_results": "Keine Benutzer gefunden"
+  },
+  "mtb": {
+    "title": "Multi-Twitch-Banner",
+    "description": "Benutzer auf mehreren Kanälen gleichzeitig bannen.",
+    "target": "Ziel-Benutzer",
+    "username": "Twitch-Benutzername",
+    "reason": "Grund",
+    "custom_reason": "Eigener Grund...",
+    "channels": "Kanäle",
+    "add_channel": "Kanal hinzufügen",
+    "channel_placeholder": "kanalname",
+    "token_optional": "OAuth-Token (optional)",
+    "token_hint": "Falls kein Token angegeben, verwendet das System den konfigurierten Bot-Token.",
+    "confirm_text": "Wirklich {{user}} in {{count}} Kanal(en) bannen? Grund: {{reason}}",
+    "confirm_checkbox": "Ich bestätige diesen Massen-Ban",
+    "execute": "{{count}} Kanal(e) bannen",
+    "results": "Ergebnis",
+    "banned": "Gebannt",
+    "error": "Fehler"
   },
   "pagination": {
     "prev": "Zurück",

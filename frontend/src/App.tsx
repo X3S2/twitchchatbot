@@ -8,6 +8,8 @@ import Setup from '../pages/Setup'
 import Login from '../pages/Login'
 import Dashboard from '../pages/Dashboard'
 import LegalPage from '../pages/LegalPage'
+import TwitchUserSearch from '../pages/TwitchUserSearch'
+import MultiTwitchBanner from '../pages/MultiTwitchBanner'
 import { useTheme } from '../hooks/useTheme'
 // Admin pages
 import AdminIndex from '../pages/admin/Index'
@@ -78,6 +80,10 @@ export default function App() {
             <Route path="tenants/:id/bans" element={<BanList />} />
             <Route path="tenants/:id/bans/shared" element={<SharedBans />} />
             <Route path="tenants/:id/commands" element={<Commands />} />
+
+            {/* Utility routes */}
+            <Route path="users/search" element={<TwitchUserSearch />} />
+            <Route path="multi-ban" element={<MultiTwitchBanner />} />
 
             {/* Admin routes */}
             <Route

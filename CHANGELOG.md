@@ -7,6 +7,21 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.8.0] — API-Fixes, Tenant-Sub-Navigation, TwitchUser-Suche, Multi-Banner
+
+### Hinzugefügt
+- `frontend/src/pages/TwitchUserSearch.tsx` — Twitch-User-Suche mit Debounce, Avatar, Erstellt/Zuletzt-gesehen, Ban-Verlauf (Admin)
+- `frontend/src/pages/MultiTwitchBanner.tsx` — Massen-Ban-Tool: Ziel-User, Grund (Auswahl + frei), Kanal-Liste, Bestätigungs-Checkbox, Echtzeit-Ergebnis je Kanal
+- `frontend/src/layouts/AppLayout.tsx` — Kontextsensitive Sidebar: Tenant-Sub-Navigation (Dashboard, Chat-Filter, Namens-Filter, Bans, Geteilte Bans, Befehle, Statistiken, Moderatoren, Einstellungen, Audit), Admin-Sub-Navigation, aktiver NavItem-Highlight
+- `frontend/src/App.tsx` — Neue Routen `/users/search` und `/multi-ban` hinzugefügt
+- `frontend/src/i18n/de.json` + `en.json` — Neue Schlüssel: `nav.*` (tenant_section, filters_chat, filters_name, shared_bans, user_search, multi_ban), `settings.already_set`, `settings.token_placeholder`, `settings.new_mod_default_role`, `admin.credentials_hint`, `admin.global_retention_days`, `users.*`, `mtb.*`
+
+### Geändert/Korrigiert
+- `frontend/src/pages/admin/AdminSettings.tsx` — Vollständig überarbeitet: Nutzt korrekte API-Shape (`client_id_set: bool`, `bot_token_set: bool` statt Klartext-Credentials); masked-credential Pattern identisch zu TenantSettings; `require_approval` entfernt (kein Backend-Feld); `global_retention_days` hinzugefügt
+- `frontend/src/pages/tenants/TenantSettings.tsx` — Überarbeitet: Split in `TenantSettingsData` (API-Response mit masked Booleans) und `TenantSettingsForm` (Formular, Credential-Felder leer); leere Credential-Felder werden vor PATCH entfernt; grüner CheckCircle-Hinweis bei gesetztem Wert
+
+---
+
 ## [0.7.0] — Name-Scan & Admin-Verwaltung (Frontend)
 
 ### Hinzugefügt

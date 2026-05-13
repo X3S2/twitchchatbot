@@ -13,7 +13,14 @@
     "logout": "Logout",
     "tenants": "My Channels",
     "moderators": "Moderators",
-    "stats": "Statistics"
+    "stats": "Statistics",
+    "tenant_section": "Channel",
+    "filters_chat": "Chat Filters",
+    "filters_name": "Name Filters",
+    "shared_bans": "Shared Bans",
+    "audit": "Audit Log",
+    "user_search": "User Search",
+    "multi_ban": "Multi-Banner"
   },
   "notifications": {
     "label": "Notifications",
@@ -130,7 +137,10 @@
     "reconnect": "Reconnection",
     "reconnect_mode": "Mode",
     "reconnect_max_attempts": "Max Attempts",
-    "saved": "Saved!"
+    "saved": "Saved!",
+    "already_set": "Already set (leave blank to keep)",
+    "token_placeholder": "Enter oauth:...",
+    "new_mod_default_role": "Default role for new moderators"
   },
   "admin": {
     "title": "Administration",
@@ -162,7 +172,37 @@
     "maintenance_mode_hint": "Show maintenance page to all users",
     "maintenance_message": "Maintenance Message",
     "bot_username": "Bot Username",
-    "bot_token": "Bot OAuth Token"
+    "bot_token": "Bot OAuth Token",
+    "credentials_hint": "Leave fields blank to keep existing values",
+    "global_retention_days": "Global Data Retention (days)"
+  },
+  "users": {
+    "search_title": "Twitch User Search",
+    "search_placeholder": "Search username...",
+    "first_seen": "First seen",
+    "last_seen": "Last seen",
+    "ban_history": "Ban History (all channels)",
+    "no_bans": "No bans found",
+    "no_results": "No users found"
+  },
+  "mtb": {
+    "title": "Multi-Twitch-Banner",
+    "description": "Ban a user across multiple channels at once.",
+    "target": "Target User",
+    "username": "Twitch Username",
+    "reason": "Reason",
+    "custom_reason": "Custom reason...",
+    "channels": "Channels",
+    "add_channel": "Add Channel",
+    "channel_placeholder": "channelname",
+    "token_optional": "OAuth Token (optional)",
+    "token_hint": "If no token is provided, the system uses the configured bot token.",
+    "confirm_text": "Really ban {{user}} in {{count}} channel(s)? Reason: {{reason}}",
+    "confirm_checkbox": "I confirm this mass-ban",
+    "execute": "Ban {{count}} channel(s)",
+    "results": "Results",
+    "banned": "Banned",
+    "error": "Error"
   },
   "user": {
     "username": "Username",

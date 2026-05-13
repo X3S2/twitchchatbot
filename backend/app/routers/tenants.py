@@ -128,6 +128,29 @@ async def get_tenant(
     return _tenant_dict(tenant)
 
 
+@router.get("/{tenant_id}/settings")
+async def get_tenant_settings(
+    tenant_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    tenant = await _get_tenant_or_403(tenant_id, current_user, db)
+    return {
+        "display_name": tenant.display_name,
+        "bot_mode": tenant.bot_mode,
+        "own_bot_username": tenant.own_bot_username,
+        "own_bot_token_set": bool(tenant.own_bot_token_enc),
+        "own_client_id_set": bool(tenant.own_client_id_enc),
+        "own_client_secret_set": bool(tenant.own_client_secret_enc),
+        "stream_awareness": tenant.stream_awareness,
+        "bot_language": tenant.bot_language,
+        "reconnect_mode": tenant.reconnect_mode,
+        "reconnect_max_attempts": tenant.reconnect_max_attempts,
+        "retention_days": tenant.retention_days,
+        "new_mod_default_role": tenant.new_mod_default_role,
+    }
+
+
 @router.patch("/{tenant_id}/settings")
 async def update_tenant_settings(
     tenant_id: str,
