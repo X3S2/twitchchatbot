@@ -13,10 +13,11 @@ export function LangToggle() {
   return (
     <button
       onClick={toggle}
-      className="px-2 py-1 text-sm font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      className="px-2 py-1 text-xl rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       aria-label={current === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
+      title={current === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
     >
-      {current === 'de' ? 'EN' : 'DE'}
+      {current === 'de' ? '🇬🇧' : '🇩🇪'}
     </button>
   )
 }
