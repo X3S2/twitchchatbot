@@ -14,10 +14,6 @@ interface Tenant {
   stream_live: boolean
 }
 
-interface BotStatus {
-  status: string
-}
-
 async function fetchTenants(): Promise<Tenant[]> {
   const res = await fetch('/api/tenants', { credentials: 'include' })
   if (!res.ok) throw new Error('Fehler')

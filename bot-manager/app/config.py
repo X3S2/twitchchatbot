@@ -6,7 +6,7 @@ class BotManagerSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Backend-API
-    api_url: str = "http://tcb-backend:8000"
+    api_url: str = "http://tcb-api:8000"
     internal_api_key: str = "changeme"
 
     # Redis

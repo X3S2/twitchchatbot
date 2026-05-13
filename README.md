@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.18.0-blue)
+  ![Version](https://img.shields.io/badge/version-0.19.0-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -215,6 +215,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | Bot-Commands !tcbinfo/!tcbstats/!tcbstop/!tcbstart | `v0.16.0` | ✅ Fertig | Vollständige Chat-Befehle für Mods und Broadcaster |
 | Name-Scan Bulk-Apply | `v0.17.0` | ✅ Fertig | Massen-Ban aus NameScan-Filter mit doppelter Bestätigung |
 | README-Bereinigung & !tcbrejoin | `v0.18.0` | ✅ Fertig | NameScan-Nav, !tcbrejoin-Befehl, README-Duplikat entfernt |
+| Docker-Bugfixes & erster Stack-Start | `v0.19.0` | ✅ Fertig | Env-Vars, nginx.conf, TS-Duplikate, Python-Syntax, Healthcheck |
 
 ---
 

@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Plus, Trash2, Link2, CheckCircle } from 'lucide-react'
+import { Trash2, Link2, CheckCircle } from 'lucide-react'
 
 interface SharedConnection {
   id: string

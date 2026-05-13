@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1
+# Build-only image — kompiliert das Frontend und kopiert dist/ in ein Volume
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+# dist/ liegt jetzt unter /app/dist
+
+# Minimales Alpine-Image für den Copy-Schritt
+FROM alpine:3.20
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+# Beim Start: Dateien in gemountetes Volume kopieren, dann beenden
+CMD ["sh", "-c", "cp -r /app/dist/. /output/ && echo 'Frontend build erfolgreich in Volume kopiert.'"]

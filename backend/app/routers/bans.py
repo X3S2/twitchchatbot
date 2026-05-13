@@ -145,9 +145,9 @@ async def update_ban(
 async def delete_ban(
     tenant_id: str,
     ban_id: str,
-    add_to_whitelist: bool = False,
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
+    add_to_whitelist: bool = False,
 ):
     await _check_access(tenant_id, current_user, db)
     result = await db.execute(select(Ban).where(Ban.id == ban_id, Ban.tenant_id == tenant_id))
@@ -169,9 +169,9 @@ async def delete_ban(
 async def bulk_unban(
     tenant_id: str,
     ban_ids: list[str],
-    add_to_whitelist: bool = False,
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
+    add_to_whitelist: bool = False,
 ):
     await _check_access(tenant_id, current_user, db)
     await db.execute(
@@ -184,9 +184,9 @@ async def bulk_unban(
 @router.get("/export")
 async def export_bans(
     tenant_id: str,
-    format: str = "json",
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
+    format: str = "json",
 ):
     await _check_access(tenant_id, current_user, db, require_editor=False)
     result = await db.execute(select(Ban).where(Ban.tenant_id == tenant_id).order_by(desc(Ban.created_at)))

@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function ProtectedRoute({ children, requireAdmin = false }: Props) {
-  const { user, isLoading, isAuthenticated, isAdmin } = useAuth()
+  const { isLoading, isAuthenticated, isAdmin } = useAuth()
   const { t } = useTranslation()
 
   if (isLoading) {

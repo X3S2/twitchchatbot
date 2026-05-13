@@ -7,6 +7,33 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.19.0] — Docker-Bugfixes, erster funktionaler Stack-Start
+
+### Behoben
+- `docker-compose.yml`:
+  - `tcb-botmanager`: env-Var `API_INTERNAL_URL` → korrekter Name `API_URL` (passend zu `bot-manager/app/config.py`)
+  - `tcb-botmanager`: fehlender `INTERNAL_API_KEY` env-Var ergänzt
+  - `tcb-api`: fehlender `INTERNAL_API_KEY` env-Var ergänzt
+  - `tcb-nginx`: Config-Mount von `conf.d/default.conf` → `nginx.conf` (vollständige nginx.conf mit `events`-Block)
+- `nginx/nginx.conf`: `worker_processes auto;` war fälschlicherweise innerhalb von `events {}` — in den main-Context verschoben; `events {}` hat nun `worker_connections 1024`
+- `bot-manager/app/config.py`: Standard-Hostname `tcb-backend` → korrekter Containername `tcb-api`
+- `bot-manager/Dockerfile`: `curl` installiert (für HEALTHCHECK benötigt)
+- `frontend/Dockerfile.build`: Neues Build-only Image für Volume-Befüllung (`/output`)
+- `frontend/src/App.tsx`: Import-Pfade `'../'` → `'./'` (Datei liegt in `src/`, nicht in `src/src/`)
+- `frontend/src/layouts/AppLayout.tsx`: Doppelter `export default function AppLayout` entfernt (altes Duplikat)
+- `frontend/src/pages/tenants/TenantSettings.tsx`: Doppelter `export default function TenantSettings` entfernt
+- `frontend/src/pages/TwitchUserSearch.tsx`: Doppelter `export default function TwitchUserSearch` entfernt
+- `frontend/src/pages/admin/AdminSettings.tsx`: Zweifaches Duplikat entfernt (3 → 1 Implementierung)
+- Diverse ungenutzte TypeScript-Imports entfernt (`useState`, `useMutation`, `useQueryClient`, `Trash2`, `Plus`, `BotStatus`)
+- `backend/app/routers/bans.py`: Python-Syntaxfehler — Default-Parameter vor Non-Default-Parametern in `delete_ban`, `bulk_unban`, `export_bans` korrigiert
+- `frontend/src/pages/Dashboard.tsx`: Import-Pfad `'../../hooks/useAuth'` → `'../hooks/useAuth'`
+
+### Hinzugefügt
+- `.env` (lokal, nicht in Git): Erstes lokales Test-Set mit generierten Schlüsseln
+- `frontend/package-lock.json`: Generiert für reproduzierbare Docker-Builds
+
+---
+
 ## [0.18.0] — README-Bereinigung, NameScan-Navigation, !tcbrejoin
 
 ### Hinzugefügt
