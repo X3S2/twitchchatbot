@@ -7,6 +7,58 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.7.0] — Name-Scan & Admin-Verwaltung (Frontend)
+
+### Hinzugefügt
+- `frontend/src/pages/admin/AdminSettings.tsx` — App-weite Einstellungen (Twitch Client-ID/Secret, Shared-Bot-Credentials, Maintenance-Mode, Freigabepflicht)
+- `frontend/src/pages/admin/NameScan.tsx` — Name-Scan-Filter verwalten (Aktivieren/Deaktivieren, Löschen)
+- `frontend/src/i18n/de.json` + `en.json` — Vollständige Erweiterung aller UI-Schlüssel (notifications, tenant, bot, stats, bans, filters, commands, mods, audit, settings, admin, user, pagination)
+- `frontend/src/App.tsx` — Alle Routen eingebunden: tenants, tenant-subpages, admin, admin-subpages
+- Topbar-Navigation erweitert mit Benachrichtigungsglocke und Tenant-Menüeintrag
+
+---
+
+## [0.6.0] — Befehle & Statistiken (Frontend)
+
+### Hinzugefügt
+- `frontend/src/pages/tenants/commands/Commands.tsx` — Bot-Befehl-Verwaltung: Liste, Erstellen, Bearbeiten, Löschen; Permission-Level-Badges; Cooldown-Konfiguration
+- `frontend/src/pages/tenants/Stats.tsx` — Statistik-Dashboard mit Recharts BarChart (Bans/Timeouts pro Tag), Perioden-Auswahl (Tag/Woche/Monat), Top-Filter, Top-Begriffe, Totals-Kacheln
+
+---
+
+## [0.5.0] — Ban-System UI (Frontend)
+
+### Hinzugefügt
+- `frontend/src/pages/tenants/bans/BanList.tsx` — Ban-Liste: Suche, Typ-Filter, Multi-Select für Bulk-Unban, Ban hinzufügen, CSV-Export
+- `frontend/src/pages/tenants/bans/SharedBans.tsx` — Geteilte Bans: Verbindungsliste, Einladungen senden/empfangen (annehmen/ablehnen), Verbindung trennen
+
+---
+
+## [0.4.0] — Chat-Filter & Name-Filter UI (Frontend)
+
+### Hinzugefügt
+- `frontend/src/pages/tenants/filters/ChatFilters.tsx` — Chat-Filter-Verwaltung: Expandierbare Karten mit Begriffsliste (Regex/Whitelist-Badge) und Tier-Übersicht; Toggle, Duplizieren, Löschen
+- `frontend/src/pages/tenants/filters/NameFilters.tsx` — Namens-Filter-Verwaltung: analog zu Chat-Filtern mit Pattern-Liste und Tier-Konfiguration
+
+---
+
+## [0.3.0] — Tenant-Dashboard & Moderationssystem (Frontend)
+
+### Hinzugefügt
+- `frontend/src/pages/tenants/TenantList.tsx` — Kachelübersicht eigener Kanäle mit LED-Status, LIVE-Badge, Freigabe-Badge, Kanal-Erstellen-Formular
+- `frontend/src/pages/tenants/TenantDashboard.tsx` — Kanal-Dashboard: Bot-Status (LED + WebSocket-Live-Updates), Stats-Kacheln (Bans/Timeouts/Filter-Hits), Schnellnavigation
+- `frontend/src/pages/tenants/TenantSettings.tsx` — Kanal-Einstellungen: bot_mode, Zugangsdaten (Show/Hide), Stream-Awareness, Retention, Reconnect-Konfiguration
+- `frontend/src/pages/tenants/TenantModerators.tsx` — Moderatoren-Verwaltung: Liste, Hinzufügen (Role-Select), Entfernen
+- `frontend/src/pages/tenants/AuditLog.tsx` — Paginator-fähiges Audit-Log mit Aktionsfilter
+- `frontend/src/hooks/useWebSocket.ts` — WebSocket-Hook mit Auto-Reconnect (3 Sek.)
+- `frontend/src/hooks/useNotifications.ts` — TanStack-Query-Hooks für Benachrichtigungen
+- `frontend/src/components/NotificationBell.tsx` — Glocken-Icon mit Unread-Badge und Dropdown
+- `frontend/src/components/LED.tsx` — Status-Indikator-Komponente (online/offline/connecting/error)
+- `frontend/src/components/InfoButton.tsx` — Tooltip-Hilfskomponente
+- Admin-Seiten: `Index.tsx` (Bot-Instanzen), `TenantApproval.tsx`, `UserManagement.tsx`
+
+---
+
 ## [0.2.0] — Backend-API-Vollständigkeit + TwitchIO-Bot
 
 ### Hinzugefügt

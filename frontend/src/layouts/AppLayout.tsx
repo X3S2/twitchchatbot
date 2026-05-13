@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { LangToggle } from '../components/LangToggle'
-import { LayoutDashboard, Settings, Shield, LogOut } from 'lucide-react'
+import { NotificationBell } from '../components/NotificationBell'
+import { LayoutDashboard, Settings, Shield, LogOut, Tv, BarChart2 } from 'lucide-react'
 
 export default function AppLayout() {
   const { t } = useTranslation()
@@ -26,6 +27,7 @@ export default function AppLayout() {
 
         <nav className="flex-1 p-2 space-y-1">
           <NavItem to="/" icon={<LayoutDashboard className="w-5 h-5" />} label={t('nav.dashboard')} />
+          <NavItem to="/tenants" icon={<Tv className="w-5 h-5" />} label={t('nav.tenants')} />
           {isAdmin && <NavItem to="/admin" icon={<Shield className="w-5 h-5" />} label={t('nav.admin')} />}
           <NavItem to="/settings" icon={<Settings className="w-5 h-5" />} label={t('nav.settings')} />
         </nav>
@@ -57,6 +59,7 @@ export default function AppLayout() {
             )}
           </div>
           <div className="flex items-center gap-1">
+            <NotificationBell />
             <LangToggle />
             <ThemeToggle />
           </div>
