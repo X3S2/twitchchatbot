@@ -1,0 +1,45 @@
+# Plan-Ordner bleibt lokal
+plan/
+
+# Umgebungsvariablen (enthält Secrets)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Node / Frontend
+node_modules/
+frontend/dist/
+frontend/build/
+*.tsbuildinfo
+
+# Docker
+*.log
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+
+# Backups (bleiben lokal)
+backups/
+
+# Alembic
+backend/alembic/versions/*.pyc

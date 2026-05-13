@@ -1,0 +1,73 @@
+{
+  "app_name": "TwitchChatBot",
+  "nav": {
+    "dashboard": "Dashboard",
+    "filters": "Filter",
+    "bans": "Bans",
+    "commands": "Befehle",
+    "settings": "Einstellungen",
+    "admin": "Administration",
+    "logout": "Abmelden"
+  },
+  "auth": {
+    "login_with_twitch": "Mit Twitch anmelden",
+    "login_description": "Melde dich mit deinem Twitch-Account an, um TwitchChatBot zu nutzen.",
+    "loading": "Wird geladen...",
+    "logout_confirm": "Wirklich abmelden?"
+  },
+  "setup": {
+    "title": "Ersteinrichtung",
+    "subtitle": "Konfiguriere TwitchChatBot für deinen Server.",
+    "client_id": "Twitch Client-ID",
+    "client_secret": "Twitch Client-Secret",
+    "bot_username": "Bot-Benutzername (optional)",
+    "bot_token": "Bot OAuth-Token (optional)",
+    "save": "Einrichtung abschließen",
+    "saving": "Wird gespeichert...",
+    "success": "Einrichtung erfolgreich! Bitte melde dich jetzt an.",
+    "already_done": "Die Einrichtung wurde bereits abgeschlossen."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Willkommen, {{name}}!",
+    "no_tenants": "Du hast noch keine Channels konfiguriert."
+  },
+  "legal": {
+    "impressum": "Impressum",
+    "datenschutz": "Datenschutz",
+    "loading": "Inhalt wird geladen...",
+    "not_found": "Diese Seite wurde nicht gefunden."
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "yes": "Ja",
+    "no": "Nein",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter"
+  },
+  "maintenance": {
+    "title": "Wartung",
+    "default_message": "Das System wird gerade gewartet. Bitte versuche es später erneut."
+  },
+  "cookie": {
+    "message": "Diese Website verwendet nur technisch notwendige Cookies für die Authentifizierung.",
+    "accept": "Verstanden"
+  },
+  "theme": {
+    "toggle_dark": "Dunkelmodus aktivieren",
+    "toggle_light": "Hellmodus aktivieren"
+  },
+  "errors": {
+    "not_found": "Seite nicht gefunden",
+    "unauthorized": "Nicht angemeldet",
+    "forbidden": "Keine Berechtigung",
+    "server_error": "Serverfehler"
+  }
+}

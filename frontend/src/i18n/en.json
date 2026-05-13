@@ -1,0 +1,73 @@
+{
+  "app_name": "TwitchChatBot",
+  "nav": {
+    "dashboard": "Dashboard",
+    "filters": "Filters",
+    "bans": "Bans",
+    "commands": "Commands",
+    "settings": "Settings",
+    "admin": "Administration",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login_with_twitch": "Login with Twitch",
+    "login_description": "Sign in with your Twitch account to use TwitchChatBot.",
+    "loading": "Loading...",
+    "logout_confirm": "Really log out?"
+  },
+  "setup": {
+    "title": "Initial Setup",
+    "subtitle": "Configure TwitchChatBot for your server.",
+    "client_id": "Twitch Client ID",
+    "client_secret": "Twitch Client Secret",
+    "bot_username": "Bot Username (optional)",
+    "bot_token": "Bot OAuth Token (optional)",
+    "save": "Complete Setup",
+    "saving": "Saving...",
+    "success": "Setup complete! Please log in now.",
+    "already_done": "Setup has already been completed."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {{name}}!",
+    "no_tenants": "You have no channels configured yet."
+  },
+  "legal": {
+    "impressum": "Imprint",
+    "datenschutz": "Privacy Policy",
+    "loading": "Loading content...",
+    "not_found": "This page was not found."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next"
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "default_message": "The system is currently under maintenance. Please try again later."
+  },
+  "cookie": {
+    "message": "This website only uses technically necessary cookies for authentication.",
+    "accept": "Got it"
+  },
+  "theme": {
+    "toggle_dark": "Enable dark mode",
+    "toggle_light": "Enable light mode"
+  },
+  "errors": {
+    "not_found": "Page not found",
+    "unauthorized": "Not authenticated",
+    "forbidden": "Access denied",
+    "server_error": "Server error"
+  }
+}
