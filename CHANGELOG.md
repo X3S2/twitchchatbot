@@ -7,6 +7,19 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.1] — Filter-Nachrichtentext, Encoding-Fix, Bot-Fehleranzeige
+
+### Neu
+- **Filter-Tiers: Chat-Nachricht konfigurierbar** — Jede Stufe (warn/timeout/ban) hat jetzt ein Eingabefeld „Chat-Nachricht nach Aktion". Der Bot sendet diesen Text nach der Aktion in den Chat; `{user}` wird durch den Benutzernamen ersetzt. Das Feld war bisher im Backend und Bot-Manager vorhanden, aber nicht in der UI zugänglich.
+
+### Behoben
+- **NameFilters: Encoding-Fehler in Quellcode** — Sonderzeichen `·` (Mittelpunkt), `…` (Ellipsis) und `→` (Pfeil) wurden als `Â·`, `â€¦`, `â†'` dargestellt (UTF-8/Latin-1-Mojibake in NameFilters.tsx). Direkt im Quellcode korrigiert.
+- **name_filters.py API-Antwort unvollständig** — `GET /filters/name` serialisierte die Tier-Daten ohne `message_template` → gespeicherte Nachrichten wurden beim Öffnen des Editierformulars nicht angezeigt.
+- **Bot starten: kein Feedback bei Fehler** — Klick auf „Bot starten" zeigte keine Fehlermeldung wenn das Backend 400 zurückgab (z. B. kein Bot-Token konfiguriert). Jetzt erscheint der Fehlertext direkt unter dem Button.
+- **Bot starten: auch bei Status `error` sichtbar** — „Bot starten"-Button ist jetzt auch dann sichtbar, wenn der Status auf `error` steht (vorher nur bei `offline`).
+
+---
+
 ## [0.22.0] — Dark-Mode-Dropdowns, Auth-Session, Stats-Tooltip, Bot-Token-Validierung
 
 ### Behoben

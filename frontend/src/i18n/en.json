@@ -104,7 +104,8 @@
     "no_terms": "No terms",
     "no_patterns": "No patterns",
     "no_tiers": "No tiers",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "template_placeholder": "Chat message after action, e.g. @{user} Warning!"
   },
   "commands": {
     "title": "Bot Commands",

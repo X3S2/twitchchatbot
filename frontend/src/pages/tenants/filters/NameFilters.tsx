@@ -10,11 +10,11 @@ interface NameFilter {
   enabled: boolean
   test_mode: boolean
   patterns: { id: string; pattern: string; is_regex: boolean; is_whitelist: boolean }[]
-  tiers: { id: string; tier_order: number; action: string; duration_seconds: number }[]
+  tiers: { id: string; tier_order: number; action: string; duration_seconds: number; message_template: string | null }[]
 }
 
 type EditPattern = { pattern: string; is_regex: boolean; is_whitelist: boolean }
-type EditTier = { tier_order: number; action: string; duration_seconds: number }
+type EditTier = { tier_order: number; action: string; duration_seconds: number; message_template: string }
 interface EditState {
   id: string; name: string; enabled: boolean; test_mode: boolean
   patterns: EditPattern[]; tiers: EditTier[]
@@ -76,7 +76,7 @@ export default function NameFilters() {
     setEditing({
       id: filter.id, name: filter.name, enabled: filter.enabled, test_mode: filter.test_mode,
       patterns: filter.patterns.map(({ pattern, is_regex, is_whitelist }) => ({ pattern, is_regex, is_whitelist: is_whitelist ?? false })),
-      tiers: filter.tiers.map(({ tier_order, action, duration_seconds }) => ({ tier_order, action, duration_seconds })),
+      tiers: filter.tiers.map(({ tier_order, action, duration_seconds, message_template }) => ({ tier_order, action, duration_seconds, message_template: message_template ?? '' })),
     })
   }
 
@@ -129,7 +129,7 @@ export default function NameFilters() {
                         {filter.test_mode && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Test-Mode</span>}
                         {!filter.enabled && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">Inaktiv</span>}
                       </div>
-                      <p className="text-xs text-gray-500">{filter.patterns.length} {t('filters.patterns')} Â· {filter.tiers.length} {t('filters.tiers')}</p>
+                      <p className="text-xs text-gray-500">{filter.patterns.length} {t('filters.patterns')} · {filter.tiers.length} {t('filters.tiers')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -169,7 +169,7 @@ export default function NameFilters() {
                         {editing.patterns.map((pat, i) => (
                           <div key={i} className="flex items-center gap-2 flex-wrap">
                             <input value={pat.pattern} onChange={(e) => updPat(i, 'pattern', e.target.value)}
-                              className={`${iCls} flex-1 min-w-[140px] font-mono`} placeholder="Muster oder Regexâ€¦" />
+                              className={`${iCls} flex-1 min-w-[140px] font-mono`} placeholder="Muster oder Regex…" />
                             <label className="flex items-center gap-1 text-xs cursor-pointer whitespace-nowrap">
                               <input type="checkbox" checked={pat.is_regex} onChange={(e) => updPat(i, 'is_regex', e.target.checked)} className="w-3.5 h-3.5" />
                               Regex
@@ -215,7 +215,7 @@ export default function NameFilters() {
                           </div>
                         ))}
                       </div>
-                      <button onClick={() => setEditing((e) => e ? { ...e, tiers: [...e.tiers, { tier_order: e.tiers.length + 1, action: 'ban', duration_seconds: 0 }] } : e)}
+                      <button onClick={() => setEditing((e) => e ? { ...e, tiers: [...e.tiers, { tier_order: e.tiers.length + 1, action: 'ban', duration_seconds: 0, message_template: '' }] } : e)}
                         className="mt-2 flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800">
                         <Plus className="w-3 h-3" />{t('filters.add_tier')}
                       </button>

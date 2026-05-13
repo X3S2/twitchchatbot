@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { LED } from '../../components/LED'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { useQueryClient } from '@tanstack/react-query'
@@ -43,13 +44,26 @@ async function fetchStats(id: string): Promise<Stats> {
   return res.json()
 }
 
-async function startBot(id: string) { await fetch(`/api/tenants/${id}/bot/start`, { method: 'POST', credentials: 'include' }) }
-async function stopBot(id: string) { await fetch(`/api/tenants/${id}/bot/stop`, { method: 'POST', credentials: 'include' }) }
+async function startBot(id: string): Promise<void> {
+  const res = await fetch(`/api/tenants/${id}/bot/start`, { method: 'POST', credentials: 'include' })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.detail || `Fehler ${res.status}`)
+  }
+}
+async function stopBot(id: string): Promise<void> {
+  const res = await fetch(`/api/tenants/${id}/bot/stop`, { method: 'POST', credentials: 'include' })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.detail || `Fehler ${res.status}`)
+  }
+}
 
 export default function TenantDashboard() {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
   const qc = useQueryClient()
+  const [botError, setBotError] = useState<string | null>(null)
 
   const { data: tenant } = useQuery({ queryKey: ['tenant', id], queryFn: () => fetchTenant(id!) })
   const { data: botStatus, refetch: refetchStatus } = useQuery({ queryKey: ['bot-status', id], queryFn: () => fetchBotStatus(id!), refetchInterval: 30000 })
@@ -74,17 +88,22 @@ export default function TenantDashboard() {
           <p className="text-sm text-gray-500">#{tenant.channel_name}</p>
         </div>
         <div className="flex items-center gap-3">
-          {botStatus?.status === 'offline' ? (
-            <button onClick={() => startBot(id!).then(() => refetchStatus())} className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+          {botStatus?.status === 'offline' || botStatus?.status === 'error' ? (
+            <button onClick={() => { setBotError(null); startBot(id!).then(() => { setBotError(null); refetchStatus() }).catch((e) => setBotError(e.message)) }} className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
               {t('bot.start')}
             </button>
           ) : (
-            <button onClick={() => stopBot(id!).then(() => refetchStatus())} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
+            <button onClick={() => stopBot(id!).then(() => refetchStatus()).catch(() => {})} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
               {t('bot.stop')}
             </button>
           )}
           <LED status={botStatus?.status || 'offline'} showLabel />
         </div>
+        {botError && (
+          <div className="mt-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
+            {botError}
+          </div>
+        )}
       </div>
 
       {/* Stats cards */}

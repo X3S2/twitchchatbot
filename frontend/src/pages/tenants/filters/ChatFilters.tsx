@@ -12,11 +12,11 @@ interface ChatFilter {
   test_mode: boolean
   priority: number
   terms: { id: string; term: string; is_regex: boolean; is_whitelist: boolean }[]
-  tiers: { id: string; tier_order: number; threshold: number; action: string; duration_seconds: number }[]
+  tiers: { id: string; tier_order: number; threshold: number; action: string; duration_seconds: number; message_template: string | null }[]
 }
 
 type EditTerm = { term: string; is_regex: boolean; is_whitelist: boolean }
-type EditTier = { tier_order: number; threshold: number; action: string; duration_seconds: number }
+type EditTier = { tier_order: number; threshold: number; action: string; duration_seconds: number; message_template: string }
 interface EditState {
   id: string; name: string; enabled: boolean; case_sensitive: boolean; test_mode: boolean; priority: number
   terms: EditTerm[]; tiers: EditTier[]
@@ -84,7 +84,7 @@ export default function ChatFilters() {
       id: filter.id, name: filter.name, enabled: filter.enabled,
       case_sensitive: filter.case_sensitive, test_mode: filter.test_mode, priority: filter.priority,
       terms: filter.terms.map(({ term, is_regex, is_whitelist }) => ({ term, is_regex, is_whitelist })),
-      tiers: filter.tiers.map(({ tier_order, threshold, action, duration_seconds }) => ({ tier_order, threshold, action, duration_seconds })),
+      tiers: filter.tiers.map(({ tier_order, threshold, action, duration_seconds, message_template }) => ({ tier_order, threshold, action, duration_seconds, message_template: message_template ?? '' })),
     })
   }
 
@@ -229,13 +229,15 @@ export default function ChatFilters() {
                                 <span className="text-xs text-gray-500">s</span>
                               </>
                             )}
+                            <input value={tier.message_template} onChange={(e) => updTier(i, 'message_template', e.target.value)}
+                              className={`${iCls} flex-1 min-w-[160px]`} placeholder={t('filters.template_placeholder')} />
                             <button onClick={() => setEditing((e) => e ? { ...e, tiers: e.tiers.filter((_, idx) => idx !== i) } : e)} className="text-red-400 hover:text-red-600">
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         ))}
                       </div>
-                      <button onClick={() => setEditing((e) => e ? { ...e, tiers: [...e.tiers, { tier_order: e.tiers.length + 1, threshold: 3, action: 'timeout', duration_seconds: 300 }] } : e)}
+                      <button onClick={() => setEditing((e) => e ? { ...e, tiers: [...e.tiers,         { tier_order: e.tiers.length + 1, threshold: 3, action: 'timeout', duration_seconds: 300, message_template: '' }] } : e)}
                         className="mt-2 flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800">
                         <Plus className="w-3 h-3" />{t('filters.add_tier')}
                       </button>

@@ -104,7 +104,8 @@
     "no_terms": "Keine Begriffe",
     "no_patterns": "Keine Muster",
     "no_tiers": "Keine Stufen",
-    "duplicate": "Duplizieren"
+    "duplicate": "Duplizieren",
+    "template_placeholder": "Chat-Nachricht nach Aktion, z. B. @{user} Verwarnung!"
   },
   "commands": {
     "title": "Bot-Befehle",

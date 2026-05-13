@@ -83,7 +83,7 @@ async def list_name_filters(
             "id": str(f.id), "name": f.name, "enabled": f.enabled,
             "test_mode": f.test_mode, "priority": f.priority,
             "patterns": [{"id": str(p.id), "pattern": p.pattern, "is_regex": p.is_regex, "is_whitelist": p.is_whitelist} for p in patterns.scalars().all()],
-            "tiers": [{"id": str(t.id), "tier_order": t.tier_order, "threshold": t.threshold, "action": t.action, "duration_seconds": t.duration_seconds} for t in tiers.scalars().all()],
+            "tiers": [{"id": str(t.id), "tier_order": t.tier_order, "threshold": t.threshold, "action": t.action, "duration_seconds": t.duration_seconds, "message_template": t.message_template} for t in tiers.scalars().all()],
         })
     return out
 
