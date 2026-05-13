@@ -17,6 +17,7 @@ import TenantApproval from './pages/admin/TenantApproval'
 import UserManagement from './pages/admin/UserManagement'
 import NameScan from './pages/admin/NameScan'
 import AdminSettings from './pages/admin/AdminSettings'
+import LegalEditor from './pages/admin/LegalEditor'
 // Tenant pages
 import TenantList from './pages/tenants/TenantList'
 import TenantDashboard from './pages/tenants/TenantDashboard'
@@ -126,6 +127,14 @@ export default function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/legal"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <LegalEditor />
                 </ProtectedRoute>
               }
             />

@@ -3,6 +3,7 @@
   "loading": "Loading...",
   "save": "Save",
   "cancel": "Cancel",
+  "saved": "Saved!",
   "nav": {
     "dashboard": "Dashboard",
     "filters": "Filters",
@@ -34,10 +35,12 @@
     "add": "Add Channel",
     "new": "New Channel",
     "channel_name": "Twitch Channel Name",
+    "channel": "Channel",
     "display_name": "Display Name",
     "pending_approval": "Pending Approval",
     "empty": "You have no channels yet.",
-    "add_first": "Add your first channel"
+    "add_first": "Add first channel",
+    "requested_at": "Requested at"
   },
   "bot": {
     "start": "Start Bot",
@@ -92,7 +95,16 @@
     "terms": "Terms",
     "patterns": "Patterns",
     "tiers": "Tiers",
-    "name_placeholder": "Filter name"
+    "name_placeholder": "Filter name",
+    "enabled": "Active",
+    "add_term": "Add term",
+    "add_pattern": "Add pattern",
+    "add_tier": "Add tier",
+    "tiers_hint": "from X hits",
+    "no_terms": "No terms",
+    "no_patterns": "No patterns",
+    "no_tiers": "No tiers",
+    "duplicate": "Duplicate"
   },
   "commands": {
     "title": "Bot Commands",
@@ -161,6 +173,17 @@
     "no_pending": "No pending requests",
     "approve": "Approve",
     "reject": "Reject",
+    "revoke": "Revoke Approval",
+    "approved": "Approved",
+    "no_approved": "No approved channels",
+    "legal_pages": "Legal Pages",
+    "legal_pages_hint": "Edit content for Impressum and Privacy Policy.",
+    "legal_preview": "Preview",
+    "legal_title_de": "Title (German)",
+    "legal_title_en": "Title (English)",
+    "legal_content_de": "Content (German)",
+    "legal_content_en": "Content (English)",
+    "datenschutz": "Privacy Policy",
     "user_management": "User Management",
     "name_scan": "Name Scan",
     "new_scan_filter": "New Scan Filter",

@@ -7,6 +7,24 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.21.0] — Filter-Bearbeitung, Kanal-Verwaltung, Legal-Editor
+
+### Neu
+- **ChatFilters**: Inline-Edit-Panel — Pencil-Button öffnet Bearbeitungsformular direkt unter dem Filter-Header; Terms (Begriff, Regex, Whitelist) und Tiers (Schwellenwert, Aktion, Dauer) können inline hinzugefügt, bearbeitet und entfernt werden; PUT-Endpoint wird aufgerufen
+- **NameFilters**: Gleiches Inline-Edit-Panel wie ChatFilters; arbeitet mit `patterns` (statt `terms`) und ohne `case_sensitive`-Feld
+- **TenantApproval**: Zeigt jetzt zwei Sektionen — „Ausstehend" (mit Freigeben/Ablehnen) und „Freigegeben" (mit Freigabe-entziehen-Button); bisher wurden nur nicht-freigegebene Kanäle angezeigt
+- **Backend revoke-Endpoint**: `POST /api/tenants/{id}/revoke` — setzt `approved=False` ohne den Tenant zu löschen
+- **LegalEditor**: Neue Admin-Seite `/admin/legal` zum Bearbeiten von Impressum und Datenschutz (Titel DE/EN, HTML-Inhalt DE/EN); PATCH-Endpoint im Backend
+- **Legal-Migration 002**: Alembic-Migration füllt `content_de` und `content_en` für beide Legal-Seiten mit deutschen/englischen HTML-Vorlagen ([PLATZHALTER] für Betreiberdaten)
+- **AppLayout**: Sidebar-Header auf `h-14` (56px) fixiert — passt jetzt zur Höhe des Haupt-Headers; Sidebar-Footer auf `h-10` (40px) fixiert — passt zur Fußzeile des Hauptbereichs
+- **Admin-Navigation**: „Rechtliche Seiten"-Link (`/admin/legal`) in der Admin-Sidebar ergänzt
+
+### Geändert
+- `backend/app/routers/legal.py`: `PATCH /{slug}`-Endpoint mit `require_admin`-Absicherung hinzugefügt
+- i18n (DE/EN): Neue Keys `filters.enabled`, `filters.add_term/add_pattern/add_tier`, `filters.tiers_hint`, `filters.no_terms/no_patterns/no_tiers`, `filters.duplicate`; `admin.revoke/approved/no_approved`; `admin.legal_*`; `tenant.channel/requested_at`; Top-Level `saved`
+
+---
+
 ## [0.20.0] — UI-Bugfixes nach erstem Login
 
 ### Behoben

@@ -29,7 +29,7 @@ export default function AppLayout() {
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <aside className="w-16 md:w-56 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col">
-        <div className="p-3 md:p-4 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3">
+        <div className="h-14 flex-shrink-0 px-3 md:px-4 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3">
           <img src="/favicon.svg" alt="TCB" className="w-8 h-8 flex-shrink-0" />
           <span className="hidden md:block font-bold text-sm truncate">{t('app_name')}</span>
         </div>
@@ -61,6 +61,7 @@ export default function AppLayout() {
               <NavItem to="/admin/users" icon={<Users className="w-5 h-5" />} label={t('admin.user_management')} />
               <NavItem to="/admin/name-scan" icon={<Search className="w-5 h-5" />} label={t('admin.name_scan')} />
               <NavItem to="/admin/settings" icon={<Settings className="w-5 h-5" />} label={t('nav.settings')} />
+              <NavItem to="/admin/legal" icon={<BookOpen className="w-5 h-5" />} label={t('admin.legal_pages')} />
             </>
           ) : (
             <>
@@ -73,10 +74,10 @@ export default function AppLayout() {
           )}
         </nav>
 
-        <div className="p-2 border-t border-gray-200 dark:border-gray-800 space-y-1">
+        <div className="h-10 flex-shrink-0 border-t border-gray-200 dark:border-gray-800 flex items-center px-1">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="w-full h-full flex items-center gap-3 px-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title={t('nav.logout')}
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />

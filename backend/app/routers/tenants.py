@@ -262,6 +262,21 @@ async def reject_tenant(
     return {"ok": True}
 
 
+@router.post("/{tenant_id}/revoke")
+async def revoke_tenant(
+    tenant_id: str,
+    admin: Annotated[User, Depends(require_admin)],
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404)
+    tenant.approved = False
+    await db.commit()
+    return {"ok": True}
+
+
 # ── Bot-Instanz Steuerung ─────────────────────────────────────
 
 @router.post("/{tenant_id}/bot/start")

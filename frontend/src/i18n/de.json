@@ -3,6 +3,7 @@
   "loading": "Laden...",
   "save": "Speichern",
   "cancel": "Abbrechen",
+  "saved": "Gespeichert!",
   "nav": {
     "dashboard": "Dashboard",
     "filters": "Filter",
@@ -34,10 +35,12 @@
     "add": "Kanal hinzufügen",
     "new": "Neuen Kanal anlegen",
     "channel_name": "Twitch-Kanalname",
+    "channel": "Kanal",
     "display_name": "Anzeigename",
     "pending_approval": "Wartet auf Freigabe",
     "empty": "Du hast noch keine Kanäle.",
-    "add_first": "Ersten Kanal hinzufügen"
+    "add_first": "Ersten Kanal hinzufügen",
+    "requested_at": "Angefragt am"
   },
   "bot": {
     "start": "Bot starten",
@@ -92,7 +95,16 @@
     "terms": "Begriffe",
     "patterns": "Muster",
     "tiers": "Stufen",
-    "name_placeholder": "Filter-Name"
+    "name_placeholder": "Filter-Name",
+    "enabled": "Aktiv",
+    "add_term": "Begriff hinzufügen",
+    "add_pattern": "Muster hinzufügen",
+    "add_tier": "Stufe hinzufügen",
+    "tiers_hint": "ab X Treffern",
+    "no_terms": "Keine Begriffe",
+    "no_patterns": "Keine Muster",
+    "no_tiers": "Keine Stufen",
+    "duplicate": "Duplizieren"
   },
   "commands": {
     "title": "Bot-Befehle",
@@ -161,6 +173,17 @@
     "no_pending": "Keine ausstehenden Anfragen",
     "approve": "Freigeben",
     "reject": "Ablehnen",
+    "revoke": "Freigabe entziehen",
+    "approved": "Freigegeben",
+    "no_approved": "Keine freigegebenen Kanäle",
+    "legal_pages": "Rechtliche Seiten",
+    "legal_pages_hint": "Inhalte für Impressum und Datenschutz bearbeiten.",
+    "legal_preview": "Vorschau",
+    "legal_title_de": "Titel (Deutsch)",
+    "legal_title_en": "Titel (Englisch)",
+    "legal_content_de": "Inhalt (Deutsch)",
+    "legal_content_en": "Inhalt (Englisch)",
+    "datenschutz": "Datenschutzerklärung",
     "user_management": "Benutzerverwaltung",
     "name_scan": "Name-Scan",
     "new_scan_filter": "Scan-Filter erstellen",
