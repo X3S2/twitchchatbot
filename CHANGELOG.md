@@ -7,6 +7,15 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.12.0] — Token-Validierung, Twitch-User-ID-Lookup, Test-Credentials
+
+### Hinzugefügt
+- `backend/app/core/twitch_client.py` — Neue Funktion `validate_token()`: validiert Twitch-Access-Token via `/oauth2/validate`
+- `backend/app/routers/admin.py` — `POST /api/admin/test-credentials`: prüft gespeicherte App-Credentials auf Gültigkeit (gibt Scopes + Ablaufzeit zurück)
+- `backend/app/routers/multi_ban.py` — Echte Twitch-User-ID-Auflösung via `lookup_twitch_user()` bei Multi-Ban (Best-Effort, Fallback auf "unknown")
+
+---
+
 ## [0.11.0] — Failover-Schutz, Unban-Benachrichtigung, Bot !unban-Befehl
 
 ### Hinzugefügt

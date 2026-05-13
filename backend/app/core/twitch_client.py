@@ -99,3 +99,22 @@ async def lookup_twitch_user(
     except Exception as exc:
         logger.warning("User-Lookup fehlgeschlagen für %s: %s", login, exc)
         return None
+
+
+async def validate_token(access_token: str) -> dict[str, Any] | None:
+    """
+    Validiert einen Twitch-Access-Token via /oauth2/validate.
+    Gibt Token-Infos zurück (login, user_id, scopes, expires_in) oder None wenn ungültig.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                TWITCH_VALIDATE_URL,
+                headers={"Authorization": f"OAuth {access_token}"},
+            )
+            if resp.status_code == 200:
+                return resp.json()
+            return None
+    except Exception as exc:
+        logger.warning("Token-Validierung fehlgeschlagen: %s", exc)
+        return None

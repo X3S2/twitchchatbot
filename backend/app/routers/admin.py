@@ -284,3 +284,33 @@ async def trigger_mod_check():
     import asyncio
     asyncio.create_task(run_mod_check())
     return {"ok": True, "message": "Mod-Check wird im Hintergrund ausgeführt"}
+
+
+@router.post("/test-credentials", dependencies=[Depends(require_admin)])
+async def test_credentials(db: AsyncSession = Depends(get_db)):
+    """Prüft ob die gespeicherten Twitch-Credentials (App-Access-Token) funktionieren."""
+    from ..core.twitch_client import get_app_access_token, validate_token
+    from ..core.security import decrypt_value
+
+    cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+    app_cfg = cfg_result.scalar_one_or_none()
+    if not app_cfg or not app_cfg.client_id_enc or not app_cfg.client_secret_enc:
+        return {"ok": False, "error": "Keine Credentials gespeichert"}
+
+    client_id = decrypt_value(app_cfg.client_id_enc)
+    client_secret = decrypt_value(app_cfg.client_secret_enc)
+
+    token = await get_app_access_token(client_id, client_secret)
+    if not token:
+        return {"ok": False, "error": "App-Access-Token konnte nicht abgerufen werden"}
+
+    validated = await validate_token(token)
+    if not validated:
+        return {"ok": False, "error": "Token-Validierung fehlgeschlagen"}
+
+    return {
+        "ok": True,
+        "client_id": client_id[:6] + "…",
+        "expires_in": validated.get("expires_in"),
+        "scopes": validated.get("scopes", []),
+    }
