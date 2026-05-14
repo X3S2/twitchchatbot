@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.22.8-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.9-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -251,6 +251,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | nginx DNS-Resolver Fix | `v0.22.6` | ✅ Fertig | Docker-DNS-Resolver in nginx.conf — verhindert stale IP nach Container-Restart |
 | nginx OAuth-Callback Query-String Fix | `v0.22.7` | ✅ Fertig | Login wieder funktionstüchtig: `?code=` und `?state=` wurden von nginx gestripped |
 | InfoModals, BanList-Fix, Stats-Tooltip, Commands-Erweiterung, HelpModals | `v0.22.8` | ✅ Fertig | Encoding-Fix NameFilters, reaktiver Stats-Chart-Cursor, BanList Username-First + Timeout-Dauer, Muster-Erklärung NameFilter/ChatFilter, neue Command-Aktionstypen + Syntax-Preview, Bot `_execute_command_action`, seitenweite HelpModals |
+| BotStop-Fehleranzeige, HelpModals komplett, Template-Variablen-Hilfe, Stats-Tooltip-Fix, Legal-Vorlagen | `v0.22.9` | ✅ Fertig | Bot-Stop zeigt Fehler im Dashboard, HelpModals auf 8 weiteren Seiten, Template-Variablen-Hilfe in Befehlen, Stats-Chart-Tooltip-Position, HTML-Vorlagen für Impressum/Datenschutz im LegalEditor |
 
 ---
 
