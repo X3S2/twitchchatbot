@@ -2,7 +2,14 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Plus, Trash2, Pencil } from 'lucide-react'
+import { Plus, Trash2, Pencil, Info, X } from 'lucide-react'
+
+const ACTION_INFO: Record<string, string> = {
+  respond: 'Sendet eine Chat-Nachricht als Antwort. Im Template können {user} (Aufrufer) und {args} (Parameter) genutzt werden.',
+  ban: 'Bannt den Nutzer, der den Befehl aufruft (oder den als Parameter angegebenen User). Nur für Moderatoren sinnvoll.',
+  timeout: 'Gibt dem Nutzer einen Timeout. Dauer wird in der Bot-Konfiguration festgelegt.',
+  delete: 'Löscht die Nachricht, die den Befehl ausgelöst hat, direkt aus dem Chat.',
+}
 
 interface ChatCommand {
   id: string
@@ -50,12 +57,13 @@ export default function Commands() {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
   const qc = useQueryClient()
-  const { data: commands = [], isLoading } = useQuery({ queryKey: ['commands', id], queryFn: () => fetchCommands(id!) })
   const [showForm, setShowForm] = useState(false)
   const [editCmd, setEditCmd] = useState<ChatCommand | null>(null)
   const [form, setForm] = useState({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60 })
+  const [showActionInfo, setShowActionInfo] = useState(false)
 
   const deleteMut = useMutation({ mutationFn: (cmdId: string) => deleteCommand(id!, cmdId), onSuccess: () => qc.invalidateQueries({ queryKey: ['commands', id] }) })
+  const { data: commands = [], isLoading } = useQuery({ queryKey: ['commands', id], queryFn: () => fetchCommands(id!) })
   const saveMut = useMutation({
     mutationFn: () => editCmd ? updateCommand(id!, editCmd.id, form) : createCommand(id!, form),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['commands', id] }); setShowForm(false); setEditCmd(null); setForm({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60 }) },
@@ -96,7 +104,23 @@ export default function Commands() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">{t('commands.action')}</label>
+              <label className="block text-xs font-medium mb-1 flex items-center gap-1">
+                {t('commands.action')}
+                <button type="button" onClick={() => setShowActionInfo(v => !v)} className="text-gray-400 hover:text-purple-600">
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+              </label>
+              {showActionInfo && (
+                <div className="mb-2 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg text-xs space-y-1.5">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-purple-700 dark:text-purple-300">Aktionen erklärt</span>
+                    <button onClick={() => setShowActionInfo(false)}><X className="w-3.5 h-3.5 text-gray-400" /></button>
+                  </div>
+                  {Object.entries(ACTION_INFO).map(([key, desc]) => (
+                    <div key={key}><span className="font-mono font-semibold">{key}</span>: <span className="text-gray-600 dark:text-gray-400">{desc}</span></div>
+                  ))}
+                </div>
+              )}
               <select value={form.action_type} onChange={(e) => setForm((f) => ({ ...f, action_type: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 text-sm focus:outline-none">
                 {ACTION_TYPES.map((a) => <option key={a} value={a}>{a}</option>)}
               </select>

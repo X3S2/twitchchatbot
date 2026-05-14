@@ -202,7 +202,7 @@ export default function NameFilters() {
                               <option value="timeout">timeout</option>
                               <option value="ban">ban</option>
                             </select>
-                            {tier.action !== 'ban' && (
+                            {tier.action === 'timeout' && (
                               <>
                                 <input type="number" min={1} value={tier.duration_seconds} onChange={(e) => updTier(i, 'duration_seconds', Number(e.target.value))}
                                   className={`${iCls} w-20`} />
@@ -241,8 +241,8 @@ export default function NameFilters() {
                       <p className="text-xs font-semibold text-gray-500 uppercase mb-2">{t('filters.patterns')}</p>
                       <div className="flex flex-wrap gap-1.5">
                         {filter.patterns.length === 0 ? <span className="text-xs text-gray-400 italic">{t('filters.no_patterns')}</span> : filter.patterns.map((p) => (
-                          <span key={p.id} className="px-2 py-0.5 rounded text-xs font-mono bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-                            {p.pattern}
+                          <span key={p.id} className={`px-2 py-0.5 rounded text-xs font-mono ${p.is_whitelist ? 'bg-green-100 text-green-700' : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'}`}>
+                            {p.is_whitelist && '\u2713 '}{p.pattern}
                             {p.is_regex && <span className="ml-1 text-[9px] opacity-60">regex</span>}
                           </span>
                         ))}

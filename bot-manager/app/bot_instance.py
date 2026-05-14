@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -21,8 +22,8 @@ from .redis_bus import publish
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-# In-Memory-Violation-Counter: {tenant_id: {filter_id: {user_id: count}}}
-_violation_counts: dict[str, dict[str, dict[str, int]]] = {}
+# In-Memory-Violation-Timestamps: {tenant_id: {filter_id: {user_id: [datetime, ...]}}}
+_violation_timestamps: dict[str, dict[str, dict[str, list[datetime]]]] = {}
 # Bereits gesehene Chatter: {tenant_id: set(user_ids)}
 _seen_chatters: dict[str, set[str]] = {}
 # Command-Cooldowns: {tenant_id: {key: timestamp}}
@@ -75,12 +76,11 @@ class TwitchBotInstance(twitch_commands.Bot):
                 await self._apply_action(message.channel, username, user_id, nf_action.action, nf_action.duration_seconds, nf_action.message_template)
 
         # 2. Chat-Filter
-        vmap = _violation_counts.setdefault(self.tenant_id, {})
-        violation_counts = {fid: counts.get(user_id, 0) for fid, counts in vmap.items()}
-        cf_action = check_message(text, user_id, username, self.config.get("chat_filters", []), violation_counts)
+        tmap = _violation_timestamps.setdefault(self.tenant_id, {})
+        violation_data = {fid: user_ts.get(user_id, []) for fid, user_ts in tmap.items()}
+        cf_action = check_message(text, user_id, username, self.config.get("chat_filters", []), violation_data)
         if cf_action:
-            vmap.setdefault(cf_action.filter_id, {})
-            vmap[cf_action.filter_id][user_id] = vmap[cf_action.filter_id].get(user_id, 0) + 1
+            tmap.setdefault(cf_action.filter_id, {}).setdefault(user_id, []).append(datetime.now(timezone.utc))
             await self._report_filter_hit(cf_action, username, user_id, text)
             filter_cfg = next((f for f in self.config.get("chat_filters", []) if f["id"] == cf_action.filter_id), {})
             if not filter_cfg.get("test_mode", False):
@@ -233,12 +233,12 @@ class TwitchBotInstance(twitch_commands.Bot):
 
     async def _cmd_tcbstats(self) -> str:
         """Gibt Filter-Trefferstatistik für diesen Tenant zurück."""
-        vmap = _violation_counts.get(self.tenant_id, {})
-        if not vmap:
+        tmap = _violation_timestamps.get(self.tenant_id, {})
+        if not tmap:
             return "Keine Filter-Treffer in dieser Session."
         parts = []
-        for fid, users in vmap.items():
-            total = sum(users.values())
+        for fid, users in tmap.items():
+            total = sum(len(ts) for ts in users.values())
             fname = next((f.get("name", fid) for f in self.config.get("chat_filters", []) if f["id"] == fid), fid)
             parts.append(f"{fname}: {total}x")
         return "TCB-Stats: " + " | ".join(parts[:5])  # max 5 filter

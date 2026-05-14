@@ -8,6 +8,7 @@ import fnmatch
 import logging
 import re
 from dataclasses import dataclass
+from datetime import datetime, timezone, timedelta
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ def check_message(
     user_id: str,
     username: str,
     filters_config: list[dict],
-    violation_counts: dict[str, int],  # {filter_id: count_in_window}
+    violation_timestamps: dict[str, list[datetime]],  # {filter_id: [ts1, ts2, ...]}
 ) -> FilterAction | None:
     """
     Prüft eine Nachricht gegen alle aktiven Filter.
@@ -49,8 +50,21 @@ def check_message(
 
         # Tiers evaluieren
         filter_id = flt["id"]
-        current_count = violation_counts.get(filter_id, 0)
-        action = _select_tier(flt.get("tiers", []), current_count + 1)
+        tiers = flt.get("tiers", [])
+
+        # Zeitrahmen aus dem ersten Tier lesen (alle Tiers teilen sich denselben Wert)
+        window_minutes = tiers[0].get("window_minutes", 60) if tiers else 60
+
+        # Anzahl Verstöße im Zeitfenster bestimmen
+        now = datetime.now(timezone.utc)
+        timestamps = violation_timestamps.get(filter_id, [])
+        if window_minutes > 0:
+            cutoff = now - timedelta(minutes=window_minutes)
+            count_in_window = sum(1 for ts in timestamps if ts > cutoff)
+        else:
+            count_in_window = len(timestamps)  # window_minutes=0 → immer zählen
+
+        action = _select_tier(tiers, count_in_window + 1)
         if action is None:
             continue
 

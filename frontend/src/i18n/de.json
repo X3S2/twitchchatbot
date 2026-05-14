@@ -105,7 +105,9 @@
     "no_patterns": "Keine Muster",
     "no_tiers": "Keine Stufen",
     "duplicate": "Duplizieren",
-    "template_placeholder": "Chat-Nachricht nach Aktion, z. B. @{user} Verwarnung!"
+    "template_placeholder": "Chat-Nachricht nach Aktion, z. B. @{user} Verwarnung!",
+    "check_window": "Prüf-Zeitrahmen",
+    "window_always": "Immer (kein Limit)"
   },
   "commands": {
     "title": "Bot-Befehle",

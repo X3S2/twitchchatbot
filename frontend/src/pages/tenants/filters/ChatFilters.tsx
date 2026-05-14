@@ -12,13 +12,14 @@ interface ChatFilter {
   test_mode: boolean
   priority: number
   terms: { id: string; term: string; is_regex: boolean; is_whitelist: boolean }[]
-  tiers: { id: string; tier_order: number; threshold: number; action: string; duration_seconds: number; message_template: string | null }[]
+  tiers: { id: string; tier_order: number; threshold: number; action: string; duration_seconds: number; window_minutes: number; message_template: string | null }[]
 }
 
 type EditTerm = { term: string; is_regex: boolean; is_whitelist: boolean }
 type EditTier = { tier_order: number; threshold: number; action: string; duration_seconds: number; message_template: string }
 interface EditState {
   id: string; name: string; enabled: boolean; case_sensitive: boolean; test_mode: boolean; priority: number
+  window_minutes: number
   terms: EditTerm[]; tiers: EditTier[]
 }
 
@@ -55,7 +56,8 @@ async function updateFilter(tenantId: string, filterId: string, data: EditState)
     body: JSON.stringify({
       name: data.name, enabled: data.enabled, case_sensitive: data.case_sensitive,
       test_mode: data.test_mode, priority: data.priority,
-      terms: data.terms, tiers: data.tiers,
+      terms: data.terms,
+      tiers: data.tiers.map(t => ({ ...t, window_minutes: data.window_minutes })),
     }),
   })
   if (!res.ok) throw new Error(await res.text())
@@ -83,6 +85,7 @@ export default function ChatFilters() {
     setEditing({
       id: filter.id, name: filter.name, enabled: filter.enabled,
       case_sensitive: filter.case_sensitive, test_mode: filter.test_mode, priority: filter.priority,
+      window_minutes: filter.tiers[0]?.window_minutes ?? 60,
       terms: filter.terms.map(({ term, is_regex, is_whitelist }) => ({ term, is_regex, is_whitelist })),
       tiers: filter.tiers.map(({ tier_order, threshold, action, duration_seconds, message_template }) => ({ tier_order, threshold, action, duration_seconds, message_template: message_template ?? '' })),
     })
@@ -177,6 +180,18 @@ export default function ChatFilters() {
                         <input type="checkbox" checked={editing.case_sensitive} onChange={(e) => setE('case_sensitive', e.target.checked)} className="w-3.5 h-3.5 accent-gray-500" />
                         Case-sensitiv
                       </label>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-gray-500 whitespace-nowrap">{t('filters.check_window')}:</span>
+                        <select value={editing.window_minutes} onChange={(e) => setE('window_minutes', Number(e.target.value))} className={iCls}>
+                          <option value={0}>{t('filters.window_always')}</option>
+                          <option value={1}>1 min</option>
+                          <option value={5}>5 min</option>
+                          <option value={15}>15 min</option>
+                          <option value={30}>30 min</option>
+                          <option value={60}>60 min</option>
+                          <option value={120}>120 min</option>
+                        </select>
+                      </div>
                     </div>
 
                     {/* Terms */}
@@ -222,7 +237,7 @@ export default function ChatFilters() {
                               <option value="timeout">timeout</option>
                               <option value="ban">ban</option>
                             </select>
-                            {tier.action !== 'ban' && (
+                            {tier.action === 'timeout' && (
                               <>
                                 <input type="number" min={1} value={tier.duration_seconds} onChange={(e) => updTier(i, 'duration_seconds', Number(e.target.value))}
                                   className={`${iCls} w-20`} />
@@ -283,10 +298,13 @@ export default function ChatFilters() {
                               <div key={tier.id} className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
                                 <span className="font-medium">Tier {tier.tier_order}</span>
                                 <span>ab {tier.threshold}x</span>
-                                <span className={`px-1.5 py-0.5 rounded ${tier.action === 'ban' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{tier.action}</span>
-                                {tier.duration_seconds > 0 && <span>{tier.duration_seconds}s</span>}
+                                <span className={`px-1.5 py-0.5 rounded ${tier.action === 'ban' ? 'bg-red-100 text-red-700' : tier.action === 'warn' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>{tier.action}</span>
+                                {tier.action === 'timeout' && tier.duration_seconds > 0 && <span>{tier.duration_seconds}s</span>}
                               </div>
                             ))}
+                            {filter.tiers[0]?.window_minutes != null && (
+                              <p className="text-xs text-gray-400 mt-1">{t('filters.check_window')}: {filter.tiers[0].window_minutes === 0 ? t('filters.window_always') : `${filter.tiers[0].window_minutes} min`}</p>
+                            )}
                           </div>
                         )}
                     </div>

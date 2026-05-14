@@ -7,7 +7,33 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
-## [0.22.2] — Setup-Weiterleitung, README Bot-Token-Doku
+## [0.22.4] — 2026-05-14 — Zeitfenster-Filter, Dashboard-Fix, Whitelist-Hervorhebung, Commands-Info
+
+### Neu
+- **Chat-Filter: Prüf-Zeitrahmen (Zeitfenster)** — Jeder Chat-Filter hat jetzt eine "Prüf-Zeitrahmen"-Einstellung auf Filter-Ebene (nicht pro Stufe). Optionen: Immer, 1/5/15/30/60/120 min. Der Bot zählt nur Verstöße innerhalb dieses Zeitfensters – ältere Einträge werden ignoriert. Das Zeitfenster gilt für alle Stufen desselben Filters.
+- **Bot-Filter: echtes zeitfenster-basiertes Violation-Tracking** — `filter_engine.py` und `bot_instance.py` nutzen jetzt Timestamps statt einfacher Zähler. Verstöße außerhalb des `window_minutes`-Fensters werden beim Auslösen ignoriert.
+- **Namens-Filter: Whitelist-Einträge visuell hervorheben** — Im erweiterten Leseansicht der Name-Filter werden Whitelist-Muster jetzt grün mit einem Häkchen (✓) dargestellt – identisch zur Chat-Filter-Ansicht.
+- **Befehle: Info-Modal für Aktionstypen** — Neben dem Aktion-Dropdown gibt es jetzt einen Info-Button (ℹ), der ein Erklärungs-Modal öffnet: Was macht `respond`, `ban`, `timeout`, `delete`?
+
+### Behoben
+- **Dashboard: "Du hast noch keine Channels konfiguriert"** — Das Haupt-Dashboard zeigte immer die Leer-Meldung, auch wenn Channels konfiguriert waren. Jetzt werden Tenants abgefragt: bei einem Channel wird direkt zur Tenant-Übersicht weitergeleitet, bei mehreren zu `/tenants`. Nur bei echten Null-Channels erscheint die Meldung mit direktem Link zum Hinzufügen.
+- **Bot-Fehler bleibt nach erfolgreichem Start sichtbar** — Wenn der Bot nach einem Fehler-Status erfolgreich startete, blieb `error_message` in der DB stehen (Heartbeat-Update überschrieb es nur bei neuem Fehler). Jetzt wird `error_message` beim Heartbeat immer gesetzt – `None` bei Erfolg löscht den alten Fehler.
+- **Trigger-Stufen: Dauer-Feld für Warn und Ban ausgeblendet** — "Für X Sekunden" erscheint jetzt nur noch bei der Aktion `timeout`. Warn und Ban brauchen keine Dauer.
+
+---
+
+## [0.22.3] — 2026-05-14 — Bot-Token-Key-Mismatch, Admin-Panel-Feedback, Warning-Scope
+
+### Neu
+- **README: `moderator:manage:warnings` Scope** — In der Bot-OAuth-Token-Anleitung ergänzt.
+
+### Behoben
+- **Bot startet nicht ("Kein Bot-Token konfiguriert")** — Root Cause: `BotInstance.start()` und `TwitchBotInstance._resolve_token()` suchten nach `"shared_bot_token"` im Config-Dict, aber `internal.py` lieferte den Schlüssel als `"bot_token"`. Fix: Schlüssel korrigiert + `"bot_mode"` in die Config-Antwort aufgenommen.
+- **Admin-Panel: Start/Stop ohne Fehler-Feedback** — `startBot()`/`stopBot()` in `AdminIndex.tsx` ignorierten `res.ok` und zeigten bei Fehler nichts an. Jetzt wirft jede Funktion bei HTTP-Fehler, `onError` zeigt die Fehlermeldung inline pro Tabellenzeile.
+- **Admin-Panel: "Bot starten" auch bei Status `error`** — Identischer Fix wie in TenantDashboard (v0.22.1).
+
+---
+
 
 ### Neu
 - **README: Bot OAuth-Token Anleitung** — Schritt-für-Schritt-Erklärung wie man den Bot-Token über twitchtokengenerator.com generiert, welche Scopes benötigt werden, und wo der Token eingetragen wird (Setup-Wizard oder Admin → Einstellungen).

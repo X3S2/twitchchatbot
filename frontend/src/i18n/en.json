@@ -105,7 +105,9 @@
     "no_patterns": "No patterns",
     "no_tiers": "No tiers",
     "duplicate": "Duplicate",
-    "template_placeholder": "Chat message after action, e.g. @{user} Warning!"
+    "template_placeholder": "Chat message after action, e.g. @{user} Warning!",
+    "check_window": "Check window",
+    "window_always": "Always (no limit)"
   },
   "commands": {
     "title": "Bot Commands",

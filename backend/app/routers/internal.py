@@ -72,8 +72,7 @@ async def heartbeat(
         instance.last_heartbeat = now
         instance.stream_live = data.stream_live
         instance.reconnect_attempts = data.reconnect_attempts
-        if data.error_message:
-            instance.error_message = data.error_message
+        instance.error_message = data.error_message  # always update — clears stale errors when None
         if data.status == "online" and instance.connected_at is None:
             instance.connected_at = now
 
