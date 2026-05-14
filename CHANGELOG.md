@@ -7,6 +7,15 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.5] — 2026-05-14 — NameFilter Dauer-Anzeige-Fix, README Entwicklungsstatus
+
+### Behoben
+- **NameFilters: Dauer-Feld in Leseansicht auch bei Warn/Ban sichtbar** — In der aufgeklappten Leseansicht eines Name-Filters zeigte `{tier.duration_seconds > 0}` die Sekundenzahl auch bei `warn` und `ban`. Guard auf `tier.action === 'timeout'` korrigiert (war in der Bearbeitungsansicht bereits korrekt).
+- **Warn-Aktion-Badge in NameFilters-Leseansicht fehlte** — `warn`-Tiers wurden in gelb statt blau dargestellt (gleiche Farbe wie `timeout`). Jetzt: `warn` → blau, `timeout` → gelb, `ban` → rot — konsistent mit ChatFilters.
+- **README Entwicklungsstatus unvollständig** — Tabelle endete bei v0.19. Ergänzt um v0.20 bis v0.22.4 mit kurzen Inhaltsbeschreibungen.
+
+---
+
 ## [0.22.4] — 2026-05-14 — Zeitfenster-Filter, Dashboard-Fix, Whitelist-Hervorhebung, Commands-Info
 
 ### Neu

@@ -255,8 +255,8 @@ export default function NameFilters() {
                           {filter.tiers.map((tier) => (
                             <div key={tier.id} className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
                               <span className="font-medium">Tier {tier.tier_order}</span>
-                              <span className={`px-1.5 py-0.5 rounded ${tier.action === 'ban' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{tier.action}</span>
-                              {tier.duration_seconds > 0 && <span>{tier.duration_seconds}s</span>}
+                              <span className={`px-1.5 py-0.5 rounded ${tier.action === 'ban' ? 'bg-red-100 text-red-700' : tier.action === 'warn' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>{tier.action}</span>
+                              {tier.action === 'timeout' && tier.duration_seconds > 0 && <span>{tier.duration_seconds}s</span>}
                             </div>
                           ))}
                         </div>

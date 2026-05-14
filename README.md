@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.22.4-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.5-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -240,6 +240,14 @@ APP_PUBLIC_URL=https://deine-domain.de
 | Name-Scan Bulk-Apply | `v0.17.0` | ✅ Fertig | Massen-Ban aus NameScan-Filter mit doppelter Bestätigung |
 | README-Bereinigung & !tcbrejoin | `v0.18.0` | ✅ Fertig | NameScan-Nav, !tcbrejoin-Befehl, README-Duplikat entfernt |
 | Docker-Bugfixes & erster Stack-Start | `v0.19.0` | ✅ Fertig | Env-Vars, nginx.conf, TS-Duplikate, Python-Syntax, Healthcheck |
+| UI-Bugfixes nach erstem Login | `v0.20.0` | ✅ Fertig | nginx charset, Audit-Log Shape, ChatFilter/NameFilter Create, TenantMods Rollen-Fix |
+| Filter-Bearbeitung, Kanalverwaltung, Legal-Editor | `v0.21.0` | ✅ Fertig | Inline-Edit für Chat/Name-Filter, TenantApproval Revoke, Legal-Editor (Admin), Migrations |
+| Dark-Mode, Auth-Session, Bot-Token-Validierung | `v0.22.0` | ✅ Fertig | Dark-Mode Dropdowns, Auto-Token-Refresh, Filter-Toggle 401-Fix, Bot-Token-Pflichtprüfung |
+| Filter-Nachrichten, Encoding-Fix, Bot-Fehleranzeige | `v0.22.1` | ✅ Fertig | Tier-Nachrichten in UI, UTF-8-Mojibake-Fix, Bot-Startfehler-Feedback |
+| Setup-Weiterleitung, README Bot-Token-Doku | `v0.22.2` | ✅ Fertig | Redirect nach Setup, Bot-OAuth-Token Schritt-für-Schritt-Anleitung |
+| Bot-Token-Key-Fix, Admin-Panel-Feedback, Warning-Scope | `v0.22.3` | ✅ Fertig | Kritischer `bot_token`-Key-Fix (Bot startet wieder), Admin Start/Stop Fehlermeldung |
+| Zeitfenster-Filter, Dashboard-Fix, UI-Verbesserungen | `v0.22.4` | ✅ Fertig | Prüf-Zeitrahmen pro Chat-Filter, Dashboard-Weiterleitung, Whitelist-Hervorhebung, Commands Info-Modal |
+| NameFilter Dauer-Fix, README-Update | `v0.22.5` | ✅ Fertig | NameFilters Leseansicht Dauer/Farbe korrigiert, README Entwicklungsstatus ergänzt |
 
 ---
 
