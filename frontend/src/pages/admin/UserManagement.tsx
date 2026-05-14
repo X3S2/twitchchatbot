@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Ban, UserX, HelpCircle, X } from 'lucide-react'
+import { Ban, UserX, HelpCircle, X, ShieldCheck, ShieldOff } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
 
 interface UserItem {
   id: string
@@ -23,14 +24,31 @@ async function fetchUsers(): Promise<UserItem[]> {
 async function banUser(id: string) { await fetch(`/api/admin/users/${id}/ban`, { method: 'POST', credentials: 'include' }) }
 async function unbanUser(id: string) { await fetch(`/api/admin/users/${id}/unban`, { method: 'POST', credentials: 'include' }) }
 async function kickUser(id: string) { await fetch(`/api/admin/users/${id}/kick`, { method: 'POST', credentials: 'include' }) }
+async function setUserRole(id: string, role: string) {
+  const res = await fetch(`/api/admin/users/${id}/set-role?role=${role}`, { method: 'POST', credentials: 'include' })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || 'Fehler beim Ändern der Rolle')
+  }
+  return res.json()
+}
 
 export default function UserManagement() {
   const { t } = useTranslation()
   const qc = useQueryClient()
+  const { user: me } = useAuth()
   const { data: users = [], isLoading } = useQuery({ queryKey: ['admin-users'], queryFn: fetchUsers })
   const banMut = useMutation({ mutationFn: banUser, onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }) })
   const unbanMut = useMutation({ mutationFn: unbanUser, onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }) })
   const kickMut = useMutation({ mutationFn: kickUser, onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }) })
+  const roleMut = useMutation({
+    mutationFn: ({ id, role }: { id: string; role: string }) => setUserRole(id, role),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-users'] })
+      qc.invalidateQueries({ queryKey: ['auth', 'me'] })
+    },
+    onError: (err: Error) => alert(err.message),
+  })
   const [showHelp, setShowHelp] = useState(false)
 
   return (
@@ -88,6 +106,29 @@ export default function UserManagement() {
                     <button onClick={() => kickMut.mutate(u.id)} className="flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white rounded text-xs">
                       <UserX className="w-3 h-3" /> Kick
                     </button>
+                    {me && me.id !== u.id && (
+                      u.role === 'admin' ? (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Admin-Rechte von "${u.display_name || u.twitch_username}" entfernen?`))
+                              roleMut.mutate({ id: u.id, role: 'streamer' })
+                          }}
+                          title="Admin-Rechte entfernen"
+                          className="flex items-center gap-1 px-2 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded text-xs">
+                          <ShieldOff className="w-3 h-3" /> Admin
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`"${u.display_name || u.twitch_username}" zum Admin ernennen?`))
+                              roleMut.mutate({ id: u.id, role: 'admin' })
+                          }}
+                          title="Zum Admin ernennen"
+                          className="flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs">
+                          <ShieldCheck className="w-3 h-3" /> Admin
+                        </button>
+                      )
+                    )}
                   </td>
                 </tr>
               ))}

@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.22.17-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.18-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -269,6 +269,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | In-App Bot-Token OAuth-Generator | `v0.22.15` | ✅ Fertig | Bot-Token direkt aus der App generieren; Tokens mit eigenen App-Credentials → Auto-Refresh funktioniert; Bot-Name wird automatisch befüllt |
 | Metadaten-Fixes, Entwicklungsstatus einklappbar | `v0.22.16` | ✅ Fertig | Changelog-Datumskorrekturen; README-Tabelle eingeklappt; Repository-Footer auf public aktualisiert |
 | Setup-Hilfe Shared-Bot verbessert | `v0.22.17` | ✅ Fertig | Help-Box Admin-Einstellungen: Schritt-für-Schritt-Anleitung für Twitch-App + Bot-Token; Warnung bei twitchtokengenerator.com-Tokens (kein Auto-Refresh) |
+| Admin-Rollenvergabe in Benutzerverwaltung | `v0.22.18` | ✅ Fertig | Admins können andere Nutzer zum Admin ernennen oder degradieren; Self-Demotion-Schutz; Mindestens-1-Admin-Schutz |
 
 </details>
 

@@ -343,7 +343,7 @@
       "p1": "All registered users who have signed in via Twitch.",
       "p2": "<strong>Suspend:</strong> Blocks login for this user. Existing sessions end on the next request.",
       "p3": "<strong>Kick:</strong> Immediately invalidates all active sessions without permanently blocking the account.",
-      "p4": "<strong>Roles:</strong> <em>admin</em> = full access to this panel · <em>user</em> = regular streamer account."
+      "p4": "<strong>Change role:</strong> Click the shield button to promote a user to admin (blue) or revoke admin rights (grey). At least one admin must always remain. Your own role cannot be changed."
     },
     "admin_approval": {
       "title": "Channel Approval",

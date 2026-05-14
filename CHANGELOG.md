@@ -8,6 +8,16 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
+## [0.22.18] — 2026-05-14 — Admin-Rollenvergabe in Benutzerverwaltung
+
+### Neu
+- **Benutzerverwaltung: Rolle ändern** — Admins können andere Nutzer zum Admin ernennen oder Admin-Rechte entziehen (Streamer-Degradierung) per Shield-Button in der Aktionsspalte
+- **Backend-Schutz** — Neuer Endpunkt `POST /api/admin/users/{id}/set-role`: verhindert Änderung der eigenen Rolle, verweigert Degradierung wenn nur noch ein Admin übrig bleibt, validiert erlaubte Rollenwerte (`admin`/`streamer`)
+- **Frontend-Schutz** — Shield-Button wird für den aktuell eingeloggten Nutzer ausgeblendet (kein Self-Demotion)
+- **Help-Box** — Hilfetext der Benutzerverwaltung beschreibt die neue Funktion (DE + EN)
+
+---
+
 ## [0.22.17] — 2026-05-14 — Setup-Hilfe für Shared-Bot und Twitch-App verbessert
 
 ### Geändert

@@ -253,6 +253,37 @@ async def kick_user(
     return {"ok": True, "sessions_invalidated": len(sessions)}
 
 
+@router.post("/users/{user_id}/set-role")
+async def set_user_role(
+    user_id: str,
+    role: str,
+    admin: Annotated[User, Depends(require_admin)],
+    db: AsyncSession = Depends(get_db),
+):
+    """Rolle eines Nutzers ändern (admin ↔ streamer)."""
+    if role not in ("admin", "streamer"):
+        raise HTTPException(status_code=400, detail="Ungültige Rolle. Erlaubt: admin, streamer")
+    if str(admin.id) == user_id:
+        raise HTTPException(status_code=400, detail="Du kannst deine eigene Rolle nicht ändern.")
+
+    result = await db.execute(select(User).where(User.id == user_id, User.soft_delete_at.is_(None)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Nutzer nicht gefunden")
+
+    # Sicherstellen dass mindestens ein Admin verbleibt
+    if role == "streamer" and user.role == "admin":
+        admin_count_result = await db.execute(
+            select(User).where(User.role == "admin", User.soft_delete_at.is_(None))
+        )
+        if len(admin_count_result.scalars().all()) <= 1:
+            raise HTTPException(status_code=400, detail="Es muss mindestens ein Admin verbleiben.")
+
+    user.role = role
+    await db.commit()
+    return {"ok": True, "role": role}
+
+
 # ── Profil-Einstellungen (eigener User) ──────────────────────
 
 @router.patch("/profile")

@@ -343,7 +343,7 @@
       "p1": "Alle registrierten Nutzer, die sich per Twitch angemeldet haben.",
       "p2": "<strong>Sperren:</strong> Blockiert den Login für diesen Nutzer. Bestehende Sessions werden beim nächsten Request beendet.",
       "p3": "<strong>Kick:</strong> Invalidiert alle aktiven Sessions sofort, ohne den Account dauerhaft zu sperren.",
-      "p4": "<strong>Rollen:</strong> <em>admin</em> = Vollzugriff auf dieses Panel · <em>user</em> = normaler Streamer-Account."
+      "p4": "<strong>Rolle ändern:</strong> Klicke den Shield-Button um einen Nutzer zum Admin zu ernennen (blau) oder Admin-Rechte zu entziehen (grau). Mindestens ein Admin muss immer verbleiben. Die eigene Rolle kann nicht geändert werden."
     },
     "admin_approval": {
       "title": "Tenant-Freigabe",
