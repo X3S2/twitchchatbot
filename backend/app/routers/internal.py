@@ -208,6 +208,7 @@ async def get_tenant_config(
         "tenant_id": str(tenant.id),
         "channel_name": tenant.channel_name,
         "bot_token": bot_token,
+        "bot_mode": tenant.bot_mode or "shared",
         "client_id": client_id,
         "bot_username": bot_username,
         "reconnect_mode": tenant.reconnect_mode,

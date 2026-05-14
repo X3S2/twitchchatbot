@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { LED } from '../../components/LED'
 import { useWebSocket } from '../../hooks/useWebSocket'
 
@@ -20,20 +21,40 @@ async function fetchInstances(): Promise<BotInstance[]> {
 }
 
 async function startBot(tenant_id: string): Promise<void> {
-  await fetch('/api/tenants/' + tenant_id + '/bot/start', { method: 'POST', credentials: 'include' })
+  const res = await fetch('/api/tenants/' + tenant_id + '/bot/start', { method: 'POST', credentials: 'include' })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.detail || 'Fehler beim Starten des Bots')
+  }
 }
 
 async function stopBot(tenant_id: string): Promise<void> {
-  await fetch('/api/tenants/' + tenant_id + '/bot/stop', { method: 'POST', credentials: 'include' })
+  const res = await fetch('/api/tenants/' + tenant_id + '/bot/stop', { method: 'POST', credentials: 'include' })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.detail || 'Fehler beim Stoppen des Bots')
+  }
 }
 
 export default function AdminIndex() {
   const { t } = useTranslation()
   const qc = useQueryClient()
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({})
   const { data: instances = [], isLoading } = useQuery({ queryKey: ['admin-instances'], queryFn: fetchInstances, refetchInterval: 30000 })
 
-  const startMut = useMutation({ mutationFn: ({ tenant_id }: { tenant_id: string }) => startBot(tenant_id), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-instances'] }) })
-  const stopMut = useMutation({ mutationFn: ({ tenant_id }: { tenant_id: string }) => stopBot(tenant_id), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-instances'] }) })
+  const setRowError = (tenant_id: string, msg: string) => setRowErrors(prev => ({ ...prev, [tenant_id]: msg }))
+  const clearRowError = (tenant_id: string) => setRowErrors(prev => { const n = { ...prev }; delete n[tenant_id]; return n })
+
+  const startMut = useMutation({
+    mutationFn: ({ tenant_id }: { tenant_id: string }) => startBot(tenant_id),
+    onSuccess: (_d, { tenant_id }) => { clearRowError(tenant_id); qc.invalidateQueries({ queryKey: ['admin-instances'] }) },
+    onError: (err: Error, { tenant_id }) => setRowError(tenant_id, err.message),
+  })
+  const stopMut = useMutation({
+    mutationFn: ({ tenant_id }: { tenant_id: string }) => stopBot(tenant_id),
+    onSuccess: (_d, { tenant_id }) => { clearRowError(tenant_id); qc.invalidateQueries({ queryKey: ['admin-instances'] }) },
+    onError: (err: Error, { tenant_id }) => setRowError(tenant_id, err.message),
+  })
 
   // Echtzeit-Updates via WebSocket
   useWebSocket({
@@ -80,21 +101,26 @@ export default function AdminIndex() {
                     {inst.last_heartbeat ? new Date(inst.last_heartbeat).toLocaleString() : '–'}
                   </td>
                   <td className="px-4 py-2">
-                    {inst.status === 'offline' ? (
-                      <button
-                        onClick={() => startMut.mutate({ tenant_id: inst.tenant_id })}
-                        className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
-                      >
-                        {t('admin.start')}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => stopMut.mutate({ tenant_id: inst.tenant_id })}
-                        className="px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
-                      >
-                        {t('admin.stop')}
-                      </button>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      {(inst.status === 'offline' || inst.status === 'error') ? (
+                        <button
+                          onClick={() => startMut.mutate({ tenant_id: inst.tenant_id })}
+                          className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                        >
+                          {t('admin.start')}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => stopMut.mutate({ tenant_id: inst.tenant_id })}
+                          className="px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
+                        >
+                          {t('admin.stop')}
+                        </button>
+                      )}
+                      {rowErrors[inst.tenant_id] && (
+                        <span className="text-xs text-red-500">{rowErrors[inst.tenant_id]}</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

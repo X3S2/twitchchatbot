@@ -169,6 +169,7 @@ Der Bot braucht einen eigenen OAuth-Token, mit dem er sich bei Twitch authentifi
    - `chat:edit`
    - `channel:moderate`
    - `moderator:manage:banned_users`
+   - `moderator:manage:warnings`
 5. „Generate Token!" klicken und bei Twitch autorisieren
 6. Den angezeigten **Access Token** kopieren — *(Prefix `oauth:` weglassen, falls vorhanden)*
 

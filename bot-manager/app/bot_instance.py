@@ -46,7 +46,7 @@ class TwitchBotInstance(twitch_commands.Bot):
         mode = self.config.get("bot_mode", "shared")
         if mode in ("own_bot", "own_full"):
             return self.config.get("own_bot_token", "")
-        return self.config.get("shared_bot_token", "")
+        return self.config.get("bot_token", "")
 
     # ── TwitchIO-Events ───────────────────────────────────────
 
@@ -307,7 +307,7 @@ class BotInstance:
         if mode in ("own_bot", "own_full"):
             token = self._config.get("own_bot_token", "")
         else:
-            token = self._config.get("shared_bot_token", "")
+            token = self._config.get("bot_token", "")
 
         if not token:
             logger.error(
