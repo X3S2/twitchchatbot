@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.22.13-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.17-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -15,6 +15,8 @@
 ## Überblick
 
 **TwitchChatBot (TCB)** ist eine selbst gehostete, mandantenfähige Plattform zur automatisierten Moderation von Twitch-Chats. Jeder Streamer erhält eine eigene isolierte IRC-Bot-Instanz mit individuellen Filtern, Bannlisten und einem vollständigen Dashboard. Moderatoren können mit kontrollierten Rechten auf die Einstellungen zugreifen.
+
+---
 
 <details>
 <summary><strong>Funktionsübersicht</strong></summary>
@@ -47,6 +49,8 @@
 | **Sicherheit** | Fernet-verschlüsselte Credentials, HttpOnly JWT-Cookies, Internal-API-Key |
 
 </details>
+
+---
 
 <details>
 <summary><strong>Systemanforderungen & Installation</strong></summary>
@@ -100,6 +104,8 @@ TCB_EXTERNAL_PORT=3080
 
 </details>
 
+---
+
 <details>
 <summary><strong>Architektur</strong></summary>
 
@@ -143,6 +149,8 @@ Browser ──► tcb-nginx (Port 3080)
 | `internal.py` | `/api/internal` | Bot-Manager Callback (API-Key gesichert) |
 
 </details>
+
+---
 
 <details>
 <summary><strong>Konfiguration</strong></summary>
@@ -259,6 +267,8 @@ APP_PUBLIC_URL=https://deine-domain.de
 | i18n Help-Boxen, Bot-Status-Live-Update, Token-Auto-Refresh, Chart-Cursor-Fix | `v0.22.13` | ✅ Fertig | Alle 12 Help-Boxen i18n-fähig (DE+EN); Bot-Status wird nach Pending sofort aktualisiert; Token-Refresh bei abgelaufenem Token; Chart-Hover-Cursor deaktiviert |
 | Auge-Icon-Fix, Token-Refresh-Fehlermeldungen | `v0.22.14` | ✅ Fertig | Eye-Toggle nur bei eingetipptem Wert sichtbar; spezifische Fehlermeldungen beim Token-Refresh (kein Refresh-Token, fehlende Credentials, API-Fehler) |
 | In-App Bot-Token OAuth-Generator | `v0.22.15` | ✅ Fertig | Bot-Token direkt aus der App generieren; Tokens mit eigenen App-Credentials → Auto-Refresh funktioniert; Bot-Name wird automatisch befüllt |
+| Metadaten-Fixes, Entwicklungsstatus einklappbar | `v0.22.16` | ✅ Fertig | Changelog-Datumskorrekturen; README-Tabelle eingeklappt; Repository-Footer auf public aktualisiert |
+| Setup-Hilfe Shared-Bot verbessert | `v0.22.17` | ✅ Fertig | Help-Box Admin-Einstellungen: Schritt-für-Schritt-Anleitung für Twitch-App + Bot-Token; Warnung bei twitchtokengenerator.com-Tokens (kein Auto-Refresh) |
 
 </details>
 

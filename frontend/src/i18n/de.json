@@ -207,7 +207,7 @@
     "bot_username": "Bot-Benutzername",
     "bot_token": "Bot OAuth-Token",
     "bot_refresh_token": "Bot Refresh-Token",
-    "bot_refresh_token_hint": "Refresh-Token von twitchtokengenerator.com – ermöglicht automatische Token-Erneuerung",
+    "bot_refresh_token_hint": "Refresh-Token für automatische Token-Erneuerung. Nur wirksam wenn der Token mit eigenen App-Credentials generiert wurde (\"Bot-Token generieren\"-Button empfohlen).",
     "global_retention_days": "Globale Datenhaltung (Tage)",
     "test_credentials": "Credentials testen",
     "testing": "Teste…",
@@ -360,11 +360,11 @@
       "p4": "Tenants können über die <em>Namensscan</em>-Seite ihres Dashboards einzeln entscheiden, welche Filter sie nutzen möchten."
     },
     "admin_settings": {
-      "title": "Admin-Einstellungen",
-      "p1": "<strong>Twitch App:</strong> Client-ID und Client-Secret aus der Twitch Developer Console. Werden benötigt um mit der Twitch API zu kommunizieren.",
-      "p2": "<strong>Shared Bot:</strong> OAuth-Token des gemeinsamen Bot-Kontos. Wird verwendet wenn ein Tenant keinen eigenen Bot konfiguriert hat.",
-      "p3": "<strong>Wartungsmodus:</strong> Sperrt den Login für alle nicht-Admin-Nutzer und zeigt eine Nachricht an.",
-      "p4": "<strong>Datenaufbewahrung:</strong> Nach wie vielen Tagen ältere Einträge (Bans, Filter-Logs) automatisch gelöscht werden."
+      "title": "Admin-Einstellungen — Setup-Anleitung",
+      "p1": "<strong>① Twitch App anlegen:</strong> Gehe zu <a href=\"https://dev.twitch.tv/console/apps/create\" target=\"_blank\" rel=\"noreferrer\" class=\"text-purple-600 underline\">dev.twitch.tv/console</a> → \"Anwendung registrieren\". Setze die Redirect-URI auf <code class=\"bg-gray-100 dark:bg-gray-800 px-1 rounded\">https://deine-domain.de/auth/callback</code>. Dann Client-ID und Client-Secret hier eintragen.",
+      "p2": "<strong>② Bot-Token generieren (empfohlen):</strong> Zuerst Client-ID + Secret speichern, dann \"Bot-Token generieren\" klicken und als Bot-Twitch-Account einloggen. Token wird direkt gespeichert und kann <strong>automatisch erneuert</strong> werden, da er mit deinen eigenen App-Credentials verkn\u00fcpft ist.",
+      "p3": "<strong>Alternativ — manuell \u00fcber <a href=\"https://twitchtokengenerator.com\" target=\"_blank\" rel=\"noreferrer\" class=\"text-purple-600 underline\">twitchtokengenerator.com</a>:</strong> Access-Token → Bot-Token-Feld, Refresh-Token → Refresh-Token-Feld. <strong>Wichtig:</strong> Diese Tokens nutzen die Client-ID von twitchtokengenerator.com — Auto-Refresh schl\u00e4gt mit deinen Credentials fehl.",
+      "p4": "<strong>Ben\u00f6tigte Bot-Scopes:</strong> <code class=\"bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs\">chat:read</code> <code class=\"bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs\">chat:edit</code> <code class=\"bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs\">channel:moderate</code> <code class=\"bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs\">moderator:manage:banned_users</code> <code class=\"bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs\">moderator:manage:warnings</code>"
     },
     "tenant_list": {
       "title": "Kanal-Übersicht: Erklärungen",

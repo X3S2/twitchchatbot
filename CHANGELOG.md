@@ -8,6 +8,23 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
+## [0.22.17] — 2026-05-14 — Setup-Hilfe für Shared-Bot und Twitch-App verbessert
+
+### Geändert
+- **Help-Box Admin-Einstellungen** — Vollständig überarbeitet mit Schritt-für-Schritt-Anleitung: ① Twitch-App bei dev.twitch.tv registrieren (Link + Redirect-URI-Anleitung), ② Bot-Token über In-App-OAuth generieren (empfohlen, Auto-Refresh funktioniert), Alternativ manuell via twitchtokengenerator.com (kein Auto-Refresh, klare Warnung); Benötigte Bot-Scopes aufgelistet — beide Sprachen (DE + EN)
+- **Refresh-Token-Hinweis** — Text unter dem Refresh-Token-Feld stellt klar: Auto-Refresh funktioniert nur mit Tokens die über den „Bot-Token generieren"-Button erstellt wurden; bei twitchtokengenerator.com-Tokens schlägt der Refresh fehl (andere Client-ID) — beide Sprachen
+
+---
+
+## [0.22.16] — 2026-05-14 — Metadaten-Fixes, Entwicklungsstatus einklappbar
+
+### Behoben
+- **CHANGELOG-Daten korrigiert** — Einträge v0.22.11–v0.22.15 hatten fälschlicherweise Daten in der Zukunft (15.05.–22.05.); alle auf korrektes Datum 2026-05-14 gesetzt
+- **README: Entwicklungsstatus einklappbar** — Die Versionstabelle ist nun als `<details>`-Element eingeklappt und spart Platz auf der GitHub-Seite
+- **README: Repository-Footer** — Fußzeile von „Privates Projekt" auf öffentlichen GitHub-Link aktualisiert (Repository ist jetzt public)
+
+---
+
 ## [0.22.15] — 2026-05-14 — In-App Bot-Token OAuth-Generator
 
 ### Neu
