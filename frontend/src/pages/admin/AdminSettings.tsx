@@ -29,6 +29,7 @@ interface TestCredentialsResult {
   ok: boolean
   error?: string
   client_id?: string
+  login?: string
   expires_in?: number
   scopes?: string[]
 }
@@ -63,6 +64,11 @@ async function testCredentials(): Promise<TestCredentialsResult> {
   return res.json()
 }
 
+async function testBotToken(): Promise<TestCredentialsResult> {
+  const res = await fetch('/api/admin/test-bot-token', { method: 'POST', credentials: 'include' })
+  return res.json()
+}
+
 const inputCls = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-purple-500'
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -86,6 +92,8 @@ export default function AdminSettings() {
   const [saved, setSaved] = useState(false)
   const [testResult, setTestResult] = useState<TestCredentialsResult | null>(null)
   const [testing, setTesting] = useState(false)
+  const [testBotResult, setTestBotResult] = useState<TestCredentialsResult | null>(null)
+  const [testingBot, setTestingBot] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
 
   if (data && !formInit) {
@@ -118,6 +126,14 @@ export default function AdminSettings() {
     const result = await testCredentials()
     setTestResult(result)
     setTesting(false)
+  }
+
+  const handleTestBotToken = async () => {
+    setTestingBot(true)
+    setTestBotResult(null)
+    const result = await testBotToken()
+    setTestBotResult(result)
+    setTestingBot(false)
   }
 
   const set = (key: keyof AppSettingsForm, value: unknown) =>
@@ -214,6 +230,22 @@ export default function AdminSettings() {
             <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
           )}
         </Field>
+        {data.bot_token_set && (
+          <div className="flex items-center gap-3 pt-1">
+            <button onClick={handleTestBotToken} disabled={testingBot}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
+              <FlaskConical className="w-4 h-4" />
+              {testingBot ? t('admin.testing') : t('admin.test_bot_token')}
+            </button>
+            {testBotResult && (
+              <span className={`text-xs font-medium ${testBotResult.ok ? 'text-green-600' : 'text-red-500'}`}>
+                {testBotResult.ok
+                  ? `✓ @${testBotResult.login} (${Math.round((testBotResult.expires_in ?? 0) / 3600)}h)`
+                  : `✗ ${testBotResult.error || t('admin.credentials_fail')}`}
+              </span>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">

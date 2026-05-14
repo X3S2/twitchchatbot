@@ -318,3 +318,27 @@ async def test_credentials(db: AsyncSession = Depends(get_db)):
         "expires_in": validated.get("expires_in"),
         "scopes": validated.get("scopes", []),
     }
+
+
+@router.post("/test-bot-token", dependencies=[Depends(require_admin)])
+async def test_bot_token(db: AsyncSession = Depends(get_db)):
+    """Prüft ob der gespeicherte Bot-OAuth-Token gültig ist."""
+    from ..core.twitch_client import validate_token
+    from ..core.security import decrypt_value
+
+    cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+    app_cfg = cfg_result.scalar_one_or_none()
+    if not app_cfg or not app_cfg.bot_token_enc:
+        return {"ok": False, "error": "Kein Bot-Token gespeichert"}
+
+    bot_token = decrypt_value(app_cfg.bot_token_enc)
+    validated = await validate_token(bot_token)
+    if not validated:
+        return {"ok": False, "error": "Token ungültig oder abgelaufen"}
+
+    return {
+        "ok": True,
+        "login": validated.get("login"),
+        "expires_in": validated.get("expires_in"),
+        "scopes": validated.get("scopes", []),
+    }

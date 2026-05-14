@@ -40,7 +40,7 @@ export default function LegalPage() {
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">{title}</h1>
       <div
-        className="prose dark:prose-invert max-w-none"
+        className="[&_p]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:mb-4 [&_a]:text-purple-600 [&_a]:underline"
         dangerouslySetInnerHTML={{ __html: body }}
       />
     </div>

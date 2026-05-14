@@ -7,6 +7,19 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.11] — 2026-05-15 — Pending-Buttons, Impressum-Fix, Token-Test, NameScan-Create, Tooltip-Fix
+
+### Neu
+- **Bot-Start/Stop: Pending-Zustand (gelber Button)** — Während der Bot gestartet oder gestoppt wird, erscheint ein gelber, deaktivierter Button mit Lade-Spinner anstelle des grünen/roten Buttons — sowohl im TenantDashboard als auch im Admin-Panel (pro Zeile); verhindert Doppelklick-Aktionen
+- **OAuth-Token-Test-Buttons** — Neuer „Bot-Token testen"-Button in den Admin-Einstellungen (Shared-Bot-Bereich) und in den Tenant-Einstellungen (Eigener Bot); ruft `POST /api/admin/test-bot-token` bzw. `POST /api/tenants/{id}/test-bot-token` auf und zeigt Twitch-Login + Ablaufzeit an
+- **NameScan: Filter erstellen & bearbeiten** — Der `+Scan-Filter erstellen`-Button öffnet jetzt ein Modal mit Formular (Name, Beschreibung, Aktion: flag/warn/ban/log, Aktiv-Checkbox); Stift-Button öffnet Edit-Modal; beide senden an `POST /api/name-scan/filters` bzw. `PUT /api/name-scan/filters/{id}`
+
+### Geändert
+- **Impressum: HTML-Paragraph-Abstände** — `prose`-Klasse (benötigt `@tailwindcss/typography`) ersetzt durch explizite Tailwind-Arbitrary-CSS-Varianten (`[&_p]:mb-4`, `[&_h2]:...`) — Absätze, Überschriften und Listen im Impressum-/Datenschutz-HTML sind jetzt korrekt gesetzt
+- **Recharts Tooltip-Position** — `allowEscapeViewBox` auf `{ x: false, y: false }` zurückgesetzt (Standard-Recharts-Clamping-Verhalten); `wrapperStyle={{ zIndex: 50 }}` hinzugefügt — Tooltip bleibt im Chart-Bereich
+
+---
+
 ## [0.22.10] — 2026-05-14 — Twitch Refresh-Token, Auth-Fehlerbehandlung, Bot-Stop-DB-Fix, Docker-Build-Fix
 
 ### Neu

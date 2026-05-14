@@ -41,21 +41,27 @@ export default function AdminIndex() {
   const { t } = useTranslation()
   const qc = useQueryClient()
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({})
+  const [rowPending, setRowPending] = useState<Record<string, boolean>>({})
   const [showHelp, setShowHelp] = useState(false)
   const { data: instances = [], isLoading } = useQuery({ queryKey: ['admin-instances'], queryFn: fetchInstances, refetchInterval: 30000 })
 
   const setRowError = (tenant_id: string, msg: string) => setRowErrors(prev => ({ ...prev, [tenant_id]: msg }))
   const clearRowError = (tenant_id: string) => setRowErrors(prev => { const n = { ...prev }; delete n[tenant_id]; return n })
+  const setPending = (tenant_id: string, v: boolean) => setRowPending(prev => ({ ...prev, [tenant_id]: v }))
 
   const startMut = useMutation({
     mutationFn: ({ tenant_id }: { tenant_id: string }) => startBot(tenant_id),
+    onMutate: ({ tenant_id }) => setPending(tenant_id, true),
     onSuccess: (_d, { tenant_id }) => { clearRowError(tenant_id); qc.invalidateQueries({ queryKey: ['admin-instances'] }) },
     onError: (err: Error, { tenant_id }) => setRowError(tenant_id, err.message),
+    onSettled: (_d, _e, { tenant_id }) => setPending(tenant_id, false),
   })
   const stopMut = useMutation({
     mutationFn: ({ tenant_id }: { tenant_id: string }) => stopBot(tenant_id),
+    onMutate: ({ tenant_id }) => setPending(tenant_id, true),
     onSuccess: (_d, { tenant_id }) => { clearRowError(tenant_id); qc.invalidateQueries({ queryKey: ['admin-instances'] }) },
     onError: (err: Error, { tenant_id }) => setRowError(tenant_id, err.message),
+    onSettled: (_d, _e, { tenant_id }) => setPending(tenant_id, false),
   })
 
   // Echtzeit-Updates via WebSocket
@@ -121,7 +127,12 @@ export default function AdminIndex() {
                   </td>
                   <td className="px-4 py-2">
                     <div className="flex flex-col gap-1">
-                      {(inst.status === 'offline' || inst.status === 'error') ? (
+                      {rowPending[inst.tenant_id] ? (
+                        <button disabled className="px-2 py-1 bg-yellow-500 text-white rounded text-xs opacity-80 cursor-not-allowed flex items-center gap-1">
+                          <span className="w-2.5 h-2.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                          {t('bot.pending')}
+                        </button>
+                      ) : (inst.status === 'offline' || inst.status === 'error') ? (
                         <button
                           onClick={() => startMut.mutate({ tenant_id: inst.tenant_id })}
                           className="px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"

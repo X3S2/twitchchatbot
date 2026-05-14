@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Save, Eye, EyeOff, CheckCircle, HelpCircle, X } from 'lucide-react'
+import { Save, Eye, EyeOff, CheckCircle, FlaskConical, HelpCircle, X } from 'lucide-react'
 
 interface TenantSettingsData {
   display_name: string
@@ -58,6 +58,18 @@ async function saveSettings(tenantId: string, data: Partial<TenantSettingsForm>)
   return res.json()
 }
 
+interface TestTokenResult {
+  ok: boolean
+  error?: string
+  login?: string
+  expires_in?: number
+}
+
+async function testOwnBotToken(tenantId: string): Promise<TestTokenResult> {
+  const res = await fetch(`/api/tenants/${tenantId}/test-bot-token`, { method: 'POST', credentials: 'include' })
+  return res.json()
+}
+
 export default function TenantSettings() {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
@@ -67,6 +79,8 @@ export default function TenantSettings() {
   const [showSecret, setShowSecret] = useState(false)
   const [saved, setSaved] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [testTokenResult, setTestTokenResult] = useState<TestTokenResult | null>(null)
+  const [testingToken, setTestingToken] = useState(false)
 
   const { data, isLoading } = useQuery({ queryKey: ['tenant-settings', id], queryFn: () => fetchSettings(id!) })
   const [form, setForm] = useState<TenantSettingsForm | null>(null)
@@ -103,6 +117,14 @@ export default function TenantSettings() {
 
   const set = (key: keyof TenantSettingsForm, value: unknown) =>
     setForm((f) => f ? { ...f, [key]: value } : f)
+
+  const handleTestToken = async () => {
+    setTestingToken(true)
+    setTestTokenResult(null)
+    const result = await testOwnBotToken(id!)
+    setTestTokenResult(result)
+    setTestingToken(false)
+  }
 
   if (isLoading || !form || !data) return <div className="p-6 text-center text-gray-500">{t('loading')}</div>
 
@@ -201,6 +223,22 @@ export default function TenantSettings() {
               <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
             )}
           </Field>
+          {data.own_bot_token_set && (
+            <div className="flex items-center gap-3 pt-1">
+              <button onClick={handleTestToken} disabled={testingToken}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
+                <FlaskConical className="w-4 h-4" />
+                {testingToken ? t('admin.testing') : t('admin.test_bot_token')}
+              </button>
+              {testTokenResult && (
+                <span className={`text-xs font-medium ${testTokenResult.ok ? 'text-green-600' : 'text-red-500'}`}>
+                  {testTokenResult.ok
+                    ? `✓ @${testTokenResult.login} (${Math.round((testTokenResult.expires_in ?? 0) / 3600)}h)`
+                    : `✗ ${testTokenResult.error || t('admin.credentials_fail')}`}
+                </span>
+              )}
+            </div>
+          )}
           {form.bot_mode === 'own_full' && (
             <>
               <Field label={t('settings.own_client_id')}>

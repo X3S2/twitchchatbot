@@ -354,6 +354,33 @@ async def stop_bot(
     return {"ok": True}
 
 
+@router.post("/{tenant_id}/test-bot-token")
+async def test_own_bot_token(
+    tenant_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    """Prüft ob der eigene Bot-OAuth-Token des Tenants gültig ist."""
+    from ..core.twitch_client import validate_token
+    from ..core.security import decrypt_value
+
+    tenant = await _get_tenant_or_403(tenant_id, current_user, db)
+    if not tenant.own_bot_token_enc:
+        return {"ok": False, "error": "Kein Bot-Token gespeichert"}
+
+    bot_token = decrypt_value(tenant.own_bot_token_enc)
+    validated = await validate_token(bot_token)
+    if not validated:
+        return {"ok": False, "error": "Token ungültig oder abgelaufen"}
+
+    return {
+        "ok": True,
+        "login": validated.get("login"),
+        "expires_in": validated.get("expires_in"),
+        "scopes": validated.get("scopes", []),
+    }
+
+
 @router.get("/{tenant_id}/bot/status")
 async def get_bot_status(
     tenant_id: str,

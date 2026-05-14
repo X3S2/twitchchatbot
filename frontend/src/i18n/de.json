@@ -45,6 +45,7 @@
   "bot": {
     "start": "Bot starten",
     "stop": "Bot stoppen",
+    "pending": "Bitte warten…",
     "error": "Bot-Fehler"
   },
   "stats": {
@@ -211,7 +212,8 @@
     "test_credentials": "Credentials testen",
     "testing": "Teste…",
     "credentials_ok": "Verbindung erfolgreich",
-    "credentials_fail": "Verbindung fehlgeschlagen"
+    "credentials_fail": "Verbindung fehlgeschlagen",
+    "test_bot_token": "Bot-Token testen"
   },
   "user": {
     "username": "Benutzername",

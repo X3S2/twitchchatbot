@@ -90,7 +90,8 @@ export default function StatsPage() {
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip
                   cursor={{ fill: 'rgba(139,92,246,0.08)' }}
-                  allowEscapeViewBox={{ x: true, y: true }}
+                  allowEscapeViewBox={{ x: false, y: false }}
+                  wrapperStyle={{ zIndex: 50 }}
                   contentStyle={isDark
                     ? { background: '#111827', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }
                     : { background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#111827' }}

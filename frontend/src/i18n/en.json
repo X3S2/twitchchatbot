@@ -45,6 +45,7 @@
   "bot": {
     "start": "Start Bot",
     "stop": "Stop Bot",
+    "pending": "Please wait…",
     "error": "Bot Error"
   },
   "stats": {
@@ -211,7 +212,8 @@
     "test_credentials": "Test Credentials",
     "testing": "Testing…",
     "credentials_ok": "Connection successful",
-    "credentials_fail": "Connection failed"
+    "credentials_fail": "Connection failed",
+    "test_bot_token": "Test Bot Token"
   },
   "users": {
     "search_title": "Twitch User Search",
