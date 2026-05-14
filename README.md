@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.22.5-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.6-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -248,6 +248,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | Bot-Token-Key-Fix, Admin-Panel-Feedback, Warning-Scope | `v0.22.3` | ✅ Fertig | Kritischer `bot_token`-Key-Fix (Bot startet wieder), Admin Start/Stop Fehlermeldung |
 | Zeitfenster-Filter, Dashboard-Fix, UI-Verbesserungen | `v0.22.4` | ✅ Fertig | Prüf-Zeitrahmen pro Chat-Filter, Dashboard-Weiterleitung, Whitelist-Hervorhebung, Commands Info-Modal |
 | NameFilter Dauer-Fix, README-Update | `v0.22.5` | ✅ Fertig | NameFilters Leseansicht Dauer/Farbe korrigiert, README Entwicklungsstatus ergänzt |
+| nginx DNS-Resolver Fix | `v0.22.6` | ✅ Fertig | Docker-DNS-Resolver in nginx.conf — verhindert stale IP nach Container-Restart |
 
 ---
 

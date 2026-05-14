@@ -7,6 +7,13 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.6] — 2026-05-14 — nginx DNS-Resolver Fix
+
+### Behoben
+- **nginx: stale upstream IP nach Container-Restart** — nginx löste `tcb-api` einmalig beim Start auf und cachte die IP dauerhaft. Nach einem API-Neustart (neue Docker-IP) lieferte nginx 502 für alle `/api/`-Requests ("Connection refused" zur alten IP). Fix: `resolver 127.0.0.11 valid=30s ipv6=off;` + `set $api_upstream http://tcb-api:8000;` in nginx.conf — erzwingt regelmäßiges Re-Resolving über den Docker-internen DNS.
+
+---
+
 ## [0.22.5] — 2026-05-14 — NameFilter Dauer-Anzeige-Fix, README Entwicklungsstatus
 
 ### Behoben
