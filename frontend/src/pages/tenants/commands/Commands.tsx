@@ -43,7 +43,18 @@ const ACTION_TYPES = ['respond', 'ban', 'timeout', 'delete', 'bot_stop', 'bot_re
 async function fetchCommands(tenantId: string): Promise<ChatCommand[]> {
   const res = await fetch(`/api/tenants/${tenantId}/commands`, { credentials: 'include' })
   if (!res.ok) throw new Error('Fehler')
-  return res.json()
+  const data = await res.json()
+  // map backend field names → frontend interface
+  return data.map((c: Record<string, unknown>) => ({
+    id: c.id as string,
+    name: c.command_name as string,
+    permission_level: c.permission_level as string,
+    action_type: c.action_type as string,
+    response_template: (c.response_template as string | null) ?? null,
+    cooldown_global_seconds: c.global_cooldown_sec as number,
+    cooldown_user_seconds: c.user_cooldown_sec as number,
+    enabled: c.enabled as boolean,
+  }))
 }
 
 async function deleteCommand(tenantId: string, cmdId: string) {
@@ -54,7 +65,15 @@ async function createCommand(tenantId: string, data: Partial<ChatCommand>) {
   const res = await fetch(`/api/tenants/${tenantId}/commands`, {
     method: 'POST', credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      command_name: data.name,
+      permission_level: data.permission_level,
+      action_type: data.action_type,
+      response_template: data.response_template || null,
+      global_cooldown_sec: data.cooldown_global_seconds,
+      user_cooldown_sec: data.cooldown_user_seconds,
+      enabled: data.enabled ?? true,
+    }),
   })
   if (!res.ok) throw new Error(await res.text())
 }
@@ -63,7 +82,15 @@ async function updateCommand(tenantId: string, cmdId: string, data: Partial<Chat
   const res = await fetch(`/api/tenants/${tenantId}/commands/${cmdId}`, {
     method: 'PUT', credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      command_name: data.name,
+      permission_level: data.permission_level,
+      action_type: data.action_type,
+      response_template: data.response_template || null,
+      global_cooldown_sec: data.cooldown_global_seconds,
+      user_cooldown_sec: data.cooldown_user_seconds,
+      enabled: data.enabled,
+    }),
   })
   if (!res.ok) throw new Error(await res.text())
 }
@@ -84,6 +111,7 @@ export default function Commands() {
   const saveMut = useMutation({
     mutationFn: () => editCmd ? updateCommand(id!, editCmd.id, form) : createCommand(id!, form),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['commands', id] }); setShowForm(false); setEditCmd(null); setForm({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60 }) },
+    onError: (e: Error) => alert(e.message),
   })
 
   function openEdit(cmd: ChatCommand) {

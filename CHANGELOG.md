@@ -8,6 +8,18 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
+## [0.22.19] — 2026-05-14 — Streamer-Bot-OAuth, Live-Chat im Dashboard, Command-Save-Fix
+
+### Neu
+- **Streamer Bot-Token per Klick** — In den Tenant-Einstellungen kann der Streamer nun den eigenen Bot-Token direkt per Twitch-OAuth generieren/erneuern (analog zur Admin-Funktion), inkl. Rücksprung-Statusmeldungen bei Erfolg/Fehler
+- **Live-Chat im Tenant-Dashboard** — Neuer einklappbarer Live-Chat-Block zeigt eingehende IRC-Nachrichten in Echtzeit via WebSocket/Redis-Stream
+
+### Behoben
+- **Befehle speichern** — Feldmapping zwischen Frontend und Backend korrigiert (`name`/`command_name`, Cooldown-Felder), dadurch funktionieren Erstellen und Bearbeiten von Commands wieder zuverlässig
+- **Fehleranzeige Commands** — Save-Fehler werden im UI jetzt sichtbar angezeigt statt still zu scheitern
+
+---
+
 ## [0.22.18] — 2026-05-14 — Admin-Rollenvergabe in Benutzerverwaltung
 
 ### Neu

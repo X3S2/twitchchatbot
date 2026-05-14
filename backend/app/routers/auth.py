@@ -15,6 +15,7 @@ from ..core.security import create_access_token, create_refresh_token, decode_to
 from ..core.deps import get_current_user, require_admin
 from ..models.user import User
 from ..models.settings import AppSettings
+from ..models.tenant import Tenant
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
@@ -29,6 +30,8 @@ BOT_SCOPES = "chat:read chat:edit channel:moderate moderator:manage:banned_users
 
 # Kurzlebiger State-Speicher für Bot-OAuth-Flow (max 5 Minuten)
 _pending_bot_oauth: dict[str, float] = {}  # state -> unix-timestamp
+# Tenant-Bot-OAuth-Flow: state -> (tenant_id, unix-timestamp)
+_pending_tenant_bot_oauth: dict[str, tuple[str, float]] = {}
 
 
 def _cleanup_bot_states() -> None:
@@ -37,6 +40,9 @@ def _cleanup_bot_states() -> None:
     expired = [k for k, v in _pending_bot_oauth.items() if v < cutoff]
     for k in expired:
         del _pending_bot_oauth[k]
+    expired_t = [k for k, (_, ts) in _pending_tenant_bot_oauth.items() if ts < cutoff]
+    for k in expired_t:
+        del _pending_tenant_bot_oauth[k]
 
 
 def _redirect_uri() -> str:
@@ -129,6 +135,115 @@ async def _handle_bot_token_callback(code: str, db: AsyncSession) -> RedirectRes
     return RedirectResponse(url="/admin/settings?bot_oauth_success=1")
 
 
+@router.get("/tenant-bot-oauth/start")
+async def tenant_bot_oauth_start(
+    tenant_id: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    """Startet den OAuth-Flow für einen Tenant-eigenen Bot-Token."""
+    result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant nicht gefunden")
+    if current_user.role != "admin" and str(tenant.user_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Zugriff verweigert")
+    if tenant.bot_mode == "shared":
+        raise HTTPException(status_code=400, detail="Im Shared-Bot-Modus wird kein eigener Token benötigt.")
+
+    from ..core.security import decrypt_value
+    if tenant.bot_mode == "own_full":
+        if not tenant.own_client_id_enc:
+            raise HTTPException(status_code=400, detail="Zuerst eigene Client-ID eintragen und speichern.")
+        client_id = decrypt_value(tenant.own_client_id_enc)
+        if not client_id:
+            raise HTTPException(status_code=400, detail="Client-ID konnte nicht entschlüsselt werden.")
+    else:
+        # own_bot: globale App-Credentials verwenden
+        cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+        app_cfg = cfg_result.scalar_one_or_none()
+        if not app_cfg or not app_cfg.client_id_enc:
+            raise HTTPException(status_code=400, detail="Globale Client-ID fehlt. Admin muss zuerst die Twitch-App konfigurieren.")
+        client_id = decrypt_value(app_cfg.client_id_enc)
+        if not client_id:
+            raise HTTPException(status_code=400, detail="Globale Client-ID konnte nicht entschlüsselt werden.")
+
+    state = "tbot_" + secrets.token_urlsafe(24)
+    _pending_tenant_bot_oauth[state] = (str(tenant_id), time.time())
+    _cleanup_bot_states()
+
+    auth_url = (
+        f"{TWITCH_AUTH_URL}"
+        f"?client_id={client_id}"
+        f"&redirect_uri={_redirect_uri()}"
+        f"&response_type=code"
+        f"&scope={quote(BOT_SCOPES)}"
+        f"&state={state}"
+        f"&force_verify=true"
+    )
+    return {"auth_url": auth_url}
+
+
+async def _handle_tenant_bot_token_callback(code: str, tenant_id: str, db: AsyncSession) -> RedirectResponse:
+    """Tauscht den OAuth-Code gegen Bot-Tokens und speichert sie im Tenant."""
+    result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        return RedirectResponse(url=f"/login?error=config_missing")
+
+    from ..core.security import decrypt_value, encrypt_value
+    redirect_base = f"/tenants/{tenant_id}/settings"
+
+    if tenant.bot_mode == "own_full":
+        client_id = decrypt_value(tenant.own_client_id_enc) if tenant.own_client_id_enc else None
+        client_secret = decrypt_value(tenant.own_client_secret_enc) if tenant.own_client_secret_enc else None
+    else:
+        cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+        app_cfg = cfg_result.scalar_one_or_none()
+        client_id = decrypt_value(app_cfg.client_id_enc) if app_cfg and app_cfg.client_id_enc else None
+        client_secret = decrypt_value(app_cfg.client_secret_enc) if app_cfg and app_cfg.client_secret_enc else None
+
+    if not client_id or not client_secret:
+        return RedirectResponse(url=f"{redirect_base}?bot_oauth_error=credentials_missing")
+
+    async with httpx.AsyncClient() as client:
+        token_resp = await client.post(
+            TWITCH_TOKEN_URL,
+            data={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "code": code,
+                "grant_type": "authorization_code",
+                "redirect_uri": _redirect_uri(),
+            },
+        )
+        if token_resp.status_code != 200:
+            return RedirectResponse(url=f"{redirect_base}?bot_oauth_error=token_exchange")
+
+        token_data = token_resp.json()
+        access_token = token_data.get("access_token")
+        refresh_token = token_data.get("refresh_token")
+        if not access_token:
+            return RedirectResponse(url=f"{redirect_base}?bot_oauth_error=no_token")
+
+        bot_login = None
+        validate_resp = await client.get(
+            TWITCH_VALIDATE_URL,
+            headers={"Authorization": f"OAuth {access_token}"},
+        )
+        if validate_resp.status_code == 200:
+            bot_login = validate_resp.json().get("login")
+
+    tenant.own_bot_token_enc = encrypt_value(access_token)
+    if refresh_token:
+        tenant.own_bot_refresh_token_enc = encrypt_value(refresh_token)
+    if bot_login:
+        tenant.own_bot_username = bot_login
+    await db.commit()
+
+    return RedirectResponse(url=f"{redirect_base}?bot_oauth_success=1")
+
+
 @router.get("/login")
 async def login(db: AsyncSession = Depends(get_db)):
     """Weiterleitung zur Twitch-OAuth-Seite."""
@@ -169,6 +284,15 @@ async def callback(
             return RedirectResponse(url="/admin/settings?bot_oauth_error=state_expired")
         del _pending_bot_oauth[state]
         return await _handle_bot_token_callback(code, db)
+
+    # Tenant-Bot-OAuth-Flow
+    if state in _pending_tenant_bot_oauth:
+        tenant_id, ts = _pending_tenant_bot_oauth[state]
+        if time.time() - ts > 300:
+            del _pending_tenant_bot_oauth[state]
+            return RedirectResponse(url=f"/tenants/{tenant_id}/settings?bot_oauth_error=state_expired")
+        del _pending_tenant_bot_oauth[state]
+        return await _handle_tenant_bot_token_callback(code, tenant_id, db)
 
     # Normaler User-Login-Flow
     result = await db.execute(select(AppSettings).where(AppSettings.id == 1))

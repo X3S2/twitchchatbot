@@ -111,6 +111,43 @@ async def ws_tenant(websocket: WebSocket, tenant_id: str, db: AsyncSession = Dep
         manager.disconnect(cid)
 
 
+@router.websocket("/ws/tenant/{tenant_id}/chat")
+async def ws_tenant_chat(websocket: WebSocket, tenant_id: str, db: AsyncSession = Depends(get_db)):
+    """Live-Chat-Stream für einen Tenant-Kanal (Redis pub/sub → WebSocket)."""
+    payload = await _auth_ws(websocket)
+    if not payload:
+        return
+
+    user_id = payload.get("sub")
+    role = payload.get("role")
+
+    if role != "admin":
+        result = await db.execute(
+            select(Tenant).where(Tenant.id == tenant_id, Tenant.user_id == user_id)
+        )
+        if not result.scalar_one_or_none():
+            await websocket.close(code=4003)
+            return
+
+    await websocket.accept()
+    redis = await get_redis()
+    pubsub = redis.pubsub()
+    await pubsub.subscribe(f"tcb:chat:{tenant_id}")
+    try:
+        async for msg in pubsub.listen():
+            if msg["type"] != "message":
+                continue
+            try:
+                await websocket.send_text(msg["data"] if isinstance(msg["data"], str) else msg["data"].decode())
+            except Exception:
+                break
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await pubsub.unsubscribe(f"tcb:chat:{tenant_id}")
+        await pubsub.aclose()
+
+
 async def redis_subscriber():
     """Hintergrundtask: liest Redis Pub/Sub und broadcastet an WS-Clients."""
     redis = await get_redis()

@@ -1,8 +1,8 @@
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
-import { Save, Eye, EyeOff, CheckCircle, FlaskConical, HelpCircle, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Save, Eye, EyeOff, CheckCircle, FlaskConical, HelpCircle, X, LogIn } from 'lucide-react'
 
 interface TenantSettingsData {
   display_name: string
@@ -82,6 +82,34 @@ export default function TenantSettings() {
   const [showHelp, setShowHelp] = useState(false)
   const [testTokenResult, setTestTokenResult] = useState<TestTokenResult | null>(null)
   const [testingToken, setTestingToken] = useState(false)
+  const [botOAuthNotif, setBotOAuthNotif] = useState<{ ok: boolean; msg: string } | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Bot-OAuth Rücksprung aus Twitch
+  useEffect(() => {
+    const success = searchParams.get('bot_oauth_success') === '1'
+    const error = searchParams.get('bot_oauth_error')
+    if (success) {
+      setBotOAuthNotif({ ok: true, msg: 'Bot-Token erfolgreich generiert und gespeichert!' })
+      qc.invalidateQueries({ queryKey: ['tenant-settings', id] })
+      setFormInit(false)
+      setSearchParams({}, { replace: true })
+      const t = setTimeout(() => setBotOAuthNotif(null), 8000)
+      return () => clearTimeout(t)
+    } else if (error) {
+      const msgs: Record<string, string> = {
+        config_missing: 'Konfiguration fehlt.',
+        credentials_missing: 'Client ID oder Secret nicht konfiguriert.',
+        token_exchange: 'Token-Austausch mit Twitch fehlgeschlagen.',
+        no_token: 'Kein Token von Twitch erhalten.',
+        state_expired: 'OAuth-State abgelaufen. Bitte erneut versuchen.',
+      }
+      setBotOAuthNotif({ ok: false, msg: msgs[error] ?? `Fehler: ${error}` })
+      setSearchParams({}, { replace: true })
+      const t = setTimeout(() => setBotOAuthNotif(null), 10000)
+      return () => clearTimeout(t)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data, isLoading } = useQuery({ queryKey: ['tenant-settings', id], queryFn: () => fetchSettings(id!) })
   const [form, setForm] = useState<TenantSettingsForm | null>(null)
@@ -125,6 +153,17 @@ export default function TenantSettings() {
     const result = await testOwnBotToken(id!)
     setTestTokenResult(result)
     setTestingToken(false)
+  }
+
+  const startTenantBotOAuth = async () => {
+    const res = await fetch(`/api/auth/tenant-bot-oauth/start?tenant_id=${id}`, { credentials: 'include' })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      setBotOAuthNotif({ ok: false, msg: err.detail || 'OAuth-Start fehlgeschlagen.' })
+      return
+    }
+    const data = await res.json()
+    window.location.href = data.auth_url
   }
 
   if (isLoading || !form || !data) return <div className="p-6 text-center text-gray-500">{t('loading')}</div>
@@ -229,11 +268,17 @@ export default function TenantSettings() {
             )}
           </Field>
           {data.own_bot_token_set && (
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               <button onClick={handleTestToken} disabled={testingToken}
                 className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
                 <FlaskConical className="w-4 h-4" />
                 {testingToken ? t('admin.testing') : t('admin.test_bot_token')}
+              </button>
+              <button onClick={startTenantBotOAuth}
+                title="Bot-Token mit Twitch-OAuth neu generieren (als Bot-Account einloggen)"
+                className="flex items-center gap-2 px-4 py-2 border border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 rounded-lg text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                <LogIn className="w-4 h-4" />
+                Bot-Token neu generieren
               </button>
               {testTokenResult && (
                 <span className={`text-xs font-medium ${testTokenResult.ok ? 'text-green-600' : 'text-red-500'}`}>
@@ -243,6 +288,22 @@ export default function TenantSettings() {
                 </span>
               )}
             </div>
+          )}
+          {!data.own_bot_token_set && (
+            <div className="flex items-center gap-3 pt-1">
+              <button onClick={startTenantBotOAuth}
+                title={form.bot_mode === 'own_full' && !data.own_client_id_set ? 'Zuerst eigene Client ID eintragen und speichern' : 'Bot-Token mit Twitch-OAuth generieren (als Bot-Account einloggen)'}
+                disabled={form.bot_mode === 'own_full' && !data.own_client_id_set}
+                className="flex items-center gap-2 px-4 py-2 border border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-300 rounded-lg text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20 disabled:opacity-40">
+                <LogIn className="w-4 h-4" />
+                Bot-Token generieren
+              </button>
+            </div>
+          )}
+          {botOAuthNotif && (
+            <p className={`flex items-center gap-1 text-xs font-medium ${botOAuthNotif.ok ? 'text-green-600' : 'text-red-500'}`}>
+              {botOAuthNotif.ok ? <CheckCircle className="w-3 h-3" /> : '✗'} {botOAuthNotif.msg}
+            </p>
           )}
           {form.bot_mode === 'own_full' && (
             <>

@@ -70,7 +70,21 @@ class TwitchBotInstance(twitch_commands.Bot):
         author = message.author
         user_id = str(author.id) if author else ""
         username = author.name if author else "unknown"
+        display_name = getattr(author, 'display_name', username) or username
         text = message.content or ""
+        color = getattr(author, 'colour', None) or getattr(author, 'color', None) or None
+
+        # Live-Chat-Event an API streamen
+        await publish(f"tcb:chat:{self.tenant_id}", {
+            "type": "chat_message",
+            "tenant_id": self.tenant_id,
+            "user_id": user_id,
+            "username": username,
+            "display_name": display_name,
+            "color": str(color) if color else None,
+            "text": text,
+            "ts": datetime.now(timezone.utc).isoformat(),
+        })
 
         # 1. Name-Filter (einmalig pro Chatter)
         if user_id and user_id not in _seen_chatters.get(self.tenant_id, set()):

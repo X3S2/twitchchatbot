@@ -1,12 +1,12 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import React from 'react'
 import { LED } from '../../components/LED'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { useQueryClient } from '@tanstack/react-query'
-import { Activity, Filter, Ban, Terminal, BarChart2, Settings, Users } from 'lucide-react'
+import { Activity, Filter, Ban, Terminal, BarChart2, Settings, Users, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface Tenant {
   id: string
@@ -150,6 +150,9 @@ export default function TenantDashboard() {
         <QuickLink to={`/tenants/${id}/moderators`} icon={<Users className="w-5 h-5" />} label={t('nav.moderators')} />
       </div>
 
+      {/* Live Chat */}
+      <LiveChat tenantId={id!} />
+
       {botStatus?.error_message && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-red-700 dark:text-red-400 text-sm font-medium">{t('bot.error')}: {botStatus.error_message}</p>
@@ -177,5 +180,79 @@ function QuickLink({ to, icon, label }: { to: string; icon: React.ReactNode; lab
       <div className="text-purple-600 dark:text-purple-400">{icon}</div>
       <span className="text-sm font-medium text-center">{label}</span>
     </Link>
+  )
+}
+
+interface ChatMsg {
+  username: string
+  display_name: string
+  color: string | null
+  text: string
+  ts: string
+}
+
+function LiveChat({ tenantId }: { tenantId: string }) {
+  const [messages, setMessages] = useState<ChatMsg[]>([])
+  const [open, setOpen] = useState(true)
+  const [connected, setConnected] = useState(false)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+
+  useEffect(() => {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const url = `${proto}//${window.location.host}/api/ws/tenant/${tenantId}/chat`
+    const ws = new WebSocket(url)
+    wsRef.current = ws
+
+    ws.onopen = () => setConnected(true)
+    ws.onclose = () => setConnected(false)
+    ws.onerror = () => ws.close()
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data) as ChatMsg & { type?: string }
+        if (msg.type === 'chat_message') {
+          setMessages(prev => {
+            const next = [...prev, msg]
+            return next.length > 200 ? next.slice(-200) : next
+          })
+        }
+      } catch { /* ignore */ }
+    }
+    return () => { ws.close(); wsRef.current = null }
+  }, [tenantId])
+
+  useEffect(() => {
+    if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, open])
+
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          <span className="font-medium text-sm">Live Chat</span>
+          <span className={`inline-block w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-gray-400'}`} title={connected ? 'Verbunden' : 'Getrennt'} />
+        </div>
+        {open ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+      </button>
+      {open && (
+        <div className="h-72 overflow-y-auto px-4 pb-3 pt-1 space-y-1 font-mono text-xs bg-gray-950 dark:bg-gray-950">
+          {messages.length === 0 && (
+            <p className="text-gray-500 mt-4 text-center">{connected ? 'Warte auf Nachrichten…' : 'Keine Verbindung'}</p>
+          )}
+          {messages.map((m, i) => (
+            <div key={i} className="flex gap-1 leading-relaxed">
+              <span className="text-gray-500 shrink-0">{new Date(m.ts).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+              <span className="shrink-0" style={{ color: m.color || '#a78bfa' }}>{m.display_name || m.username}</span>
+              <span className="text-gray-300 dark:text-gray-200 break-all">: {m.text}</span>
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+      )}
+    </div>
   )
 }
