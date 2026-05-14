@@ -14,6 +14,7 @@ from ..core.database import get_db
 from ..core.security import decode_token
 from ..core.redis_client import get_redis
 from ..models.tenant import Tenant
+from ..models.settings import AppSettings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["websocket"])
@@ -131,6 +132,21 @@ async def ws_tenant_chat(websocket: WebSocket, tenant_id: str, db: AsyncSession 
 
     await websocket.accept()
     redis = await get_redis()
+
+    # Verlauf zuerst senden (letzte N Nachrichten aus Redis)
+    cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+    cfg = cfg_result.scalar_one_or_none()
+    history_limit = max(10, min(500, (cfg.chat_history_limit if cfg and cfg.chat_history_limit else 100)))
+    history_key = f"tcb:chatlog:{tenant_id}"
+    history_raw = await redis.lrange(history_key, 0, -1)
+    history_msgs: list[dict] = []
+    for raw in history_raw[-history_limit:]:
+        try:
+            history_msgs.append(json.loads(raw))
+        except Exception:
+            continue
+    await websocket.send_json({"type": "chat_history", "messages": history_msgs, "limit": history_limit})
+
     pubsub = redis.pubsub()
     await pubsub.subscribe(f"tcb:chat:{tenant_id}")
     try:

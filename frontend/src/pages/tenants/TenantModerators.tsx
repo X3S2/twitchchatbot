@@ -26,7 +26,7 @@ async function searchTwitchUsers(q: string): Promise<TwitchUserSuggestion[]> {
   if (q.length < 2) return []
   const res = await fetch(`/api/twitch-users?q=${encodeURIComponent(q)}`, { credentials: 'include' })
   if (!res.ok) return []
-  return res.json()
+  return (await res.json()) as TwitchUserSuggestion[]
 }
 
 async function addMod(tenantId: string, data: { twitch_user_id: string; twitch_username: string; role: string }) {
@@ -125,14 +125,14 @@ export default function TenantModerators() {
           <h2 className="font-semibold">{t('mods.add')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="relative">
-              <div className="flex items-center gap-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent">
+              <div className="flex items-center gap-1 px-3 h-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent">
                 <Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                 <input
                   value={username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                   placeholder={t('mods.username')}
-                  className="flex-1 bg-transparent text-sm outline-none"
+                  className="flex-1 h-full bg-transparent text-sm outline-none"
                 />
               </div>
               {showSuggestions && (
@@ -154,9 +154,9 @@ export default function TenantModerators() {
             <div>
               <input value={userId} onChange={(e) => setUserId(e.target.value)}
                 placeholder="Twitch ID (manuell)"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
+                className="w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
             </div>
-            <select value={role} onChange={(e) => setRole(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm">
+            <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full h-10 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm">
               {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>

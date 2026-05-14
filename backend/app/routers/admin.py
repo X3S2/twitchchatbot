@@ -27,6 +27,7 @@ class AppSettingsUpdate(BaseModel):
     bot_token: str | None = None
     bot_refresh_token: str | None = None
     global_retention_days: int | None = None
+    chat_history_limit: int | None = None
     maintenance_mode: bool | None = None
     maintenance_message: str | None = None
     global_timezone: str | None = None
@@ -94,6 +95,7 @@ async def get_app_settings(
         "bot_refresh_token_set": bool(cfg.bot_refresh_token_enc),
         "bot_user_id": cfg.bot_user_id,
         "global_retention_days": cfg.global_retention_days,
+        "chat_history_limit": cfg.chat_history_limit,
         "maintenance_mode": cfg.maintenance_mode,
         "maintenance_message": cfg.maintenance_message,
         "global_timezone": cfg.global_timezone,
@@ -124,6 +126,8 @@ async def update_app_settings(
         cfg.bot_refresh_token_enc = encrypt_value(data.bot_refresh_token)
     if data.global_retention_days is not None:
         cfg.global_retention_days = max(1, min(730, data.global_retention_days))
+    if data.chat_history_limit is not None:
+        cfg.chat_history_limit = max(10, min(500, data.chat_history_limit))
     if data.maintenance_mode is not None:
         cfg.maintenance_mode = data.maintenance_mode
     if data.maintenance_message is not None:

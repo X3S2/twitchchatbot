@@ -33,7 +33,11 @@ async def _check_access(tenant_id: str, user: User, db: AsyncSession) -> None:
 
 
 PERMISSION_LEVELS = ["everyone", "subscriber", "vip", "moderator", "editor", "owner", "admin"]
-ACTION_TYPES = ["response", "tcbstop", "tcbstart", "tcbrejoin", "tcbstatus", "tcbfilter", "tcbwl", "tcbbl", "tcbinfo", "tcbstats"]
+ACTION_TYPES = [
+    "respond", "ban", "timeout", "delete", "bot_stop", "bot_restart", "bot_start", "unban_user", "test_mode_toggle",
+    # Legacy aliases
+    "response", "tcbstop", "tcbstart", "tcbrejoin", "tcbstatus", "tcbfilter", "tcbwl", "tcbbl", "tcbinfo", "tcbstats",
+]
 
 
 class CommandCreate(BaseModel):
@@ -77,20 +81,24 @@ async def create_command(
     db: AsyncSession = Depends(get_db),
 ):
     await _check_access(tenant_id, current_user, db)
-    if not data.command_name.startswith("!"):
-        data.command_name = "!" + data.command_name
+    normalized_name = data.command_name.strip().lower()
+    if not normalized_name.startswith("!"):
+        normalized_name = "!" + normalized_name
     existing = await db.execute(
-        select(ChatCommand).where(ChatCommand.tenant_id == tenant_id, ChatCommand.command_name == data.command_name)
+        select(ChatCommand).where(ChatCommand.tenant_id == tenant_id, ChatCommand.command_name == normalized_name)
     )
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="Befehl existiert bereits")
+    action_type = _normalize_action_type(data.action_type)
+    if action_type not in ACTION_TYPES:
+        action_type = "respond"
     cmd = ChatCommand(
         tenant_id=tenant_id,
-        command_name=data.command_name.lower(),
+        command_name=normalized_name,
         permission_level=data.permission_level if data.permission_level in PERMISSION_LEVELS else "everyone",
         global_cooldown_sec=max(0, data.global_cooldown_sec),
         user_cooldown_sec=max(0, data.user_cooldown_sec),
-        action_type=data.action_type if data.action_type in ACTION_TYPES else "response",
+        action_type=action_type,
         response_template=data.response_template,
         enabled=data.enabled,
     )
@@ -116,7 +124,10 @@ async def update_command(
     if not cmd:
         raise HTTPException(status_code=404)
     if data.command_name is not None:
-        cmd.command_name = data.command_name.lower()
+        normalized_name = data.command_name.strip().lower()
+        if not normalized_name.startswith("!"):
+            normalized_name = "!" + normalized_name
+        cmd.command_name = normalized_name
     if data.permission_level is not None:
         cmd.permission_level = data.permission_level
     if data.global_cooldown_sec is not None:
@@ -124,7 +135,9 @@ async def update_command(
     if data.user_cooldown_sec is not None:
         cmd.user_cooldown_sec = max(0, data.user_cooldown_sec)
     if data.action_type is not None:
-        cmd.action_type = data.action_type
+        normalized_action = _normalize_action_type(data.action_type)
+        if normalized_action in ACTION_TYPES:
+            cmd.action_type = normalized_action
     if data.response_template is not None:
         cmd.response_template = data.response_template
     if data.enabled is not None:
@@ -164,3 +177,16 @@ def _cmd_dict(c: ChatCommand) -> dict:
         "enabled": c.enabled,
         "created_at": c.created_at,
     }
+
+
+def _normalize_action_type(action_type: str | None) -> str:
+    if not action_type:
+        return "respond"
+    action = action_type.lower()
+    mapping = {
+        "response": "respond",
+        "tcbstop": "bot_stop",
+        "tcbstart": "bot_start",
+        "tcbrejoin": "bot_restart",
+    }
+    return mapping.get(action, action)

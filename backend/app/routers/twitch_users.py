@@ -9,6 +9,9 @@ from ..core.deps import get_current_user, require_admin
 from ..models.user import User
 from ..models.twitch_user import TwitchUser, TenantUserExclusion, GlobalUserExclusion
 from ..models.ban import Ban
+from ..models.settings import AppSettings
+from ..core.security import decrypt_value
+from ..core.twitch_client import get_app_access_token, lookup_twitch_user
 
 router = APIRouter(prefix="/twitch-users", tags=["twitch-users"])
 
@@ -20,14 +23,50 @@ async def search_twitch_users(
     q: str = Query(min_length=2, max_length=50),
     limit: int = 20,
 ):
+    query = q.strip().lstrip("@").lower()
     result = await db.execute(
         select(TwitchUser)
-        .where(TwitchUser.current_username.ilike(f"%{q}%"))
+        .where(TwitchUser.current_username.ilike(f"%{query}%"))
         .order_by(TwitchUser.current_username)
         .limit(limit)
     )
     users = result.scalars().all()
-    return [{"twitch_id": u.twitch_id, "current_username": u.current_username, "avatar_url": u.avatar_url, "first_seen": u.first_seen, "last_seen": u.last_seen} for u in users]
+    out = [
+        {
+            "twitch_id": u.twitch_id,
+            "current_username": u.current_username,
+            "avatar_url": u.avatar_url,
+            "first_seen": u.first_seen,
+            "last_seen": u.last_seen,
+        }
+        for u in users
+    ]
+
+    # Fallback: exakten Login direkt bei Twitch nachschlagen,
+    # falls lokale Datenbank leer ist oder den User noch nicht kennt.
+    has_exact = any((u.get("current_username") or "").lower() == query for u in out)
+    if query and not has_exact:
+        cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+        cfg = cfg_result.scalar_one_or_none()
+        if cfg and cfg.client_id_enc and cfg.client_secret_enc:
+            client_id = decrypt_value(cfg.client_id_enc)
+            client_secret = decrypt_value(cfg.client_secret_enc)
+            if client_id and client_secret:
+                app_token = await get_app_access_token(client_id, client_secret)
+                if app_token:
+                    twitch_user = await lookup_twitch_user(query, client_id, app_token)
+                    if twitch_user:
+                        twitch_id = str(twitch_user.get("id") or "")
+                        if twitch_id and not any(u.get("twitch_id") == twitch_id for u in out):
+                            out.insert(0, {
+                                "twitch_id": twitch_id,
+                                "current_username": twitch_user.get("login") or query,
+                                "avatar_url": twitch_user.get("profile_image_url"),
+                                "first_seen": None,
+                                "last_seen": None,
+                            })
+
+    return out[: max(1, min(limit, 50))]
 
 
 @router.get("/{twitch_id}")

@@ -45,6 +45,7 @@ CREATE TABLE app_settings (
     bot_token_enc           TEXT,       -- Fernet-verschlüsselt
     bot_user_id             VARCHAR(64),
     global_retention_days   INTEGER NOT NULL DEFAULT 180,
+    chat_history_limit      INTEGER NOT NULL DEFAULT 100,
     reconnect_mode_default  VARCHAR(32) NOT NULL DEFAULT 'unlimited' CHECK (reconnect_mode_default IN ('unlimited', 'limited')),
     reconnect_max_attempts  INTEGER NOT NULL DEFAULT 10,
     maintenance_mode        BOOLEAN NOT NULL DEFAULT FALSE,

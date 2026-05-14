@@ -11,6 +11,7 @@ interface AppSettingsData {
   bot_token_set: boolean
   bot_refresh_token_set: boolean
   global_retention_days: number
+  chat_history_limit: number
   maintenance_mode: boolean
   maintenance_message: string | null
 }
@@ -22,6 +23,7 @@ interface AppSettingsForm {
   bot_token: string
   bot_refresh_token: string
   global_retention_days: number
+  chat_history_limit: number
   maintenance_mode: boolean
   maintenance_message: string
 }
@@ -45,6 +47,7 @@ async function fetchSettings(): Promise<AppSettingsData> {
 async function saveSettings(data: AppSettingsForm) {
   const payload: Record<string, unknown> = {
     global_retention_days: data.global_retention_days,
+    chat_history_limit: data.chat_history_limit,
     maintenance_mode: data.maintenance_mode,
     maintenance_message: data.maintenance_message,
   }
@@ -141,6 +144,7 @@ export default function AdminSettings() {
       bot_token: '',
       bot_refresh_token: '',
       global_retention_days: data.global_retention_days,
+      chat_history_limit: data.chat_history_limit,
       maintenance_mode: data.maintenance_mode,
       maintenance_message: data.maintenance_message || '',
     })
@@ -327,6 +331,17 @@ export default function AdminSettings() {
         <h2 className="font-semibold">{t('admin.platform')}</h2>
         <Field label={t('settings.retention_days')}>
           <input type="number" min={1} max={730} value={form.global_retention_days} onChange={(e) => set('global_retention_days', Number(e.target.value))} className={inputCls} />
+        </Field>
+        <Field label="Live-Chat Verlauf (Nachrichten)">
+          <input
+            type="number"
+            min={10}
+            max={500}
+            value={form.chat_history_limit}
+            onChange={(e) => set('chat_history_limit', Number(e.target.value))}
+            className={inputCls}
+          />
+          <p className="text-xs text-gray-500 mt-1">Wie viele letzte Chat-Nachrichten pro Kanal gespeichert und nach Reload angezeigt werden.</p>
         </Field>
         <Field label={t('admin.maintenance_mode')}>
           <label className="flex items-center gap-2 cursor-pointer">

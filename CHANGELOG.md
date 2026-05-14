@@ -8,6 +8,20 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
+## [0.22.20] — 2026-05-14 — Mod-Suche-Fix, Command-Ausführung-Fix, Command-Toggle, Live-Chat-Verlauf
+
+### Neu
+- **Commands aktiv/deaktivieren** — Befehle können im Commands-Bereich per Status-Toggle ohne Löschen ein- und ausgeschaltet werden
+- **Live-Chat Verlauf persistent** — Der Live-Chat zeigt nach Reload weiterhin die letzten Nachrichten (Redis-Backlog); Standard 100, konfigurierbar im Admin-Panel
+- **Admin-Setting für Chat-Verlauf** — Neue Plattform-Einstellung `Live-Chat Verlauf (Nachrichten)` mit Bereich 10–500
+
+### Behoben
+- **Moderator-Suche robuster** — `/api/twitch-users` nutzt neben DB-Suche einen Twitch-API-Fallback (exakter Login), damit existierende Nutzer auch ohne lokale Historie gefunden werden
+- **Moderator-Form UI-Konsistenz** — Rollen-Dropdown und ID-Feld auf gleiche Feldhöhe wie das Suchfeld gebracht
+- **Command-Ausführung wieder zuverlässig** — Bot bekommt Commands wieder über den internen Config-Endpunkt; command-name Matching ist jetzt case-insensitive, Action-Typen werden normalisiert (inkl. Legacy-Aliase)
+
+---
+
 ## [0.22.19] — 2026-05-14 — Streamer-Bot-OAuth, Live-Chat im Dashboard, Command-Save-Fix
 
 ### Neu

@@ -101,7 +101,7 @@ export default function Commands() {
   const qc = useQueryClient()
   const [showForm, setShowForm] = useState(false)
   const [editCmd, setEditCmd] = useState<ChatCommand | null>(null)
-  const [form, setForm] = useState({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60 })
+  const [form, setForm] = useState({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60, enabled: true })
   const [showActionInfo, setShowActionInfo] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showTemplateHelp, setShowTemplateHelp] = useState(false)
@@ -110,13 +110,19 @@ export default function Commands() {
   const { data: commands = [], isLoading } = useQuery({ queryKey: ['commands', id], queryFn: () => fetchCommands(id!) })
   const saveMut = useMutation({
     mutationFn: () => editCmd ? updateCommand(id!, editCmd.id, form) : createCommand(id!, form),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['commands', id] }); setShowForm(false); setEditCmd(null); setForm({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60 }) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['commands', id] }); setShowForm(false); setEditCmd(null); setForm({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60, enabled: true }) },
+    onError: (e: Error) => alert(e.message),
+  })
+
+  const toggleEnabledMut = useMutation({
+    mutationFn: (cmd: ChatCommand) => updateCommand(id!, cmd.id, { enabled: !cmd.enabled }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['commands', id] }),
     onError: (e: Error) => alert(e.message),
   })
 
   function openEdit(cmd: ChatCommand) {
     setEditCmd(cmd)
-    setForm({ name: cmd.name, permission_level: cmd.permission_level, action_type: cmd.action_type, response_template: cmd.response_template || '', cooldown_global_seconds: cmd.cooldown_global_seconds, cooldown_user_seconds: cmd.cooldown_user_seconds })
+    setForm({ name: cmd.name, permission_level: cmd.permission_level, action_type: cmd.action_type, response_template: cmd.response_template || '', cooldown_global_seconds: cmd.cooldown_global_seconds, cooldown_user_seconds: cmd.cooldown_user_seconds, enabled: cmd.enabled })
     setShowForm(true)
   }
 
@@ -134,7 +140,7 @@ export default function Commands() {
             <Info className="w-4 h-4" />
           </button>
         </div>
-        <button onClick={() => { setEditCmd(null); setShowForm(true) }} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
+        <button onClick={() => { setEditCmd(null); setForm({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60, enabled: true }); setShowForm(true) }} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
           <Plus className="w-4 h-4" />{t('commands.new')}
         </button>
       </div>
@@ -230,6 +236,17 @@ export default function Commands() {
               <label className="block text-xs font-medium mb-1">{t('commands.cooldown_user')} (s)</label>
               <input type="number" value={form.cooldown_user_seconds} onChange={(e) => setForm((f) => ({ ...f, cooldown_user_seconds: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
             </div>
+            <div className="sm:col-span-2">
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form.enabled}
+                  onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
+                  className="w-4 h-4 accent-purple-600"
+                />
+                Befehl aktiviert
+              </label>
+            </div>
           </div>
           <div className="flex gap-2">
             <button onClick={() => saveMut.mutate()} disabled={!form.name.trim()} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm disabled:opacity-50">{t('save')}</button>
@@ -250,6 +267,7 @@ export default function Commands() {
                 <th className="px-4 py-2 text-left">{t('commands.name')}</th>
                 <th className="px-4 py-2 text-left">{t('commands.permission')}</th>
                 <th className="px-4 py-2 text-left">{t('commands.action')}</th>
+                <th className="px-4 py-2 text-left">Status</th>
                 <th className="px-4 py-2 text-left">{t('commands.cooldown_global')}</th>
                 <th className="px-4 py-2"></th>
               </tr>
@@ -260,6 +278,14 @@ export default function Commands() {
                   <td className="px-4 py-3 font-mono font-medium">{cmd.name}</td>
                   <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs ${permBadge(cmd.permission_level)}`}>{cmd.permission_level}</span></td>
                   <td className="px-4 py-3 text-gray-500">{cmd.action_type}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => toggleEnabledMut.mutate(cmd)}
+                      className={`px-2 py-1 rounded text-xs border ${cmd.enabled ? 'border-green-300 text-green-700 bg-green-50' : 'border-gray-300 text-gray-500 bg-gray-50'}`}
+                    >
+                      {cmd.enabled ? 'Aktiv' : 'Deaktiviert'}
+                    </button>
+                  </td>
                   <td className="px-4 py-3 text-gray-500">{cmd.cooldown_global_seconds}s</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">

@@ -50,7 +50,13 @@ async def handle_command(
         return f"[TCB] {action.upper()} für {username}"
 
     # Benutzerdefinierte Befehle
-    cmd = next((c for c in commands_config if c["command_name"] == cmd_name and c.get("enabled", True)), None)
+    cmd = next(
+        (
+            c for c in commands_config
+            if str(c.get("command_name") or "").lower() == cmd_name and c.get("enabled", True)
+        ),
+        None,
+    )
     if not cmd:
         return None
 

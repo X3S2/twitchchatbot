@@ -16,6 +16,7 @@ class AppSettings(Base):
     bot_refresh_token_enc: Mapped[str | None] = mapped_column(Text)
     bot_user_id: Mapped[str | None] = mapped_column(String(64))
     global_retention_days: Mapped[int] = mapped_column(default=180)
+    chat_history_limit: Mapped[int] = mapped_column(default=100)
     reconnect_mode_default: Mapped[str] = mapped_column(String(32), default="unlimited")
     reconnect_max_attempts: Mapped[int] = mapped_column(default=10)
     maintenance_mode: Mapped[bool] = mapped_column(Boolean, default=False)

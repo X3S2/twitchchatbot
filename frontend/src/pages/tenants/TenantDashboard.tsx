@@ -193,10 +193,16 @@ interface ChatMsg {
 
 function LiveChat({ tenantId }: { tenantId: string }) {
   const [messages, setMessages] = useState<ChatMsg[]>([])
+  const [maxMessages, setMaxMessages] = useState(100)
   const [open, setOpen] = useState(true)
   const [connected, setConnected] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const wsRef = useRef<WebSocket | null>(null)
+  const maxMessagesRef = useRef(100)
+
+  useEffect(() => {
+    maxMessagesRef.current = maxMessages
+  }, [maxMessages])
 
   useEffect(() => {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -209,11 +215,20 @@ function LiveChat({ tenantId }: { tenantId: string }) {
     ws.onerror = () => ws.close()
     ws.onmessage = (event) => {
       try {
-        const msg = JSON.parse(event.data) as ChatMsg & { type?: string }
-        if (msg.type === 'chat_message') {
+        const msg = JSON.parse(event.data) as unknown
+        const payload = msg as { type?: string; messages?: ChatMsg[]; limit?: number }
+        if (payload.type === 'chat_history' && Array.isArray(payload.messages)) {
+          const limit = Math.max(10, Math.min(500, Number(payload.limit || 100)))
+          setMaxMessages(limit)
+          setMessages(payload.messages.slice(-limit))
+          return
+        }
+        if (payload.type === 'chat_message') {
+          const chatMsg = payload as ChatMsg
           setMessages(prev => {
-            const next = [...prev, msg]
-            return next.length > 200 ? next.slice(-200) : next
+            const next = [...prev, chatMsg]
+            const limit = maxMessagesRef.current
+            return next.length > limit ? next.slice(-limit) : next
           })
         }
       } catch { /* ignore */ }

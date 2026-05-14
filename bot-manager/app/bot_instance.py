@@ -5,6 +5,7 @@ Phase 2: TwitchIO-Integration mit Chat-Filter, Name-Filter und Commands.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from datetime import datetime, timezone
 from typing import Any
@@ -17,7 +18,7 @@ from .config import get_settings
 from .filter_engine import check_message, FilterAction
 from .name_filter_engine import check_username
 from .command_handler import handle_command
-from .redis_bus import publish
+from .redis_bus import publish, get_redis
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -74,8 +75,8 @@ class TwitchBotInstance(twitch_commands.Bot):
         text = message.content or ""
         color = getattr(author, 'colour', None) or getattr(author, 'color', None) or None
 
-        # Live-Chat-Event an API streamen
-        await publish(f"tcb:chat:{self.tenant_id}", {
+        # Live-Chat-Event an API streamen + Verlauf in Redis cappen
+        chat_event = {
             "type": "chat_message",
             "tenant_id": self.tenant_id,
             "user_id": user_id,
@@ -84,7 +85,17 @@ class TwitchBotInstance(twitch_commands.Bot):
             "color": str(color) if color else None,
             "text": text,
             "ts": datetime.now(timezone.utc).isoformat(),
-        })
+        }
+        await publish(f"tcb:chat:{self.tenant_id}", chat_event)
+        try:
+            limit = int(self.config.get("chat_history_limit", 100) or 100)
+            limit = max(10, min(500, limit))
+            r = await get_redis()
+            key = f"tcb:chatlog:{self.tenant_id}"
+            await r.rpush(key, json.dumps(chat_event, default=str))
+            await r.ltrim(key, -limit, -1)
+        except Exception as exc:
+            logger.warning("[%s] Chat-History Redis-Write fehlgeschlagen: %s", self.channel_name, exc)
 
         # 1. Name-Filter (einmalig pro Chatter)
         if user_id and user_id not in _seen_chatters.get(self.tenant_id, set()):
@@ -156,11 +167,14 @@ class TwitchBotInstance(twitch_commands.Bot):
             cmd_name = text.split()[0].lower()
             args = text.split()[1:]
             matched_cmd = next(
-                (c for c in self.config.get("commands", []) if c.get("command_name") == cmd_name and c.get("enabled", True)),
+                (
+                    c for c in self.config.get("commands", [])
+                    if (str(c.get("command_name") or "").lower() == cmd_name and c.get("enabled", True))
+                ),
                 None,
             )
             if matched_cmd:
-                action_type = matched_cmd.get("action_type", "respond")
+                action_type = str(matched_cmd.get("action_type", "respond") or "respond").lower()
                 await self._execute_command_action(message.channel, action_type, username, user_id, args)
 
         await self.handle_commands(message)
@@ -181,6 +195,13 @@ class TwitchBotInstance(twitch_commands.Bot):
     async def _execute_command_action(self, channel, action_type: str, username: str, user_id: str, args: list[str]) -> None:
         """Führt spezielle Befehlsaktionen aus (nicht respond)."""
         try:
+            action_aliases = {
+                "response": "respond",
+                "tcbstop": "bot_stop",
+                "tcbstart": "bot_start",
+            }
+            action_type = action_aliases.get(action_type, action_type)
+
             if action_type == "ban" and user_id:
                 await channel.ban(user_id, reason=f"TCB Befehl von {username}")
             elif action_type == "timeout" and user_id:
@@ -193,6 +214,9 @@ class TwitchBotInstance(twitch_commands.Bot):
             elif action_type == "bot_restart":
                 await channel.send("TCB-Bot startet neu...")
                 await self._cmd_rejoin()
+            elif action_type == "bot_start":
+                await self._cmd_bot_pause(False)
+                await channel.send("TCB-Bot läuft wieder.")
             elif action_type == "unban_user":
                 if args:
                     target = args[0].lstrip("@")

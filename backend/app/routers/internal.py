@@ -139,6 +139,7 @@ async def get_tenant_config(
 ):
     """Bot-Manager holt Konfiguration für eine Tenant-Instanz."""
     from ..models.chat_filter import ChatFilter, ChatFilterTerm, ChatFilterTier
+    from ..models.command import ChatCommand
     from ..models.name_filter import NameFilter, NameFilterPattern, NameFilterTier
     from ..models.ban import Ban
     from ..models.twitch_user import TenantUserExclusion, GlobalUserExclusion
@@ -209,6 +210,24 @@ async def get_tenant_config(
             "patterns": [{"pattern": p.pattern, "is_regex": p.is_regex, "is_whitelist": p.is_whitelist} for p in patterns_result.scalars().all()],
         })
 
+    # Commands laden (inkl. enabled-Status)
+    cmd_result = await db.execute(
+        select(ChatCommand).where(ChatCommand.tenant_id == tenant_id).order_by(ChatCommand.command_name)
+    )
+    commands_data = [
+        {
+            "id": str(c.id),
+            "command_name": c.command_name,
+            "permission_level": c.permission_level,
+            "global_cooldown_sec": c.global_cooldown_sec,
+            "user_cooldown_sec": c.user_cooldown_sec,
+            "action_type": c.action_type,
+            "response_template": c.response_template,
+            "enabled": c.enabled,
+        }
+        for c in cmd_result.scalars().all()
+    ]
+
     return {
         "tenant_id": str(tenant.id),
         "channel_name": tenant.channel_name,
@@ -221,8 +240,10 @@ async def get_tenant_config(
         "reconnect_mode": tenant.reconnect_mode,
         "reconnect_max_attempts": tenant.reconnect_max_attempts,
         "bot_language": tenant.bot_language,
+        "chat_history_limit": app_cfg.chat_history_limit if app_cfg and app_cfg.chat_history_limit else 100,
         "chat_filters": chat_filter_data,
         "name_filters": name_filter_data,
+        "commands": commands_data,
     }
 
 
