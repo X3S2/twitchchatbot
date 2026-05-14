@@ -7,6 +7,13 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.7] — 2026-05-14 — nginx OAuth-Callback Query-String Fix
+
+### Behoben
+- **Login: "Fehler" / 422 nach Twitch-Redirect** — Root Cause: nginx verhält sich bei `proxy_pass $variable/uri/path` anders als bei einem literalen Wert. Wenn eine Variable verwendet wird, übergibt nginx den URI-Pfad aus `proxy_pass` **ohne** den Query-String des Originalrequests. Dadurch wurden `?code=...&state=...` (von Twitch zurückgeliefert) beim Callback gestripped — die API sah eine leere Anfrage und antwortete mit 422. Fix: `rewrite ^/auth/callback(.*)$ /api/auth/callback$1 break;` + `proxy_pass $api_upstream;` (ohne Pfad) — so übergibt nginx den vollen Request-URI inkl. Query-String korrekt.
+
+---
+
 ## [0.22.6] — 2026-05-14 — nginx DNS-Resolver Fix
 
 ### Behoben
