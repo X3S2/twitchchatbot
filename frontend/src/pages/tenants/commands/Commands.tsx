@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Plus, Trash2, Pencil, Info, X } from 'lucide-react'
+import { Plus, Trash2, Pencil, Info, X, HelpCircle } from 'lucide-react'
 
 const ACTION_INFO: Record<string, string> = {
   respond: 'Sendet eine Chat-Nachricht als Antwort. Im Template können {user} (Aufrufer) und {args} (Parameter) genutzt werden.',
@@ -77,6 +77,7 @@ export default function Commands() {
   const [form, setForm] = useState({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60 })
   const [showActionInfo, setShowActionInfo] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showTemplateHelp, setShowTemplateHelp] = useState(false)
 
   const deleteMut = useMutation({ mutationFn: (cmdId: string) => deleteCommand(id!, cmdId), onSuccess: () => qc.invalidateQueries({ queryKey: ['commands', id] }) })
   const { data: commands = [], isLoading } = useQuery({ queryKey: ['commands', id], queryFn: () => fetchCommands(id!) })
@@ -175,7 +176,22 @@ export default function Commands() {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">{t('commands.response')}</label>
+              <label className="block text-xs font-medium mb-1 flex items-center gap-1">
+                {t('commands.response')}
+                <button type="button" onClick={() => setShowTemplateHelp(v => !v)} className="text-gray-400 hover:text-purple-600" title="Verfügbare Variablen">
+                  <HelpCircle className="w-3 h-3" />
+                </button>
+              </label>
+              {showTemplateHelp && (
+                <div className="mb-2 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs space-y-1.5">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-gray-700 dark:text-gray-200">Verfügbare Variablen</span>
+                    <button onClick={() => setShowTemplateHelp(false)}><X className="w-3 h-3 text-gray-400" /></button>
+                  </div>
+                  <div><span className="font-mono bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">{'{user}'}</span> <span className="text-gray-600 dark:text-gray-400">— Twitch-Username des Befehlsaufrufers</span></div>
+                  <div><span className="font-mono bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">{'{args}'}</span> <span className="text-gray-600 dark:text-gray-400">— alle Parameter nach dem Befehlsnamen (leerzeichen-getrennt)</span></div>
+                </div>
+              )}
               <input value={form.response_template} onChange={(e) => setForm((f) => ({ ...f, response_template: e.target.value }))} placeholder="{user} → ..." className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
             </div>
             <div>

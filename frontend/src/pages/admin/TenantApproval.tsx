@@ -1,6 +1,7 @@
 ﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Check, X, ShieldOff } from 'lucide-react'
+import { useState } from 'react'
+import { Check, X, ShieldOff, HelpCircle } from 'lucide-react'
 
 interface Tenant {
   id: string
@@ -64,10 +65,28 @@ export default function TenantApproval() {
 
   const pending = tenants.filter((t) => !t.approved)
   const approved = tenants.filter((t) => t.approved)
+  const [showHelp, setShowHelp] = useState(false)
 
   return (
     <div className="p-6 space-y-8">
-      <h1 className="text-2xl font-bold">{t('admin.tenant_approval')}</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold">{t('admin.tenant_approval')}</h1>
+        <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600"><HelpCircle className="w-4 h-4" /></button>
+      </div>
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Tenant-Freigabe</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p>Neue Streamern müssen vor der Nutzung freigeschaltet werden. Hier siehst du alle ausstehenden Anfragen.</p>
+            <p><strong>Genehmigen:</strong> Schaltet den Kanal frei – der Bot kann dann gestartet werden.</p>
+            <p><strong>Ablehnen:</strong> Verhindert die Nutzung für diesen Kanal.</p>
+            <p><strong>Sperren:</strong> Widerruft eine bereits erteilte Freigabe und stoppt den Bot automatisch.</p>
+          </div>
+        </div>
+      )}
 
       {/* Pending section */}
       <div>

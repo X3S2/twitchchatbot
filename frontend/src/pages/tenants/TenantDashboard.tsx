@@ -82,25 +82,27 @@ export default function TenantDashboard() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{tenant.display_name || tenant.channel_name}</h1>
-          <p className="text-sm text-gray-500">#{tenant.channel_name}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {botStatus?.status === 'offline' || botStatus?.status === 'error' ? (
-            <button onClick={() => { setBotError(null); startBot(id!).then(() => { setBotError(null); refetchStatus() }).catch((e) => setBotError(e.message)) }} className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
-              {t('bot.start')}
-            </button>
-          ) : (
-            <button onClick={() => stopBot(id!).then(() => refetchStatus()).catch(() => {})} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
-              {t('bot.stop')}
-            </button>
-          )}
-          <LED status={botStatus?.status || 'offline'} showLabel />
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{tenant.display_name || tenant.channel_name}</h1>
+            <p className="text-sm text-gray-500">#{tenant.channel_name}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {botStatus?.status === 'offline' || botStatus?.status === 'error' ? (
+              <button onClick={() => { setBotError(null); startBot(id!).then(() => { setBotError(null); refetchStatus() }).catch((e: Error) => setBotError(e.message)) }} className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+                {t('bot.start')}
+              </button>
+            ) : (
+              <button onClick={() => { setBotError(null); stopBot(id!).then(() => refetchStatus()).catch((e: Error) => setBotError(e.message)) }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
+                {t('bot.stop')}
+              </button>
+            )}
+            <LED status={botStatus?.status || 'offline'} showLabel />
+          </div>
         </div>
         {botError && (
-          <div className="mt-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
+          <div className="px-3 py-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-300">
             {botError}
           </div>
         )}

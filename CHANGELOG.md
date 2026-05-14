@@ -7,6 +7,19 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.9] — 2026-05-15 — BotStop-Fehleranzeige, HelpModals komplett, Template-Variablen-Hilfe, Stats-Tooltip-Fix, Legal-Vorlagen
+
+### Geändert
+- **TenantDashboard: Bot-Stop-Fehleranzeige** — `stopBot()`-Fehler werden jetzt über `setBotError` angezeigt statt still ignoriert (`.catch(() => {})`); Error-Box strukturell aus dem Flex-Container herausgelöst (eigene Zeile statt drittes Flex-Item)
+- **Stats: Tooltip-Position** — `<BarChart>` erhält `margin={{ top: 5, right: 20, bottom: 5, left: 0 }}`; `<Tooltip>` erhält `allowEscapeViewBox={{ x: false, y: true }}` um seitliches Herausrutschen zu verhindern
+- **Commands: Template-Variablen-Hilfe** — Aufklappbares Hilfe-Panel neben dem „Antwort-Template"-Label zeigt verfügbare Platzhalter: `{user}` (Aufrufer) und `{args}` (Parameter)
+
+### Neu
+- **HelpModals auf fehlenden Seiten** — Aufklappbare Hilfe-Panels mit ⓘ-Button auf: Geteilte Bans, Namensscan (Tenant), Moderatoren, Admin-Übersicht, Admin-Einstellungen, Admin-Namensscan, Tenant-Freigabe, Nutzerverwaltung
+- **LegalEditor: Vorlagen** — „Vorlage einfügen"-Button neben den HTML-Textareas befüllt die Felder mit strukturierten HTML-Vorlagen für Impressum (DE/EN) und Datenschutzerklärung (DE/EN)
+
+---
+
 ## [0.22.8] — 2026-05-14 — InfoModals, BanList-Fix, Stats-Tooltip, Commands-Erweiterung, HelpModals
 
 ### Neu

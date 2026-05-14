@@ -1,7 +1,7 @@
 ﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Save, Eye, EyeOff, CheckCircle, FlaskConical } from 'lucide-react'
+import { Save, Eye, EyeOff, CheckCircle, FlaskConical, HelpCircle, X } from 'lucide-react'
 
 interface AppSettingsData {
   client_id_set: boolean
@@ -82,6 +82,7 @@ export default function AdminSettings() {
   const [saved, setSaved] = useState(false)
   const [testResult, setTestResult] = useState<TestCredentialsResult | null>(null)
   const [testing, setTesting] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   if (data && !formInit) {
     setForm({
@@ -121,7 +122,24 @@ export default function AdminSettings() {
 
   return (
     <div className="p-6 space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold">{t('admin.settings_title')}</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold">{t('admin.settings_title')}</h1>
+        <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600"><HelpCircle className="w-4 h-4" /></button>
+      </div>
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Admin-Einstellungen</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p><strong>Twitch App:</strong> Client-ID und Client-Secret aus der Twitch Developer Console. Werden benötigt um mit der Twitch API zu kommunizieren.</p>
+            <p><strong>Shared Bot:</strong> OAuth-Token des gemeinsamen Bot-Kontos. Wird verwendet wenn ein Tenant keinen eigenen Bot konfiguriert hat.</p>
+            <p><strong>Wartungsmodus:</strong> Sperrt den Login für alle nicht-Admin-Nutzer und zeigt eine Nachricht an.</p>
+            <p><strong>Datenaufbewahrung:</strong> Nach wie vielen Tagen ältere Einträge (Bans, Filter-Logs) automatisch gelöscht werden.</p>
+          </div>
+        </div>
+      )}
 
       <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
         <h2 className="font-semibold">{t('admin.twitch_app')}</h2>

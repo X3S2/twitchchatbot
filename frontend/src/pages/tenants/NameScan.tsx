@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ShieldAlert, Trash2, Zap } from 'lucide-react'
+import { ShieldAlert, Trash2, Zap, HelpCircle, X } from 'lucide-react'
 
 interface ScanFilter {
   id: string
@@ -59,6 +59,7 @@ export default function TenantNameScan() {
   const [confirmFilter, setConfirmFilter] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
   const [applyResult, setApplyResult] = useState<{ banned: number; skipped: number } | null>(null)
+  const [showHelp, setShowHelp] = useState(false)
 
   const { data: allFilters = [] } = useQuery({ queryKey: ['ns-filters'], queryFn: fetchAllFilters })
   const { data: optins = [] } = useQuery({ queryKey: ['ns-optins', tenantId], queryFn: () => fetchOptins(tenantId!) })
@@ -85,10 +86,27 @@ export default function TenantNameScan() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold flex items-center gap-2">
-        <ShieldAlert className="w-6 h-6 text-purple-500" />
-        {t('name_scan.title')}
-      </h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <ShieldAlert className="w-6 h-6 text-purple-500" />
+          {t('name_scan.title')}
+        </h1>
+        <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600"><HelpCircle className="w-4 h-4" /></button>
+      </div>
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Namensscan</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p>Der Namensscan erkennt verdächtige Twitch-Konten anhand ihrer Benutzernamen (z.B. bekannte Troll-Muster).</p>
+            <p><strong>Opt-in:</strong> Wähle aus, welche Admin-definierten Filterregeln für deinen Kanal aktiv sein sollen. Nicht aktivierte Filter werden ignoriert.</p>
+            <p><strong>Auto-Ban:</strong> Wenn aktiviert, werden Treffer automatisch gebannt, ohne manuelle Bestätigung.</p>
+            <p><strong>Alle anwenden:</strong> Bannt rückwirkend alle bekannten Treffer dieses Filters in deinem Kanal.</p>
+          </div>
+        </div>
+      )}
 
       {/* Success result */}
       {applyResult && (

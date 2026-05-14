@@ -84,12 +84,13 @@ export default function StatsPage() {
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
             <h2 className="font-semibold mb-4">{t('stats.bans_over_time')}</h2>
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={chartData}>
+              <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
                 <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip
                   cursor={{ fill: 'rgba(139,92,246,0.08)' }}
+                  allowEscapeViewBox={{ x: false, y: true }}
                   contentStyle={isDark
                     ? { background: '#111827', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }
                     : { background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#111827' }}

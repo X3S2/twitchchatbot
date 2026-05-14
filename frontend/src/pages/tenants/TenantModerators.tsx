@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState, useRef } from 'react'
-import { Plus, Trash2, Search } from 'lucide-react'
+import { Plus, Trash2, Search, HelpCircle, X } from 'lucide-react'
 
 interface Moderator {
   id: string
@@ -54,6 +54,7 @@ export default function TenantModerators() {
   const qc = useQueryClient()
   const { data: mods = [], isLoading } = useQuery({ queryKey: ['mods', id], queryFn: () => fetchMods(id!) })
   const [showForm, setShowForm] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [username, setUsername] = useState('')
   const [userId, setUserId] = useState('')
   const [role, setRole] = useState('viewer')
@@ -95,11 +96,29 @@ export default function TenantModerators() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('mods.title')}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">{t('mods.title')}</h1>
+          <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600"><HelpCircle className="w-4 h-4" /></button>
+        </div>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
           <Plus className="w-4 h-4" />{t('mods.add')}
         </button>
       </div>
+
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Moderatoren</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p>Hier verwaltest du TCB-Moderatoren für deinen Kanal. Das sind <strong>keine</strong> Twitch-Moderatoren, sondern Nutzer die Zugriff auf dieses Dashboard haben.</p>
+            <p><strong>Viewer:</strong> Kann Statistiken und Banlisten einsehen, aber nichts ändern.</p>
+            <p><strong>Editor:</strong> Kann Bans, Filter und Befehle verwalten.</p>
+            <p>Suche nach dem Twitch-Benutzernamen oder gib die Twitch-ID manuell ein.</p>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">

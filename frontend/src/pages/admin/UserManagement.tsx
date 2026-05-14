@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Ban, UserX } from 'lucide-react'
+import { useState } from 'react'
+import { Ban, UserX, HelpCircle, X } from 'lucide-react'
 
 interface UserItem {
   id: string
@@ -30,10 +31,28 @@ export default function UserManagement() {
   const banMut = useMutation({ mutationFn: banUser, onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }) })
   const unbanMut = useMutation({ mutationFn: unbanUser, onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }) })
   const kickMut = useMutation({ mutationFn: kickUser, onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-users'] }) })
+  const [showHelp, setShowHelp] = useState(false)
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">{t('admin.user_management')}</h1>
+      <div className="flex items-center gap-2 mb-6">
+        <h1 className="text-2xl font-bold">{t('admin.user_management')}</h1>
+        <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600"><HelpCircle className="w-4 h-4" /></button>
+      </div>
+      {showHelp && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Nutzerverwaltung</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p>Alle registrierten Nutzer, die sich per Twitch angemeldet haben.</p>
+            <p><strong>Sperren:</strong> Blockiert den Login für diesen Nutzer. Bestehende Sessions werden beim nächsten Request beendet.</p>
+            <p><strong>Kick:</strong> Invalidiert alle aktiven Sessions sofort, ohne den Account dauerhaft zu sperren.</p>
+            <p><strong>Rollen:</strong> <em>admin</em> = Vollzugriff auf dieses Panel · <em>user</em> = normaler Streamer-Account.</p>
+          </div>
+        </div>
+      )}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         {isLoading ? (
           <div className="p-6 text-center text-gray-500">{t('loading')}</div>

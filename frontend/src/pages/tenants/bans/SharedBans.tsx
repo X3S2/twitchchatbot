@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Trash2, Link2, CheckCircle } from 'lucide-react'
+import { Trash2, Link2, CheckCircle, HelpCircle, X } from 'lucide-react'
 
 interface SharedConnection {
   id: string
@@ -57,6 +57,7 @@ export default function SharedBans() {
   const { data: connections = [] } = useQuery({ queryKey: ['shared-bans', id], queryFn: () => fetchConnections(id!) })
   const { data: invitations = [] } = useQuery({ queryKey: ['ban-invitations', id], queryFn: () => fetchInvitations(id!) })
   const [inviteTarget, setInviteTarget] = useState('')
+  const [showHelp, setShowHelp] = useState(false)
 
   const sendInvMut = useMutation({
     mutationFn: () => sendInvitation(id!, inviteTarget),
@@ -68,7 +69,24 @@ export default function SharedBans() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">{t('bans.shared_title')}</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold">{t('bans.shared_title')}</h1>
+        <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600"><HelpCircle className="w-4 h-4" /></button>
+      </div>
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Geteilte Bans</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p>Verbinde deinen Kanal mit anderen Streamern, um Bans automatisch zu synchronisieren.</p>
+            <p><strong>Einladung senden:</strong> Gib den Kanalnamen eines anderen TCB-Nutzers ein und sende eine Einladung. Sobald diese angenommen wird, werden neue Bans beider Kanäle gegenseitig übertragen.</p>
+            <p><strong>Rolle:</strong> Als <em>Quelle</em> gibst du Bans weiter, als <em>Ziel</em> empfängst du Bans vom Partnerkanal.</p>
+            <p><strong>Status:</strong> <em>Ausstehend</em> = Einladung noch nicht angenommen · <em>Aktiv</em> = Synchronisierung läuft.</p>
+          </div>
+        </div>
+      )}
 
       {/* Pending Invitations */}
       {invitations.length > 0 && (
