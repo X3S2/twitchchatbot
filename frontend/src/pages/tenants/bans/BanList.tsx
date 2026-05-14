@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Plus, Trash2, Search, Download } from 'lucide-react'
+import { Plus, Trash2, Search, Download, ChevronDown, ChevronUp, HelpCircle, X } from 'lucide-react'
 
 interface Ban {
   id: string
@@ -49,13 +49,16 @@ export default function BanList() {
   const [newUsername, setNewUsername] = useState('')
   const [newReason, setNewReason] = useState('')
   const [newType, setNewType] = useState('permanent')
+  const [newDuration, setNewDuration] = useState(600)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [showHelp, setShowHelp] = useState(false)
 
   const { data: bans = [], isLoading } = useQuery({ queryKey: ['bans', id, search, typeFilter], queryFn: () => fetchBans(id!, search, typeFilter) })
   const unbanMut = useMutation({ mutationFn: (banId: string) => unbanUser(id!, banId), onSuccess: () => qc.invalidateQueries({ queryKey: ['bans', id] }) })
   const addMut = useMutation({
     mutationFn: (data: Parameters<typeof addBan>[1]) => addBan(id!, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['bans', id] }); setShowAdd(false); setNewUserId(''); setNewUsername(''); setNewReason('') },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['bans', id] }); setShowAdd(false); setNewUserId(''); setNewUsername(''); setNewReason(''); setNewDuration(600); setShowAdvanced(false) },
   })
 
   function toggleSelect(banId: string) {
@@ -73,7 +76,12 @@ export default function BanList() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('bans.title')}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">{t('bans.title')}</h1>
+          <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600" title="Hilfe">
+            <HelpCircle className="w-4 h-4" />
+          </button>
+        </div>
         <div className="flex gap-2">
           {selected.size > 0 && (
             <button onClick={bulkUnban} className="px-3 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700">
@@ -88,6 +96,22 @@ export default function BanList() {
           </button>
         </div>
       </div>
+
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Ban-Liste: Erklärungen</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p><strong>Permanent vs. Timeout:</strong> Permanent = dauerhafter Ban aus dem Chat. Timeout = temporäre Stummschaltung für eine bestimmte Anzahl Sekunden (Standard: 600 = 10 Minuten).</p>
+            <p><strong>Username vs. User-ID:</strong> Gib normalerweise den <em>Twitch-Benutzernamen</em> ein. Die Twitch-User-ID (numerisch) ist optional und im erweiterten Bereich verfügbar — sie ist nützlich wenn der Nutzer seinen Namen geändert hat.</p>
+            <p><strong>Failover-Schutz (🛡):</strong> Das Schild-Symbol bedeutet, der Ban ist auch auf der Twitch-Plattform direkt hinterlegt und bleibt auch dann aktiv, wenn der Bot kurz offline war.</p>
+            <p><strong>CSV-Export:</strong> Lädt die aktuelle Ban-Liste als CSV-Datei herunter. Geeignet für Backups oder Import in andere Tools.</p>
+            <p><strong>Sammel-Entbann:</strong> Mehrere Einträge auswählen (Checkbox) und dann „Ausgewählte entbannen“ drücken.</p>
+          </div>
+        </div>
+      )}
 
       {/* Search + Filter */}
       <div className="flex gap-3">
@@ -107,16 +131,38 @@ export default function BanList() {
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
           <h2 className="font-semibold">{t('bans.new')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input value={newUserId} onChange={(e) => setNewUserId(e.target.value)} placeholder={t('bans.twitch_user_id')} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
-            <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} placeholder={t('bans.username')} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
+            {/* Username — primary field */}
+            <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} placeholder={t('bans.username')} autoFocus
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm sm:col-span-2" />
             <input value={newReason} onChange={(e) => setNewReason(e.target.value)} placeholder={t('bans.reason')} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm sm:col-span-2" />
-            <select value={newType} onChange={(e) => setNewType(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm">
-              <option value="permanent">Permanent</option>
-              <option value="timeout">Timeout</option>
-            </select>
+            {/* Type + optional duration */}
+            <div className="flex gap-2 sm:col-span-2">
+              <select value={newType} onChange={(e) => setNewType(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 text-sm">
+                <option value="permanent">Permanent</option>
+                <option value="timeout">Timeout</option>
+              </select>
+              {newType === 'timeout' && (
+                <>
+                  <input type="number" min={1} value={newDuration} onChange={(e) => setNewDuration(Number(e.target.value))}
+                    className="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
+                  <span className="flex items-center text-sm text-gray-500">Sekunden</span>
+                </>
+              )}
+            </div>
+            {/* Advanced: Twitch User ID */}
+            <div className="sm:col-span-2">
+              <button type="button" onClick={() => setShowAdvanced(v => !v)} className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600">
+                {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                Erweitert: nach Twitch-User-ID bannen
+              </button>
+              {showAdvanced && (
+                <input value={newUserId} onChange={(e) => setNewUserId(e.target.value)} placeholder={t('bans.twitch_user_id')}
+                  className="mt-1.5 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
+              )}
+            </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => addMut.mutate({ twitch_user_id: newUserId, twitch_username: newUsername, type: newType, reason: newReason })} disabled={!newUserId.trim()} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm disabled:opacity-50">{t('save')}</button>
+            <button onClick={() => addMut.mutate({ twitch_user_id: newUserId || newUsername, twitch_username: newUsername, type: newType, reason: newReason, ...(newType === 'timeout' ? { duration_seconds: newDuration } : {}) } as Parameters<typeof addBan>[1])} disabled={!newUsername.trim()} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm disabled:opacity-50">{t('save')}</button>
             <button onClick={() => setShowAdd(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm">{t('cancel')}</button>
           </div>
         </div>

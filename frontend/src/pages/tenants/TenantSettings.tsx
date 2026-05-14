@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Save, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Save, Eye, EyeOff, CheckCircle, HelpCircle, X } from 'lucide-react'
 
 interface TenantSettingsData {
   display_name: string
@@ -62,6 +62,7 @@ export default function TenantSettings() {
   const [showToken, setShowToken] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   const { data, isLoading } = useQuery({ queryKey: ['tenant-settings', id], queryFn: () => fetchSettings(id!) })
   const [form, setForm] = useState<TenantSettingsForm | null>(null)
@@ -102,7 +103,32 @@ export default function TenantSettings() {
 
   return (
     <div className="p-6 space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
+        <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600" title="Hilfe">
+          <HelpCircle className="w-4 h-4" />
+        </button>
+      </div>
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Einstellungen: Erklärungen</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p><strong>Bot-Modus:</strong></p>
+            <ul className="ml-3 space-y-0.5">
+              <li><span className="font-mono">Shared Bot</span> — der zentrale TCB-Bot-Account wird für deinen Kanal genutzt. Keine eigenen Credentials nötig.</li>
+              <li><span className="font-mono">Eigener Bot-Account</span> — dein eigener Twitch-Account agiert als Bot. Benötigt OAuth-Token des Bot-Accounts.</li>
+              <li><span className="font-mono">Eigener Bot + App</span> — vollständig eigene Twitch-Anwendung (Client-ID + Secret). Für Fortgeschrittene.</li>
+            </ul>
+            <p className="mt-1"><strong>Bot-Token:</strong> Das OAuth-Token des Bot-Accounts. Wird bei <a className="text-purple-600 underline" href="https://twitchtokengenerator.com" target="_blank" rel="noreferrer">twitchtokengenerator.com</a> generiert (Scopes: chat:read, chat:edit, channel:moderate).</p>
+            <p><strong>Moderatoren:</strong> Nutzer die als Moderator hinzugefügt werden, können entweder nur lesen (Viewer) oder Filter/Bans verwalten (Editor). Kein Twitch-Mod-Status erforderlich.</p>
+            <p><strong>Stream-Awareness:</strong> Wenn aktiv, verändert der Bot sein Verhalten je nachdem ob der Stream live ist (z.B. aggressivere Filter nur im Livestream).</p>
+            <p><strong>Datenaufbewahrung:</strong> Gibt an wie viele Tage Filter-Treffer und Aktionsprotokolle gespeichert werden. Ältere Einträge werden automatisch gelöscht.</p>
+          </div>
+        </div>
+      )}
 
       <section className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
         <h2 className="font-semibold">{t('settings.general')}</h2>

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 interface Stats {
@@ -23,6 +23,12 @@ export default function StatsPage() {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week')
+  const [isDark, setIsDark] = useState(() => typeof document !== 'undefined' && document.documentElement.classList.contains('dark'))
+  useEffect(() => {
+    const obs = new MutationObserver(() => setIsDark(document.documentElement.classList.contains('dark')))
+    obs.observe(document.documentElement, { attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['stats', id, period],
@@ -79,11 +85,12 @@ export default function StatsPage() {
             <h2 className="font-semibold mb-4">{t('stats.bans_over_time')}</h2>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
                 <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip
-                  contentStyle={typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+                  cursor={{ fill: 'rgba(139,92,246,0.08)' }}
+                  contentStyle={isDark
                     ? { background: '#111827', border: '1px solid #374151', borderRadius: '8px', color: '#f3f4f6' }
                     : { background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#111827' }}
                 />

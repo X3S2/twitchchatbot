@@ -7,6 +7,26 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.8] — 2026-05-14 — InfoModals, BanList-Fix, Stats-Tooltip, Commands-Erweiterung, HelpModals
+
+### Neu
+- **InfoModal NameFilters: Muster-Erklärung** — HelpCircle-Button neben dem „Muster"-Header im Edit-Panel öffnet ein umfassendes Info-Panel mit Erklärung zu Wildcard (`*`, `?`), Teilstring-Match (kein Wildcard) und Regex-Modus, inkl. Beispieltabelle (spam*, *bot, *toxic*, raid → was trifft was)
+- **InfoModal ChatFilters: Begriff-Erklärung** — HelpCircle-Button neben dem „Begriffe"-Header erklärt Wildcard/Teilstring/Regex für Nachrichten, Whitelist-Begriff-Logik, Groß-/Kleinschreibung und Zeitrahmen-Funktion
+- **Commands: Neue Aktionstypen** — `bot_stop`, `bot_restart`, `unban_user`, `test_mode_toggle` hinzugefügt zu ACTION_TYPES und ACTION_INFO (mit Beschreibungen)
+- **Commands: Syntax-Preview-Panel** — Unter dem Aktionstyp-Dropdown wird dynamisch ein einzeiliges Syntax-Beispiel zum gewählten Aktionstyp angezeigt
+- **Bot-Backend: `_execute_command_action()`** — Neues `bot_instance.py`-Methode führt spezielle Aktionstypen (bot_stop, bot_restart, unban_user, test_mode_toggle) bei Befehls-Trigger aus
+- **Seitenweite HelpModals** — Aufklappbare Hilfe-Panels auf: TenantList, TenantSettings, BanList, Commands
+
+### Geändert
+- **BanList: Username-First-Formular** — `twitch_username` ist jetzt das primäre Eingabefeld (groß, autoFocus); User-ID wurde in einen „Erweitert"-Aufklapper verschoben
+- **BanList: `duration_seconds` bei Timeout** — Wenn Typ „Timeout" gewählt, erscheint ein Zahlen-Eingabefeld für die Dauer in Sekunden (Standard: 600)
+- **Stats: Reaktiver Dark-Mode-Cursor** — Chart-Tooltip-Cursor reagiert nun korrekt auf Theme-Wechsel via MutationObserver statt einmaligem `classList.contains` beim Render; Cursor-Fill auf dezentes Lila (`rgba(139,92,246,0.08)`) statt grauem Recharts-Standard
+
+### Behoben
+- **NameFilters: Encoding-Bug `â†'`** — Das direkte Unicode-Zeichen `→` in der TSX-Quelle führte zu Mojibake in der kompilierten Ausgabe. Ersetzt durch Lucide `<ArrowRight />` Icon
+
+---
+
 ## [0.22.7] — 2026-05-14 — nginx OAuth-Callback Query-String Fix
 
 ### Behoben

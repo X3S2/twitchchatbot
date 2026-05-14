@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, X, Save } from 'lucide-react'
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, X, Save, ArrowRight, HelpCircle } from 'lucide-react'
 
 interface NameFilter {
   id: string
@@ -64,6 +64,7 @@ export default function NameFilters() {
   const [showCreate, setShowCreate] = useState(false)
   const [createName, setCreateName] = useState('')
   const [editing, setEditing] = useState<EditState | null>(null)
+  const [showPatternHelp, setShowPatternHelp] = useState(false)
 
   const deleteMut = useMutation({ mutationFn: (fid: string) => deleteFilter(id!, fid), onSuccess: () => qc.invalidateQueries({ queryKey: ['name-filters', id] }) })
   const toggleMut = useMutation({ mutationFn: ({ fid, cur }: { fid: string; cur: boolean }) => toggleFilter(id!, fid, cur), onSuccess: () => qc.invalidateQueries({ queryKey: ['name-filters', id] }), onError: (e: Error) => { if (e.message === '401') qc.invalidateQueries({ queryKey: ['auth', 'me'] }) } })
@@ -164,7 +165,47 @@ export default function NameFilters() {
 
                     {/* Patterns */}
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase mb-2">{t('filters.patterns')}</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-xs font-semibold text-gray-500 uppercase">{t('filters.patterns')}</p>
+                        <button type="button" onClick={() => setShowPatternHelp(v => !v)} className="text-gray-400 hover:text-purple-600" title="Hilfe: Muster erklärt">
+                          <HelpCircle className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      {showPatternHelp && (
+                        <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-xs space-y-2">
+                          <div className="flex justify-between items-start">
+                            <span className="font-semibold text-blue-700 dark:text-blue-300">Wie funktionieren Muster?</span>
+                            <button onClick={() => setShowPatternHelp(false)}><X className="w-3.5 h-3.5 text-gray-400" /></button>
+                          </div>
+                          <div className="space-y-1 text-gray-700 dark:text-gray-300">
+                            <p className="font-medium">Ohne Regex (Standard):</p>
+                            <ul className="space-y-0.5 ml-2">
+                              <li><span className="font-mono bg-gray-100 dark:bg-gray-800 px-1 rounded">*</span> — beliebig viele Zeichen (auch null). Beispiel: <span className="font-mono">spam*</span> trifft <span className="font-mono">spambot</span>, aber nicht <span className="font-mono">myspam</span></li>
+                              <li><span className="font-mono bg-gray-100 dark:bg-gray-800 px-1 rounded">?</span> — genau ein beliebiges Zeichen. Beispiel: <span className="font-mono">b?t</span> trifft <span className="font-mono">bot</span> und <span className="font-mono">bat</span></li>
+                              <li><span className="font-mono bg-gray-100 dark:bg-gray-800 px-1 rounded">Kein Wildcard</span> — Teilstring-Match. Beispiel: <span className="font-mono">raid</span> trifft <span className="font-mono">raider123</span> und <span className="font-mono">antiraider</span></li>
+                            </ul>
+                            <div className="mt-2 overflow-x-auto">
+                              <table className="text-[11px] border-collapse w-full">
+                                <thead><tr className="text-gray-500">
+                                  <th className="text-left pr-3 py-0.5">Muster</th>
+                                  <th className="text-left pr-3 py-0.5">Trifft</th>
+                                  <th className="text-left py-0.5">Trifft nicht</th>
+                                </tr></thead>
+                                <tbody className="font-mono">
+                                  <tr><td className="pr-3">spam*</td><td className="pr-3 text-green-700">spam123, spambot</td><td className="text-red-600">myspam</td></tr>
+                                  <tr><td className="pr-3">*bot</td><td className="pr-3 text-green-700">chatbot, viewerbot</td><td className="text-red-600">botchat</td></tr>
+                                  <tr><td className="pr-3">*toxic*</td><td className="pr-3 text-green-700">supertoxic2</td><td className="text-red-600">—</td></tr>
+                                  <tr><td className="pr-3">raid</td><td className="pr-3 text-green-700">raider123, antiraider</td><td className="text-red-600">good_user</td></tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <p className="mt-1.5 font-medium">Mit Regex-Checkbox:</p>
+                            <p className="ml-2">Nutzt Python <span className="font-mono">re.search()</span> — findet das Muster irgendwo im Namen. Beispiel: <span className="font-mono">^spam[0-9]+$</span> trifft nur <span className="font-mono">spam123</span>, nicht <span className="font-mono">goodspam</span>.</p>
+                            <p className="mt-1.5 font-medium">Whitelist-Checkbox:</p>
+                            <p className="ml-2">Whitelist-Muster überschreiben Blacklist-Muster — ein Username der ein Whitelist-Muster erfüllt wird nie gebannt, auch wenn er auch ein Blacklist-Muster trifft. Whitelist wird immer zuerst geprüft.</p>
+                          </div>
+                        </div>
+                      )}
                       <div className="space-y-2">
                         {editing.patterns.map((pat, i) => (
                           <div key={i} className="flex items-center gap-2 flex-wrap">
@@ -196,7 +237,7 @@ export default function NameFilters() {
                       <div className="space-y-2">
                         {editing.tiers.map((tier, i) => (
                           <div key={i} className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs text-gray-500 whitespace-nowrap">Stufe {i + 1} â†’</span>
+                            <span className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-0.5">Stufe {i + 1} <ArrowRight className="w-3 h-3" /></span>
                             <select value={tier.action} onChange={(e) => updTier(i, 'action', e.target.value)} className={iCls}>
                               <option value="warn">warn</option>
                               <option value="timeout">timeout</option>

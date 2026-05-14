@@ -134,6 +134,17 @@ class TwitchBotInstance(twitch_commands.Bot):
             if response:
                 await message.channel.send(response)
 
+            # Spezielle Aktionstypen aus benutzerdefinierten Befehlen ausführen
+            cmd_name = text.split()[0].lower()
+            args = text.split()[1:]
+            matched_cmd = next(
+                (c for c in self.config.get("commands", []) if c.get("command_name") == cmd_name and c.get("enabled", True)),
+                None,
+            )
+            if matched_cmd:
+                action_type = matched_cmd.get("action_type", "respond")
+                await self._execute_command_action(message.channel, action_type, username, user_id, args)
+
         await self.handle_commands(message)
 
     # ── Aktionen ──────────────────────────────────────────────
@@ -148,6 +159,32 @@ class TwitchBotInstance(twitch_commands.Bot):
                 await channel.send(template.replace("{user}", username))
         except Exception as exc:
             logger.warning("[%s] Aktion fehlgeschlagen: %s", self.channel_name, exc)
+
+    async def _execute_command_action(self, channel, action_type: str, username: str, user_id: str, args: list[str]) -> None:
+        """Führt spezielle Befehlsaktionen aus (nicht respond)."""
+        try:
+            if action_type == "ban" and user_id:
+                await channel.ban(user_id, reason=f"TCB Befehl von {username}")
+            elif action_type == "timeout" and user_id:
+                await channel.timeout(user_id, 600, reason=f"TCB Befehl von {username}")
+            elif action_type == "delete":
+                pass  # Wird durch handle_command / TwitchIO-Decorator erledigt
+            elif action_type == "bot_stop":
+                await channel.send("TCB-Bot wird gestoppt...")
+                await self._cmd_bot_pause(True)
+            elif action_type == "bot_restart":
+                await channel.send("TCB-Bot startet neu...")
+                await self._cmd_rejoin()
+            elif action_type == "unban_user":
+                if args:
+                    target = args[0].lstrip("@")
+                    await self._report_unban(target)
+                    await channel.send(f"@{username} Unban-Anfrage für {target} wurde gesendet.")
+            elif action_type == "test_mode_toggle":
+                await channel.send("[TCB] Test-Modus Umschaltung ist noch in Entwicklung.")
+            # "respond" wird bereits durch handle_command / response_template behandelt
+        except Exception as exc:
+            logger.warning("[%s] Befehlsaktion '%s' fehlgeschlagen: %s", self.channel_name, action_type, exc)
 
     # ── Background-Tasks ──────────────────────────────────────
 

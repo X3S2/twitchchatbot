@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, ChevronRight } from 'lucide-react'
+import { Plus, ChevronRight, HelpCircle, X } from 'lucide-react'
 import { LED } from '../../components/LED'
 
 interface Tenant {
@@ -36,6 +36,7 @@ export default function TenantList() {
   const qc = useQueryClient()
   const { data: tenants = [], isLoading } = useQuery({ queryKey: ['tenants'], queryFn: fetchTenants })
   const [showForm, setShowForm] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [channel, setChannel] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [error, setError] = useState('')
@@ -54,11 +55,30 @@ export default function TenantList() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{t('tenant.my_tenants')}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">{t('tenant.my_tenants')}</h1>
+          <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600" title="Hilfe">
+            <HelpCircle className="w-4 h-4" />
+          </button>
+        </div>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
           <Plus className="w-4 h-4" />{t('tenant.add')}
         </button>
       </div>
+      {showHelp && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Kanal-Übersicht: Erklärungen</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p><strong>Kanal hinzufügen:</strong> Gib den Twitch-Kanalnamen (Kleinbuchstaben) ein. Der Kanal muss erst vom Admin freigeschaltet werden, bevor der Bot beitritt.</p>
+            <p><strong>„Ausstehend“ (Pending):</strong> Der Kanal ist angelegt, aber noch nicht vom Admin genehmigt. Der Bot nimmt noch nicht teil.</p>
+            <p><strong>Moderatoren hinzufügen:</strong> Öffne den Kanal → Einstellungen → Moderatoren. Dort kannst du weiteren Nutzern Zugriff auf deinen Kanal geben (Ansehen oder Bearbeiten).</p>
+            <p><strong>Bot-Status (LED):</strong> Grün = Bot online; Rot = Bot offline oder Fehler; Grau = unbekannt. Der Bot verbindet sich automatisch wenn der Kanal genehmigt ist.</p>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="mb-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">

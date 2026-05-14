@@ -9,6 +9,21 @@ const ACTION_INFO: Record<string, string> = {
   ban: 'Bannt den Nutzer, der den Befehl aufruft (oder den als Parameter angegebenen User). Nur für Moderatoren sinnvoll.',
   timeout: 'Gibt dem Nutzer einen Timeout. Dauer wird in der Bot-Konfiguration festgelegt.',
   delete: 'Löscht die Nachricht, die den Befehl ausgelöst hat, direkt aus dem Chat.',
+  bot_stop: 'Stoppt den Bot für diesen Kanal. Nur mit Broadcaster-Berechtigung empfohlen.',
+  bot_restart: 'Startet den Bot neu (Verbindung trennen und wiederherstellen). Nützlich bei Verbindungsproblemen.',
+  unban_user: 'Entbannt einen User aus der Ban-Liste. Parameter: Twitch-Username. Beispiel: !unban spambot123',
+  test_mode_toggle: '[Beta] Schaltet den Test-Modus des Filters um — Aktionen werden geloggt, aber nicht ausgeführt.',
+}
+
+const ACTION_SYNTAX: Record<string, string> = {
+  respond: '!befehl [args]  →  gibt {template} aus',
+  ban: '!befehl  →  Aufrufer wird gebannt',
+  timeout: '!befehl  →  Aufrufer bekommt Timeout',
+  delete: '!befehl  →  auslösende Nachricht wird gelöscht',
+  bot_stop: '!befehl  →  Bot verlässt den Kanal',
+  bot_restart: '!befehl  →  Bot Verbindung wird neu aufgebaut',
+  unban_user: '!befehl <username>  →  User aus Ban-Liste entfernen',
+  test_mode_toggle: '!befehl  →  Filter-Test-Modus an/aus',
 }
 
 interface ChatCommand {
@@ -23,7 +38,7 @@ interface ChatCommand {
 }
 
 const PERMISSION_LEVELS = ['everyone', 'subscriber', 'vip', 'moderator', 'broadcaster']
-const ACTION_TYPES = ['respond', 'ban', 'timeout', 'delete']
+const ACTION_TYPES = ['respond', 'ban', 'timeout', 'delete', 'bot_stop', 'bot_restart', 'unban_user', 'test_mode_toggle']
 
 async function fetchCommands(tenantId: string): Promise<ChatCommand[]> {
   const res = await fetch(`/api/tenants/${tenantId}/commands`, { credentials: 'include' })
@@ -61,6 +76,7 @@ export default function Commands() {
   const [editCmd, setEditCmd] = useState<ChatCommand | null>(null)
   const [form, setForm] = useState({ name: '', permission_level: 'everyone', action_type: 'respond', response_template: '', cooldown_global_seconds: 30, cooldown_user_seconds: 60 })
   const [showActionInfo, setShowActionInfo] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   const deleteMut = useMutation({ mutationFn: (cmdId: string) => deleteCommand(id!, cmdId), onSuccess: () => qc.invalidateQueries({ queryKey: ['commands', id] }) })
   const { data: commands = [], isLoading } = useQuery({ queryKey: ['commands', id], queryFn: () => fetchCommands(id!) })
@@ -83,11 +99,38 @@ export default function Commands() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('commands.title')}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">{t('commands.title')}</h1>
+          <button type="button" onClick={() => setShowHelp(v => !v)} className="text-gray-400 hover:text-purple-600" title="Hilfe">
+            <Info className="w-4 h-4" />
+          </button>
+        </div>
         <button onClick={() => { setEditCmd(null); setShowForm(true) }} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
           <Plus className="w-4 h-4" />{t('commands.new')}
         </button>
       </div>
+      {showHelp && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-blue-700 dark:text-blue-300">Befehle: Erklärungen</span>
+            <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
+          </div>
+          <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
+            <p><strong>Berechtigungsstufen</strong> (von niedrig nach hoch):</p>
+            <ul className="ml-3 space-y-0.5 font-mono text-xs">
+              <li>everyone — alle Zuschauer</li>
+              <li>subscriber — nur Abonnenten</li>
+              <li>vip — VIPs und höher</li>
+              <li>moderator — Mods und höher</li>
+              <li>broadcaster — nur der Streamer selbst</li>
+            </ul>
+            <p><strong>Cooldown (Global):</strong> Wie viele Sekunden nach dem letzten Aufruf <em>irgendjemandes</em> der Befehl wieder genutzt werden kann. Verhindert Spam.</p>
+            <p><strong>Cooldown (User):</strong> Wie viele Sekunden ein einzelner Nutzer warten muss, bis er den Befehl wieder nutzen kann.</p>
+            <p><strong>Response-Template:</strong> Verfügbare Platzhalter: <span className="font-mono">{'{user}'}</span> = Name des Aufrufers, <span className="font-mono">{'{args}'}</span> = mitgegebene Parameter.</p>
+            <p><strong>Aktion-Typ:</strong> Was der Bot macht wenn der Befehl ausgeführt wird. Klicke auf das ⓘ-Symbol neben „Aktion“ im Formular für Details zu jedem Typ.</p>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 space-y-3">
@@ -124,6 +167,12 @@ export default function Commands() {
               <select value={form.action_type} onChange={(e) => setForm((f) => ({ ...f, action_type: e.target.value }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 text-sm focus:outline-none">
                 {ACTION_TYPES.map((a) => <option key={a} value={a}>{a}</option>)}
               </select>
+              {/* Syntax preview */}
+              {ACTION_SYNTAX[form.action_type] && (
+                <p className="mt-1.5 px-2 py-1 bg-gray-50 dark:bg-gray-800 rounded font-mono text-[11px] text-gray-500 dark:text-gray-400">
+                  {ACTION_SYNTAX[form.action_type]}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium mb-1">{t('commands.response')}</label>
