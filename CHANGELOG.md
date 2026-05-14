@@ -8,7 +8,7 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
-## [0.22.15] — 2026-05-22 — In-App Bot-Token OAuth-Generator
+## [0.22.15] — 2026-05-14 — In-App Bot-Token OAuth-Generator
 
 ### Neu
 - **Bot-Token in-App generieren** — Neuer Button „Bot-Token generieren" in AdminSettings startet einen Twitch OAuth-Flow direkt aus der App heraus; der Admin loggt sich als Bot-Account ein und die generierten Tokens (access + refresh) werden sofort in der Datenbank gespeichert; da die Tokens dabei mit den eigenen App-Credentials erzeugt werden, funktioniert der automatische Refresh zuverlässig — das bisherige Problem mit twitchtokengenerator.com-Tokens (die an fremde App-Credentials gebunden waren) ist damit behoben
@@ -21,7 +21,7 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
-## [0.22.14] — 2026-05-21 — Auge-Icon-Fix, Token-Refresh-Fehlermeldungen
+## [0.22.14] — 2026-05-14 — Auge-Icon-Fix, Token-Refresh-Fehlermeldungen
 
 ### Behoben
 - **Auge-Icon in Passwortfeldern nicht klickbar** — Eye/EyeOff-Toggle-Button wird jetzt nur dann angezeigt wenn das Feld einen eingetippten Wert enthält; da das Backend gespeicherte Secrets nie im Klartext zurücksendet (nur `*_set: bool`), gibt es nichts zum Einblenden solange kein neuer Wert eingegeben wird; betrifft Client Secret, Bot-Token und Bot-Refresh-Token in AdminSettings sowie Own-Bot-Token, Refresh-Token und Client Secret in TenantSettings
@@ -29,7 +29,7 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
-## [0.22.13] — 2026-05-21 — i18n Help-Boxen, Bot-Status-Live-Update, Token-Auto-Refresh, Chart-Cursor-Fix
+## [0.22.13] — 2026-05-14 — i18n Help-Boxen, Bot-Status-Live-Update, Token-Auto-Refresh, Chart-Cursor-Fix
 
 ### Neu
 - **i18n Help-Boxen** — Alle 12 Help/Info-Boxen der App sind jetzt vollständig internationalisiert (DE + EN); Inhalte in `de.json`/`en.json` unter neuem `"help"`-Abschnitt; Seiten-Komponenten verwenden `t()` + `dangerouslySetInnerHTML` für HTML-Inhalte (sicher — statische Bundle-Strings)
@@ -44,7 +44,7 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
-## [0.22.12] — 2026-05-20 — Pending-Mindestdauer, Stream-LED, Token-Ablauf, Chart-Cursor-Fix
+## [0.22.12] — 2026-05-14 — Pending-Mindestdauer, Stream-LED, Token-Ablauf, Chart-Cursor-Fix
 
 ### Geändert
 - **Pending-Mindestdauer 3s** — Bot-Start/Stop-Pending-Zustand (gelber Button) bleibt jetzt mind. 3 Sekunden sichtbar; verhindert kurzes Aufblitzen + Button ist während Pending nicht anklickbar; WebSocket-Statusupdates werden während des Pending-Zustands ignoriert (TenantDashboard + Admin-Panel)
@@ -54,7 +54,7 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
-## [0.22.11] — 2026-05-15 — Pending-Buttons, Impressum-Fix, Token-Test, NameScan-Create, Tooltip-Fix
+## [0.22.11] — 2026-05-14 — Pending-Buttons, Impressum-Fix, Token-Test, NameScan-Create, Tooltip-Fix
 
 ### Neu
 - **Bot-Start/Stop: Pending-Zustand (gelber Button)** — Während der Bot gestartet oder gestoppt wird, erscheint ein gelber, deaktivierter Button mit Lade-Spinner anstelle des grünen/roten Buttons — sowohl im TenantDashboard als auch im Admin-Panel (pro Zeile); verhindert Doppelklick-Aktionen
@@ -85,7 +85,7 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
-## [0.22.9] — 2026-05-15 — BotStop-Fehleranzeige, HelpModals komplett, Template-Variablen-Hilfe, Stats-Tooltip-Fix, Legal-Vorlagen
+## [0.22.9] — 2026-05-14 — BotStop-Fehleranzeige, HelpModals komplett, Template-Variablen-Hilfe, Stats-Tooltip-Fix, Legal-Vorlagen
 
 ### Geändert
 - **TenantDashboard: Bot-Stop-Fehleranzeige** — `stopBot()`-Fehler werden jetzt über `setBotError` angezeigt statt still ignoriert (`.catch(() => {})`); Error-Box strukturell aus dem Flex-Container herausgelöst (eigene Zeile statt drittes Flex-Item)

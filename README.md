@@ -217,7 +217,8 @@ APP_PUBLIC_URL=https://deine-domain.de
 
 ---
 
-## Entwicklungsstatus
+<details>
+<summary><strong>Entwicklungsstatus</strong> (alle Versionen)</summary>
 
 | Phase | Version | Status | Inhalt |
 |---|---|---|---|
@@ -259,6 +260,8 @@ APP_PUBLIC_URL=https://deine-domain.de
 | Auge-Icon-Fix, Token-Refresh-Fehlermeldungen | `v0.22.14` | ✅ Fertig | Eye-Toggle nur bei eingetipptem Wert sichtbar; spezifische Fehlermeldungen beim Token-Refresh (kein Refresh-Token, fehlende Credentials, API-Fehler) |
 | In-App Bot-Token OAuth-Generator | `v0.22.15` | ✅ Fertig | Bot-Token direkt aus der App generieren; Tokens mit eigenen App-Credentials → Auto-Refresh funktioniert; Bot-Name wird automatisch befüllt |
 
+</details>
+
 ---
 
 ## Changelog
@@ -268,5 +271,5 @@ Siehe [CHANGELOG.md](CHANGELOG.md)
 ---
 
 <div align="center">
-  <sub>Privates Projekt — Nicht öffentlich zugänglich</sub>
+  <sub>Open-Source-Projekt — <a href="https://github.com/X3S2/twitchchatbot">github.com/X3S2/twitchchatbot</a></sub>
 </div>
