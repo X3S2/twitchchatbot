@@ -372,6 +372,8 @@ async def test_own_bot_token(
     validated = await validate_token(bot_token)
     if not validated:
         return {"ok": False, "error": "Token ungültig oder abgelaufen"}
+    if validated.get("expires_in", 1) == 0:
+        return {"ok": False, "error": "Token abgelaufen – bitte neuen Token generieren"}
 
     return {
         "ok": True,

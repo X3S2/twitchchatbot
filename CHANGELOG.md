@@ -7,6 +7,16 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.12] — 2026-05-20 — Pending-Mindestdauer, Stream-LED, Token-Ablauf, Chart-Cursor-Fix
+
+### Geändert
+- **Pending-Mindestdauer 3s** — Bot-Start/Stop-Pending-Zustand (gelber Button) bleibt jetzt mind. 3 Sekunden sichtbar; verhindert kurzes Aufblitzen + Button ist während Pending nicht anklickbar; WebSocket-Statusupdates werden während des Pending-Zustands ignoriert (TenantDashboard + Admin-Panel)
+- **Admin-Panel: Stream-Spalte mit LED** — Statt einfachem Strich wird jetzt eine rote pulsierende LED + „LIVE" angezeigt wenn der Kanal streamt, und eine graue LED + „Offline" wenn nicht
+- **Token-Ablaufanzeige** — Token-Test-Ergebnis zeigt jetzt lesbare Ablaufzeit: `0h` → `abgelaufen` (bei `expires_in=0`), `< 1h` → Minuten (z.B. `42min`), `≥ 1h` → Stunden (z.B. `12h`); Backend gibt bei `expires_in=0` direkt `ok: False` zurück (AdminSettings + TenantSettings + backend admin/tenants router)
+- **Chart-Cursor-Fix** — Hover-Cursor der Balkendiagramme (lila Füllfläche) ragt nicht mehr über den gestrichelten Chart-Rahmen hinaus; `ResponsiveContainer` ist in `overflow-hidden`-div eingebettet
+
+---
+
 ## [0.22.11] — 2026-05-15 — Pending-Buttons, Impressum-Fix, Token-Test, NameScan-Create, Tooltip-Fix
 
 ### Neu

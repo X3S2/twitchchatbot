@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import React from 'react'
 import { LED } from '../../components/LED'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { useQueryClient } from '@tanstack/react-query'
@@ -65,15 +66,23 @@ export default function TenantDashboard() {
   const qc = useQueryClient()
   const [botError, setBotError] = useState<string | null>(null)
   const [botPending, setBotPending] = useState(false)
+  const botPendingRef = React.useRef(false)
+
+  const startPending = () => { setBotPending(true); botPendingRef.current = true }
+  const endPending = () => {
+    setTimeout(() => { setBotPending(false); botPendingRef.current = false }, 3000)
+  }
 
   const { data: tenant } = useQuery({ queryKey: ['tenant', id], queryFn: () => fetchTenant(id!) })
-  const { data: botStatus, refetch: refetchStatus } = useQuery({ queryKey: ['bot-status', id], queryFn: () => fetchBotStatus(id!), refetchInterval: 30000 })
+  const { data: botStatus } = useQuery({ queryKey: ['bot-status', id], queryFn: () => fetchBotStatus(id!), refetchInterval: 30000 })
   const { data: stats } = useQuery({ queryKey: ['stats', id], queryFn: () => fetchStats(id!) })
 
   useWebSocket({
     room: `tenant:${id}`,
     onMessage: () => {
-      qc.invalidateQueries({ queryKey: ['bot-status', id] })
+      if (!botPendingRef.current) {
+        qc.invalidateQueries({ queryKey: ['bot-status', id] })
+      }
       qc.invalidateQueries({ queryKey: ['stats', id] })
     },
   })
@@ -97,15 +106,15 @@ export default function TenantDashboard() {
               </button>
             ) : botStatus?.status === 'offline' || botStatus?.status === 'error' ? (
               <button onClick={() => {
-                setBotError(null); setBotPending(true)
-                startBot(id!).then(() => { setBotError(null); refetchStatus() }).catch((e: Error) => setBotError(e.message)).finally(() => setBotPending(false))
+                setBotError(null); startPending()
+                startBot(id!).then(() => setBotError(null)).catch((e: Error) => setBotError(e.message)).finally(() => endPending())
               }} className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
                 {t('bot.start')}
               </button>
             ) : (
               <button onClick={() => {
-                setBotError(null); setBotPending(true)
-                stopBot(id!).then(() => refetchStatus()).catch((e: Error) => setBotError(e.message)).finally(() => setBotPending(false))
+                setBotError(null); startPending()
+                stopBot(id!).catch((e: Error) => setBotError(e.message)).finally(() => endPending())
               }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
                 {t('bot.stop')}
               </button>

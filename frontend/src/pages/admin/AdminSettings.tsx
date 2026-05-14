@@ -71,6 +71,13 @@ async function testBotToken(): Promise<TestCredentialsResult> {
 
 const inputCls = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-purple-500'
 
+function formatExpiry(expires_in: number | undefined): string {
+  const secs = expires_in ?? 0
+  if (secs <= 0) return 'abgelaufen'
+  if (secs < 3600) return `${Math.round(secs / 60)}min`
+  return `${Math.round(secs / 3600)}h`
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -193,7 +200,7 @@ export default function AdminSettings() {
           {testResult && (
             <span className={`text-xs font-medium ${testResult.ok ? 'text-green-600' : 'text-red-500'}`}>
               {testResult.ok
-                ? `✓ ${t('admin.credentials_ok')} (${Math.round((testResult.expires_in ?? 0) / 3600)}h)`
+                ? `✓ ${t('admin.credentials_ok')} (${formatExpiry(testResult.expires_in)})`
                 : `✗ ${testResult.error || t('admin.credentials_fail')}`}
             </span>
           )}
@@ -240,7 +247,7 @@ export default function AdminSettings() {
             {testBotResult && (
               <span className={`text-xs font-medium ${testBotResult.ok ? 'text-green-600' : 'text-red-500'}`}>
                 {testBotResult.ok
-                  ? `✓ @${testBotResult.login} (${Math.round((testBotResult.expires_in ?? 0) / 3600)}h)`
+                  ? `✓ @${testBotResult.login} (${formatExpiry(testBotResult.expires_in)})`
                   : `✗ ${testBotResult.error || t('admin.credentials_fail')}`}
               </span>
             )}

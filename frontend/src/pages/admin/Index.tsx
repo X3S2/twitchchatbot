@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { LED } from '../../components/LED'
@@ -42,12 +42,22 @@ export default function AdminIndex() {
   const qc = useQueryClient()
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({})
   const [rowPending, setRowPending] = useState<Record<string, boolean>>({})
+  const pendingTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
   const [showHelp, setShowHelp] = useState(false)
   const { data: instances = [], isLoading } = useQuery({ queryKey: ['admin-instances'], queryFn: fetchInstances, refetchInterval: 30000 })
 
   const setRowError = (tenant_id: string, msg: string) => setRowErrors(prev => ({ ...prev, [tenant_id]: msg }))
   const clearRowError = (tenant_id: string) => setRowErrors(prev => { const n = { ...prev }; delete n[tenant_id]; return n })
-  const setPending = (tenant_id: string, v: boolean) => setRowPending(prev => ({ ...prev, [tenant_id]: v }))
+  const setPending = (tenant_id: string, v: boolean) => {
+    if (v) {
+      setRowPending(prev => ({ ...prev, [tenant_id]: true }))
+    } else {
+      if (pendingTimers.current[tenant_id]) clearTimeout(pendingTimers.current[tenant_id])
+      pendingTimers.current[tenant_id] = setTimeout(() => {
+        setRowPending(prev => { const n = { ...prev }; delete n[tenant_id]; return n })
+      }, 3000)
+    }
+  }
 
   const startMut = useMutation({
     mutationFn: ({ tenant_id }: { tenant_id: string }) => startBot(tenant_id),
@@ -67,7 +77,12 @@ export default function AdminIndex() {
   // Echtzeit-Updates via WebSocket
   useWebSocket({
     room: 'admin',
-    onMessage: () => qc.invalidateQueries({ queryKey: ['admin-instances'] }),
+    onMessage: () => {
+      // Nur aktualisieren wenn keine Row im Pending-Zustand ist
+      if (Object.keys(rowPending).length === 0) {
+        qc.invalidateQueries({ queryKey: ['admin-instances'] })
+      }
+    },
   })
 
   return (
@@ -120,7 +135,9 @@ export default function AdminIndex() {
                   </td>
                   <td className="px-4 py-2"><LED status={inst.status} showLabel /></td>
                   <td className="px-4 py-2">
-                    {inst.stream_live ? <span className="text-red-500 font-semibold">LIVE</span> : <span className="text-gray-400">–</span>}
+                    {inst.stream_live
+                      ? <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse flex-shrink-0" /><span className="text-xs font-semibold text-red-500">LIVE</span></span>
+                      : <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0" /><span className="text-xs text-gray-400">Offline</span></span>}
                   </td>
                   <td className="px-4 py-2 text-gray-500">
                     {inst.last_heartbeat ? new Date(inst.last_heartbeat).toLocaleString() : '–'}

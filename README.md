@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.22.11-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.12-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -253,6 +253,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | InfoModals, BanList-Fix, Stats-Tooltip, Commands-Erweiterung, HelpModals | `v0.22.8` | ✅ Fertig | Encoding-Fix NameFilters, reaktiver Stats-Chart-Cursor, BanList Username-First + Timeout-Dauer, Muster-Erklärung NameFilter/ChatFilter, neue Command-Aktionstypen + Syntax-Preview, Bot `_execute_command_action`, seitenweite HelpModals |
 | BotStop-Fehleranzeige, HelpModals komplett, Template-Variablen-Hilfe, Stats-Tooltip-Fix, Legal-Vorlagen | `v0.22.9` | ✅ Fertig | Bot-Stop zeigt Fehler im Dashboard, HelpModals auf 8 weiteren Seiten, Template-Variablen-Hilfe in Befehlen, Stats-Chart-Tooltip-Position, HTML-Vorlagen für Impressum/Datenschutz im LegalEditor |
 | Twitch Refresh-Token, Auth-Fehlerbehandlung, Bot-Stop-DB-Fix | `v0.22.10` | ✅ Fertig | Refresh-Token-Felder (DB + UI) für Shared-Bot und Own-Bot; automatische Token-Erneuerung im Bot-Manager; `event_error`-Handler; Bot-Stop setzt DB-Status direkt; interner `token-update`-Endpoint; Stats-Tooltip-Escape-Fix |
+| Pending-Mindestdauer, Stream-LED, Token-Ablauf, Chart-Cursor-Fix | `v0.22.12` | ✅ Fertig | Pending-Button mind. 3s sichtbar; Stream-LED im Admin-Panel; Token-Ablaufzeit lesbar; Chart-Cursor-Overflow behoben |
 | Pending-Buttons, Impressum-Fix, Token-Test, NameScan-Create, Tooltip-Fix | `v0.22.11` | ✅ Fertig | Gelber Pending-Button beim Bot-Start/Stop (Dashboard + Admin); OAuth-Token-Test-Buttons; NameScan Filter erstellen/bearbeiten; Impressum HTML-Spacing; Recharts Tooltip-Clamping |
 
 ---
