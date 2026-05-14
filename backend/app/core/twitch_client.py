@@ -118,3 +118,32 @@ async def validate_token(access_token: str) -> dict[str, Any] | None:
     except Exception as exc:
         logger.warning("Token-Validierung fehlgeschlagen: %s", exc)
         return None
+
+
+async def refresh_user_token(
+    client_id: str,
+    client_secret: str,
+    refresh_token: str,
+) -> dict[str, Any] | None:
+    """
+    Erneuert einen User-Access-Token via Refresh-Token.
+    Gibt {access_token, refresh_token, expires_in, scope} zurück oder None bei Fehler.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.post(
+                TWITCH_TOKEN_URL,
+                data={
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                    "grant_type": "refresh_token",
+                    "refresh_token": refresh_token,
+                },
+            )
+            if resp.status_code != 200:
+                logger.warning("Token-Refresh fehlgeschlagen: %d %s", resp.status_code, resp.text)
+                return None
+            return resp.json()
+    except Exception as exc:
+        logger.warning("Token-Refresh fehlgeschlagen: %s", exc)
+        return None

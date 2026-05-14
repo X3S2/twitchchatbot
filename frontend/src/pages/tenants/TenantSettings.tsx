@@ -139,20 +139,20 @@ export default function TenantSettings() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Einstellungen: Erklärungen</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.tenant_settings.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p><strong>Bot-Modus:</strong></p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.p_bot_mode_label') }} />
             <ul className="ml-3 space-y-0.5">
-              <li><span className="font-mono">Shared Bot</span> — der zentrale TCB-Bot-Account wird für deinen Kanal genutzt. Keine eigenen Credentials nötig.</li>
-              <li><span className="font-mono">Eigener Bot-Account</span> — dein eigener Twitch-Account agiert als Bot. Benötigt OAuth-Token des Bot-Accounts.</li>
-              <li><span className="font-mono">Eigener Bot + App</span> — vollständig eigene Twitch-Anwendung (Client-ID + Secret). Für Fortgeschrittene.</li>
+              <li dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.li1') }} />
+              <li dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.li2') }} />
+              <li dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.li3') }} />
             </ul>
-            <p className="mt-1"><strong>Bot-Token:</strong> Das OAuth-Token des Bot-Accounts. Wird bei <a className="text-purple-600 underline" href="https://twitchtokengenerator.com" target="_blank" rel="noreferrer">twitchtokengenerator.com</a> generiert (Scopes: chat:read, chat:edit, channel:moderate).</p>
-            <p><strong>Moderatoren:</strong> Nutzer die als Moderator hinzugefügt werden, können entweder nur lesen (Viewer) oder Filter/Bans verwalten (Editor). Kein Twitch-Mod-Status erforderlich.</p>
-            <p><strong>Stream-Awareness:</strong> Wenn aktiv, verändert der Bot sein Verhalten je nachdem ob der Stream live ist (z.B. aggressivere Filter nur im Livestream).</p>
-            <p><strong>Datenaufbewahrung:</strong> Gibt an wie viele Tage Filter-Treffer und Aktionsprotokolle gespeichert werden. Ältere Einträge werden automatisch gelöscht.</p>
+            <p className="mt-1" dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.p_bot_token') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.p_mods') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.p_stream') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_settings.p_retention') }} />
           </div>
         </div>
       )}

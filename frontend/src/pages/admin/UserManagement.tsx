@@ -42,14 +42,14 @@ export default function UserManagement() {
       {showHelp && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Nutzerverwaltung</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.admin_user_mgmt.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p>Alle registrierten Nutzer, die sich per Twitch angemeldet haben.</p>
-            <p><strong>Sperren:</strong> Blockiert den Login für diesen Nutzer. Bestehende Sessions werden beim nächsten Request beendet.</p>
-            <p><strong>Kick:</strong> Invalidiert alle aktiven Sessions sofort, ohne den Account dauerhaft zu sperren.</p>
-            <p><strong>Rollen:</strong> <em>admin</em> = Vollzugriff auf dieses Panel · <em>user</em> = normaler Streamer-Account.</p>
+            <p>{t('help.admin_user_mgmt.p1')}</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_user_mgmt.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_user_mgmt.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_user_mgmt.p4') }} />
           </div>
         </div>
       )}

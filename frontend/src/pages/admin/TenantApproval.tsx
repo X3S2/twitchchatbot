@@ -76,14 +76,14 @@ export default function TenantApproval() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Tenant-Freigabe</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.admin_approval.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p>Neue Streamern müssen vor der Nutzung freigeschaltet werden. Hier siehst du alle ausstehenden Anfragen.</p>
-            <p><strong>Genehmigen:</strong> Schaltet den Kanal frei – der Bot kann dann gestartet werden.</p>
-            <p><strong>Ablehnen:</strong> Verhindert die Nutzung für diesen Kanal.</p>
-            <p><strong>Sperren:</strong> Widerruft eine bereits erteilte Freigabe und stoppt den Bot automatisch.</p>
+            <p>{t('help.admin_approval.p1')}</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_approval.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_approval.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_approval.p4') }} />
           </div>
         </div>
       )}

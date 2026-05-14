@@ -76,14 +76,14 @@ export default function SharedBans() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Geteilte Bans</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.shared_bans.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p>Verbinde deinen Kanal mit anderen Streamern, um Bans automatisch zu synchronisieren.</p>
-            <p><strong>Einladung senden:</strong> Gib den Kanalnamen eines anderen TCB-Nutzers ein und sende eine Einladung. Sobald diese angenommen wird, werden neue Bans beider Kanäle gegenseitig übertragen.</p>
-            <p><strong>Rolle:</strong> Als <em>Quelle</em> gibst du Bans weiter, als <em>Ziel</em> empfängst du Bans vom Partnerkanal.</p>
-            <p><strong>Status:</strong> <em>Ausstehend</em> = Einladung noch nicht angenommen · <em>Aktiv</em> = Synchronisierung läuft.</p>
+            <p>{t('help.shared_bans.p1')}</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.shared_bans.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.shared_bans.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.shared_bans.p4') }} />
           </div>
         </div>
       )}

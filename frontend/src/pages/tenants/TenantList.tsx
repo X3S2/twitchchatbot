@@ -68,14 +68,14 @@ export default function TenantList() {
       {showHelp && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Kanal-Übersicht: Erklärungen</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.tenant_list.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p><strong>Kanal hinzufügen:</strong> Gib den Twitch-Kanalnamen (Kleinbuchstaben) ein. Der Kanal muss erst vom Admin freigeschaltet werden, bevor der Bot beitritt.</p>
-            <p><strong>„Ausstehend“ (Pending):</strong> Der Kanal ist angelegt, aber noch nicht vom Admin genehmigt. Der Bot nimmt noch nicht teil.</p>
-            <p><strong>Moderatoren hinzufügen:</strong> Öffne den Kanal → Einstellungen → Moderatoren. Dort kannst du weiteren Nutzern Zugriff auf deinen Kanal geben (Ansehen oder Bearbeiten).</p>
-            <p><strong>Bot-Status (LED):</strong> Grün = Bot online; Rot = Bot offline oder Fehler; Grau = unbekannt. Der Bot verbindet sich automatisch wenn der Kanal genehmigt ist.</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_list.p1') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_list.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_list.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_list.p4') }} />
           </div>
         </div>
       )}

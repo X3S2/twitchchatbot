@@ -46,15 +46,19 @@ export default function AdminIndex() {
   const [showHelp, setShowHelp] = useState(false)
   const { data: instances = [], isLoading } = useQuery({ queryKey: ['admin-instances'], queryFn: fetchInstances, refetchInterval: 30000 })
 
+  const rowPendingRef = useRef<Record<string, boolean>>({})
   const setRowError = (tenant_id: string, msg: string) => setRowErrors(prev => ({ ...prev, [tenant_id]: msg }))
   const clearRowError = (tenant_id: string) => setRowErrors(prev => { const n = { ...prev }; delete n[tenant_id]; return n })
   const setPending = (tenant_id: string, v: boolean) => {
     if (v) {
+      rowPendingRef.current[tenant_id] = true
       setRowPending(prev => ({ ...prev, [tenant_id]: true }))
     } else {
       if (pendingTimers.current[tenant_id]) clearTimeout(pendingTimers.current[tenant_id])
       pendingTimers.current[tenant_id] = setTimeout(() => {
+        delete rowPendingRef.current[tenant_id]
         setRowPending(prev => { const n = { ...prev }; delete n[tenant_id]; return n })
+        qc.invalidateQueries({ queryKey: ['admin-instances'] })
       }, 3000)
     }
   }
@@ -78,8 +82,8 @@ export default function AdminIndex() {
   useWebSocket({
     room: 'admin',
     onMessage: () => {
-      // Nur aktualisieren wenn keine Row im Pending-Zustand ist
-      if (Object.keys(rowPending).length === 0) {
+      // Nur aktualisieren wenn keine Row im Pending-Zustand ist (ref, kein stale closure)
+      if (Object.keys(rowPendingRef.current).length === 0) {
         qc.invalidateQueries({ queryKey: ['admin-instances'] })
       }
     },
@@ -94,14 +98,14 @@ export default function AdminIndex() {
       {showHelp && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Admin-Übersicht</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.admin_overview.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p>Hier siehst du alle registrierten Tenants (Streamer-Kanäle) und den Status ihrer Bot-Instanzen in Echtzeit.</p>
-            <p><strong>Start/Stop:</strong> Startet oder stoppt den Bot für einen bestimmten Kanal manuell.</p>
-            <p><strong>Status-LED:</strong> Zeigt den aktuellen Verbindungsstatus des Bots an (online, offline, error).</p>
-            <p><strong>LIVE:</strong> Der Kanal streamt gerade – der Bot überwacht den Chat aktiv.</p>
+            <p>{t('help.admin_overview.p1')}</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_overview.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_overview.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_overview.p4') }} />
           </div>
         </div>
       )}

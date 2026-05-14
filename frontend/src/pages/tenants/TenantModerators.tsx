@@ -108,14 +108,14 @@ export default function TenantModerators() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Moderatoren</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.tenant_mods.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p>Hier verwaltest du TCB-Moderatoren für deinen Kanal. Das sind <strong>keine</strong> Twitch-Moderatoren, sondern Nutzer die Zugriff auf dieses Dashboard haben.</p>
-            <p><strong>Viewer:</strong> Kann Statistiken und Banlisten einsehen, aber nichts ändern.</p>
-            <p><strong>Editor:</strong> Kann Bans, Filter und Befehle verwalten.</p>
-            <p>Suche nach dem Twitch-Benutzernamen oder gib die Twitch-ID manuell ein.</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_mods.p1') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_mods.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.tenant_mods.p3') }} />
+            <p>{t('help.tenant_mods.p4')}</p>
           </div>
         </div>
       )}

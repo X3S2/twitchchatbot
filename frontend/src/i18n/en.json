@@ -329,5 +329,102 @@
     "unauthorized": "Not authenticated",
     "forbidden": "Access denied",
     "server_error": "Server error"
+  },
+  "help": {
+    "admin_overview": {
+      "title": "Admin Overview",
+      "p1": "Here you can see all registered tenants (streamer channels) and the status of their bot instances in real time.",
+      "p2": "<strong>Start/Stop:</strong> Manually start or stop the bot for a specific channel.",
+      "p3": "<strong>Status LED:</strong> Shows the current connection status of the bot (online, offline, error).",
+      "p4": "<strong>LIVE:</strong> The channel is currently streaming – the bot is actively monitoring the chat."
+    },
+    "admin_user_mgmt": {
+      "title": "User Management",
+      "p1": "All registered users who have signed in via Twitch.",
+      "p2": "<strong>Suspend:</strong> Blocks login for this user. Existing sessions end on the next request.",
+      "p3": "<strong>Kick:</strong> Immediately invalidates all active sessions without permanently blocking the account.",
+      "p4": "<strong>Roles:</strong> <em>admin</em> = full access to this panel · <em>user</em> = regular streamer account."
+    },
+    "admin_approval": {
+      "title": "Channel Approval",
+      "p1": "New streamers must be approved before use. Here you can see all pending requests.",
+      "p2": "<strong>Approve:</strong> Activates the channel – the bot can then be started.",
+      "p3": "<strong>Reject:</strong> Prevents use for this channel.",
+      "p4": "<strong>Revoke:</strong> Revokes a previously granted approval and stops the bot automatically."
+    },
+    "admin_name_scan": {
+      "title": "Name Scan Filters (Admin)",
+      "p1": "Here you define platform-wide name patterns that identify suspicious Twitch accounts (e.g. bot names, known troll patterns).",
+      "p2": "<strong>Create filter rule:</strong> Enter name, description, and the desired action on a match.",
+      "p3": "<strong>Active/Inactive:</strong> Inactive filters are not executed by any tenant, even if they are logged in.",
+      "p4": "Tenants can individually decide which filters they want to use via the <em>Name Scan</em> page of their dashboard."
+    },
+    "admin_settings": {
+      "title": "Admin Settings",
+      "p1": "<strong>Twitch App:</strong> Client ID and Client Secret from the Twitch Developer Console. Required to communicate with the Twitch API.",
+      "p2": "<strong>Shared Bot:</strong> OAuth token of the shared bot account. Used when a tenant has not configured their own bot.",
+      "p3": "<strong>Maintenance Mode:</strong> Locks login for all non-admin users and displays a message.",
+      "p4": "<strong>Data Retention:</strong> After how many days older entries (bans, filter logs) are automatically deleted."
+    },
+    "tenant_list": {
+      "title": "Channel Overview: Explanations",
+      "p1": "<strong>Add channel:</strong> Enter the Twitch channel name (lowercase). The channel must first be approved by an admin before the bot joins.",
+      "p2": "<strong>\"Pending\":</strong> The channel has been created but not yet approved by an admin. The bot is not participating yet.",
+      "p3": "<strong>Add moderators:</strong> Open the channel → Settings → Moderators. You can grant other users access to your channel (view or edit).",
+      "p4": "<strong>Bot status (LED):</strong> Green = bot online; Red = bot offline or error; Gray = unknown. The bot connects automatically when the channel is approved."
+    },
+    "tenant_settings": {
+      "title": "Settings: Explanations",
+      "p_bot_mode_label": "<strong>Bot Mode:</strong>",
+      "li1": "<span class=\"font-mono\">Shared Bot</span> — the central TCB bot account is used for your channel. No own credentials needed.",
+      "li2": "<span class=\"font-mono\">Own Bot Account</span> — your own Twitch account acts as the bot. Requires an OAuth token for the bot account.",
+      "li3": "<span class=\"font-mono\">Own Bot + App</span> — fully own Twitch application (Client ID + Secret). For advanced users.",
+      "p_bot_token": "<strong>Bot Token:</strong> The OAuth token of the bot account. Generated at <a class=\"text-purple-600 underline\" href=\"https://twitchtokengenerator.com\" target=\"_blank\" rel=\"noreferrer\">twitchtokengenerator.com</a> (Scopes: chat:read, chat:edit, channel:moderate).",
+      "p_mods": "<strong>Moderators:</strong> Users added as moderators can either only view (Viewer) or manage filters/bans (Editor). No Twitch mod status required.",
+      "p_stream": "<strong>Stream Awareness:</strong> When active, the bot changes its behavior depending on whether the stream is live (e.g. more aggressive filters during livestreams).",
+      "p_retention": "<strong>Data Retention:</strong> Specifies how many days filter hits and action logs are stored. Older entries are automatically deleted."
+    },
+    "tenant_mods": {
+      "title": "Moderators",
+      "p1": "Here you manage TCB moderators for your channel. These are <strong>not</strong> Twitch moderators, but users who have access to this dashboard.",
+      "p2": "<strong>Viewer:</strong> Can view statistics and ban lists, but cannot make changes.",
+      "p3": "<strong>Editor:</strong> Can manage bans, filters, and commands.",
+      "p4": "Search by Twitch username or enter the Twitch ID manually."
+    },
+    "shared_bans": {
+      "title": "Shared Bans",
+      "p1": "Connect your channel with other streamers to automatically synchronize bans.",
+      "p2": "<strong>Send invitation:</strong> Enter the channel name of another TCB user and send an invitation. Once accepted, new bans from both channels will be transferred to each other.",
+      "p3": "<strong>Role:</strong> As <em>source</em> you share bans, as <em>target</em> you receive bans from the partner channel.",
+      "p4": "<strong>Status:</strong> <em>Pending</em> = invitation not yet accepted · <em>Active</em> = synchronization running."
+    },
+    "ban_list": {
+      "title": "Ban List: Explanations",
+      "p1": "<strong>Permanent vs. Timeout:</strong> Permanent = permanent ban from chat. Timeout = temporary mute for a specific number of seconds (default: 600 = 10 minutes).",
+      "p2": "<strong>Username vs. User ID:</strong> Normally enter the <em>Twitch username</em>. The Twitch User ID (numeric) is optional and available in the advanced section — useful if the user changed their name.",
+      "p3": "<strong>Failover Protection (🛡):</strong> The shield symbol means the ban is also stored directly on the Twitch platform and remains active even if the bot was briefly offline.",
+      "p4": "<strong>CSV Export:</strong> Downloads the current ban list as a CSV file. Suitable for backups or importing into other tools.",
+      "p5": "<strong>Bulk Unban:</strong> Select multiple entries (checkbox) and then click \"Unban selected\"."
+    },
+    "name_scan": {
+      "title": "Name Scan",
+      "p1": "The name scan detects suspicious Twitch accounts based on their usernames (e.g. known troll patterns).",
+      "p2": "<strong>Opt-in:</strong> Choose which admin-defined filter rules should be active for your channel. Filters that are not activated will be ignored.",
+      "p3": "<strong>Auto-Ban:</strong> If enabled, matches will be automatically banned without manual confirmation.",
+      "p4": "<strong>Apply all:</strong> Retroactively bans all known matches of this filter in your channel."
+    },
+    "commands": {
+      "title": "Commands: Explanations",
+      "p1": "<strong>Permission levels</strong> (from lowest to highest):",
+      "li1": "everyone — all viewers",
+      "li2": "subscriber — subscribers only",
+      "li3": "vip — VIPs and above",
+      "li4": "moderator — mods and above",
+      "li5": "broadcaster — the streamer only",
+      "p2": "<strong>Cooldown (Global):</strong> How many seconds after <em>anyone's</em> last use the command can be used again. Prevents spam.",
+      "p3": "<strong>Cooldown (User):</strong> How many seconds an individual user must wait before using the command again.",
+      "p4": "<strong>Response Template:</strong> Available placeholders: {user} = caller's name, {args} = provided parameters.",
+      "p5": "<strong>Action Type:</strong> What the bot does when the command is executed. Click the ⓘ icon next to \"Action\" in the form for details on each type."
+    }
   }
 }

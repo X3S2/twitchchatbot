@@ -157,14 +157,14 @@ export default function AdminSettings() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Admin-Einstellungen</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.admin_settings.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p><strong>Twitch App:</strong> Client-ID und Client-Secret aus der Twitch Developer Console. Werden benötigt um mit der Twitch API zu kommunizieren.</p>
-            <p><strong>Shared Bot:</strong> OAuth-Token des gemeinsamen Bot-Kontos. Wird verwendet wenn ein Tenant keinen eigenen Bot konfiguriert hat.</p>
-            <p><strong>Wartungsmodus:</strong> Sperrt den Login für alle nicht-Admin-Nutzer und zeigt eine Nachricht an.</p>
-            <p><strong>Datenaufbewahrung:</strong> Nach wie vielen Tagen ältere Einträge (Bans, Filter-Logs) automatisch gelöscht werden.</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_settings.p1') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_settings.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_settings.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_settings.p4') }} />
           </div>
         </div>
       )}

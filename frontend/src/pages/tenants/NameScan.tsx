@@ -96,14 +96,14 @@ export default function TenantNameScan() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Namensscan</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.name_scan.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p>Der Namensscan erkennt verdächtige Twitch-Konten anhand ihrer Benutzernamen (z.B. bekannte Troll-Muster).</p>
-            <p><strong>Opt-in:</strong> Wähle aus, welche Admin-definierten Filterregeln für deinen Kanal aktiv sein sollen. Nicht aktivierte Filter werden ignoriert.</p>
-            <p><strong>Auto-Ban:</strong> Wenn aktiviert, werden Treffer automatisch gebannt, ohne manuelle Bestätigung.</p>
-            <p><strong>Alle anwenden:</strong> Bannt rückwirkend alle bekannten Treffer dieses Filters in deinem Kanal.</p>
+            <p>{t('help.name_scan.p1')}</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.name_scan.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.name_scan.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.name_scan.p4') }} />
           </div>
         </div>
       )}

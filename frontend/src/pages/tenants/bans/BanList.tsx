@@ -100,15 +100,15 @@ export default function BanList() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Ban-Liste: Erklärungen</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.ban_list.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p><strong>Permanent vs. Timeout:</strong> Permanent = dauerhafter Ban aus dem Chat. Timeout = temporäre Stummschaltung für eine bestimmte Anzahl Sekunden (Standard: 600 = 10 Minuten).</p>
-            <p><strong>Username vs. User-ID:</strong> Gib normalerweise den <em>Twitch-Benutzernamen</em> ein. Die Twitch-User-ID (numerisch) ist optional und im erweiterten Bereich verfügbar — sie ist nützlich wenn der Nutzer seinen Namen geändert hat.</p>
-            <p><strong>Failover-Schutz (🛡):</strong> Das Schild-Symbol bedeutet, der Ban ist auch auf der Twitch-Plattform direkt hinterlegt und bleibt auch dann aktiv, wenn der Bot kurz offline war.</p>
-            <p><strong>CSV-Export:</strong> Lädt die aktuelle Ban-Liste als CSV-Datei herunter. Geeignet für Backups oder Import in andere Tools.</p>
-            <p><strong>Sammel-Entbann:</strong> Mehrere Einträge auswählen (Checkbox) und dann „Ausgewählte entbannen“ drücken.</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.ban_list.p1') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.ban_list.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.ban_list.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.ban_list.p4') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.ban_list.p5') }} />
           </div>
         </div>
       )}

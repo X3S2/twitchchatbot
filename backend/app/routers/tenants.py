@@ -360,9 +360,9 @@ async def test_own_bot_token(
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
 ):
-    """Prüft ob der eigene Bot-OAuth-Token des Tenants gültig ist."""
-    from ..core.twitch_client import validate_token
-    from ..core.security import decrypt_value
+    """Prüft ob der eigene Bot-OAuth-Token des Tenants gültig ist und erneuert ihn ggf. automatisch."""
+    from ..core.twitch_client import validate_token, refresh_user_token
+    from ..core.security import decrypt_value, encrypt_value
 
     tenant = await _get_tenant_or_403(tenant_id, current_user, db)
     if not tenant.own_bot_token_enc:
@@ -370,8 +370,33 @@ async def test_own_bot_token(
 
     bot_token = decrypt_value(tenant.own_bot_token_enc)
     validated = await validate_token(bot_token)
+
+    # Token abgelaufen oder ungültig → Refresh versuchen
+    if (not validated or validated.get("expires_in", 1) == 0) and tenant.own_bot_refresh_token_enc:
+        # Client-Credentials: eigene App-Daten bevorzugen, sonst globale
+        from ..models.settings import AppSettings
+        cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+        app_cfg = cfg_result.scalar_one_or_none()
+        if tenant.own_client_id_enc and tenant.own_client_secret_enc:
+            client_id = decrypt_value(tenant.own_client_id_enc)
+            client_secret = decrypt_value(tenant.own_client_secret_enc)
+        elif app_cfg and app_cfg.client_id_enc and app_cfg.client_secret_enc:
+            client_id = decrypt_value(app_cfg.client_id_enc)
+            client_secret = decrypt_value(app_cfg.client_secret_enc)
+        else:
+            client_id = None
+        if client_id:
+            refresh_tok = decrypt_value(tenant.own_bot_refresh_token_enc)
+            refreshed = await refresh_user_token(client_id, client_secret, refresh_tok)
+            if refreshed and refreshed.get("access_token"):
+                tenant.own_bot_token_enc = encrypt_value(refreshed["access_token"])
+                if refreshed.get("refresh_token"):
+                    tenant.own_bot_refresh_token_enc = encrypt_value(refreshed["refresh_token"])
+                await db.commit()
+                validated = await validate_token(refreshed["access_token"])
+
     if not validated:
-        return {"ok": False, "error": "Token ungültig oder abgelaufen"}
+        return {"ok": False, "error": "Token ungültig oder abgelaufen – bitte neuen Token generieren"}
     if validated.get("expires_in", 1) == 0:
         return {"ok": False, "error": "Token abgelaufen – bitte neuen Token generieren"}
 

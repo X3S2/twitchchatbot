@@ -322,9 +322,9 @@ async def test_credentials(db: AsyncSession = Depends(get_db)):
 
 @router.post("/test-bot-token", dependencies=[Depends(require_admin)])
 async def test_bot_token(db: AsyncSession = Depends(get_db)):
-    """Prüft ob der gespeicherte Bot-OAuth-Token gültig ist."""
-    from ..core.twitch_client import validate_token
-    from ..core.security import decrypt_value
+    """Prüft ob der gespeicherte Bot-OAuth-Token gültig ist und erneuert ihn ggf. automatisch."""
+    from ..core.twitch_client import validate_token, refresh_user_token
+    from ..core.security import decrypt_value, encrypt_value
 
     cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
     app_cfg = cfg_result.scalar_one_or_none()
@@ -333,8 +333,23 @@ async def test_bot_token(db: AsyncSession = Depends(get_db)):
 
     bot_token = decrypt_value(app_cfg.bot_token_enc)
     validated = await validate_token(bot_token)
+
+    # Token abgelaufen oder ungültig → Refresh versuchen
+    if (not validated or validated.get("expires_in", 1) == 0) and \
+            app_cfg.bot_refresh_token_enc and app_cfg.client_id_enc and app_cfg.client_secret_enc:
+        client_id = decrypt_value(app_cfg.client_id_enc)
+        client_secret = decrypt_value(app_cfg.client_secret_enc)
+        refresh_tok = decrypt_value(app_cfg.bot_refresh_token_enc)
+        refreshed = await refresh_user_token(client_id, client_secret, refresh_tok)
+        if refreshed and refreshed.get("access_token"):
+            app_cfg.bot_token_enc = encrypt_value(refreshed["access_token"])
+            if refreshed.get("refresh_token"):
+                app_cfg.bot_refresh_token_enc = encrypt_value(refreshed["refresh_token"])
+            await db.commit()
+            validated = await validate_token(refreshed["access_token"])
+
     if not validated:
-        return {"ok": False, "error": "Token ungültig oder abgelaufen"}
+        return {"ok": False, "error": "Token ungültig oder abgelaufen – bitte neuen Token generieren"}
     if validated.get("expires_in", 1) == 0:
         return {"ok": False, "error": "Token abgelaufen – bitte neuen Token generieren"}
 

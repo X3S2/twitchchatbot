@@ -7,6 +7,21 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.13] — 2026-05-21 — i18n Help-Boxen, Bot-Status-Live-Update, Token-Auto-Refresh, Chart-Cursor-Fix
+
+### Neu
+- **i18n Help-Boxen** — Alle 12 Help/Info-Boxen der App sind jetzt vollständig internationalisiert (DE + EN); Inhalte in `de.json`/`en.json` unter neuem `"help"`-Abschnitt; Seiten-Komponenten verwenden `t()` + `dangerouslySetInnerHTML` für HTML-Inhalte (sicher — statische Bundle-Strings)
+
+### Geändert
+- **Bot-Status nach Pending sofort aktualisieren** — Nach Ablauf des 3s-Pending-Timers wird der React-Query-Cache (`['bot-status', id]` bzw. `['admin-instances']`) sofort invalidiert; dadurch wird der echte Bot-Status ohne Wartezeit angezeigt; Admin-Panel: Stale-Closure-Bug im WebSocket-Handler behoben (verwendet jetzt `rowPendingRef` statt State)
+- **Token-Auto-Refresh bei Test** — `POST /test-bot-token` (Admin + Tenant) versucht bei abgelaufenem oder ungültigem Token jetzt automatisch einen Refresh via `refresh_user_token()` (neue Funktion in `twitch_client.py`); neue Tokens werden in DB gespeichert; nur wenn Refresh fehlschlägt wird Fehler zurückgegeben
+- **Chart-Cursor deaktiviert** — `cursor={false}` ersetzt das bisherige `cursor={{ fill: 'rgba(...)' }}` im Stats-Chart; entfernt die lila Hover-Füllfläche die über den gestrichelten Rand ragte
+
+### Behoben
+- **README Entwicklungsstatus Reihenfolge** — v0.22.11 und v0.22.12 waren in falscher Reihenfolge eingetragen; korrigiert auf aufsteigende Versionsreihenfolge
+
+---
+
 ## [0.22.12] — 2026-05-20 — Pending-Mindestdauer, Stream-LED, Token-Ablauf, Chart-Cursor-Fix
 
 ### Geändert

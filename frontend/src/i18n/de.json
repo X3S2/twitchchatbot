@@ -329,5 +329,102 @@
     "unauthorized": "Nicht angemeldet",
     "forbidden": "Keine Berechtigung",
     "server_error": "Serverfehler"
+  },
+  "help": {
+    "admin_overview": {
+      "title": "Admin-Übersicht",
+      "p1": "Hier siehst du alle registrierten Tenants (Streamer-Kanäle) und den Status ihrer Bot-Instanzen in Echtzeit.",
+      "p2": "<strong>Start/Stop:</strong> Startet oder stoppt den Bot für einen bestimmten Kanal manuell.",
+      "p3": "<strong>Status-LED:</strong> Zeigt den aktuellen Verbindungsstatus des Bots an (online, offline, error).",
+      "p4": "<strong>LIVE:</strong> Der Kanal streamt gerade – der Bot überwacht den Chat aktiv."
+    },
+    "admin_user_mgmt": {
+      "title": "Nutzerverwaltung",
+      "p1": "Alle registrierten Nutzer, die sich per Twitch angemeldet haben.",
+      "p2": "<strong>Sperren:</strong> Blockiert den Login für diesen Nutzer. Bestehende Sessions werden beim nächsten Request beendet.",
+      "p3": "<strong>Kick:</strong> Invalidiert alle aktiven Sessions sofort, ohne den Account dauerhaft zu sperren.",
+      "p4": "<strong>Rollen:</strong> <em>admin</em> = Vollzugriff auf dieses Panel · <em>user</em> = normaler Streamer-Account."
+    },
+    "admin_approval": {
+      "title": "Tenant-Freigabe",
+      "p1": "Neue Streamern müssen vor der Nutzung freigeschaltet werden. Hier siehst du alle ausstehenden Anfragen.",
+      "p2": "<strong>Genehmigen:</strong> Schaltet den Kanal frei – der Bot kann dann gestartet werden.",
+      "p3": "<strong>Ablehnen:</strong> Verhindert die Nutzung für diesen Kanal.",
+      "p4": "<strong>Sperren:</strong> Widerruft eine bereits erteilte Freigabe und stoppt den Bot automatisch."
+    },
+    "admin_name_scan": {
+      "title": "Namensscan-Filter (Admin)",
+      "p1": "Hier definierst du plattformweite Namensmuster, die verdächtige Twitch-Konten identifizieren (z.B. Bot-Namen, bekannte Trollmuster).",
+      "p2": "<strong>Filterregel erstellen:</strong> Gib Name, Beschreibung und die gewünschte Aktion bei einem Treffer an.",
+      "p3": "<strong>Aktiv/Inaktiv:</strong> Inaktive Filter werden von keinem Tenant ausgeführt, auch wenn dieser eingeloggt ist.",
+      "p4": "Tenants können über die <em>Namensscan</em>-Seite ihres Dashboards einzeln entscheiden, welche Filter sie nutzen möchten."
+    },
+    "admin_settings": {
+      "title": "Admin-Einstellungen",
+      "p1": "<strong>Twitch App:</strong> Client-ID und Client-Secret aus der Twitch Developer Console. Werden benötigt um mit der Twitch API zu kommunizieren.",
+      "p2": "<strong>Shared Bot:</strong> OAuth-Token des gemeinsamen Bot-Kontos. Wird verwendet wenn ein Tenant keinen eigenen Bot konfiguriert hat.",
+      "p3": "<strong>Wartungsmodus:</strong> Sperrt den Login für alle nicht-Admin-Nutzer und zeigt eine Nachricht an.",
+      "p4": "<strong>Datenaufbewahrung:</strong> Nach wie vielen Tagen ältere Einträge (Bans, Filter-Logs) automatisch gelöscht werden."
+    },
+    "tenant_list": {
+      "title": "Kanal-Übersicht: Erklärungen",
+      "p1": "<strong>Kanal hinzufügen:</strong> Gib den Twitch-Kanalnamen (Kleinbuchstaben) ein. Der Kanal muss erst vom Admin freigeschaltet werden, bevor der Bot beitritt.",
+      "p2": "<strong>\"Ausstehend\" (Pending):</strong> Der Kanal ist angelegt, aber noch nicht vom Admin genehmigt. Der Bot nimmt noch nicht teil.",
+      "p3": "<strong>Moderatoren hinzufügen:</strong> Öffne den Kanal → Einstellungen → Moderatoren. Dort kannst du weiteren Nutzern Zugriff auf deinen Kanal geben (Ansehen oder Bearbeiten).",
+      "p4": "<strong>Bot-Status (LED):</strong> Grün = Bot online; Rot = Bot offline oder Fehler; Grau = unbekannt. Der Bot verbindet sich automatisch wenn der Kanal genehmigt ist."
+    },
+    "tenant_settings": {
+      "title": "Einstellungen: Erklärungen",
+      "p_bot_mode_label": "<strong>Bot-Modus:</strong>",
+      "li1": "<span class=\"font-mono\">Shared Bot</span> — der zentrale TCB-Bot-Account wird für deinen Kanal genutzt. Keine eigenen Credentials nötig.",
+      "li2": "<span class=\"font-mono\">Eigener Bot-Account</span> — dein eigener Twitch-Account agiert als Bot. Benötigt OAuth-Token des Bot-Accounts.",
+      "li3": "<span class=\"font-mono\">Eigener Bot + App</span> — vollständig eigene Twitch-Anwendung (Client-ID + Secret). Für Fortgeschrittene.",
+      "p_bot_token": "<strong>Bot-Token:</strong> Das OAuth-Token des Bot-Accounts. Wird bei <a class=\"text-purple-600 underline\" href=\"https://twitchtokengenerator.com\" target=\"_blank\" rel=\"noreferrer\">twitchtokengenerator.com</a> generiert (Scopes: chat:read, chat:edit, channel:moderate).",
+      "p_mods": "<strong>Moderatoren:</strong> Nutzer die als Moderator hinzugefügt werden, können entweder nur lesen (Viewer) oder Filter/Bans verwalten (Editor). Kein Twitch-Mod-Status erforderlich.",
+      "p_stream": "<strong>Stream-Awareness:</strong> Wenn aktiv, verändert der Bot sein Verhalten je nachdem ob der Stream live ist (z.B. aggressivere Filter nur im Livestream).",
+      "p_retention": "<strong>Datenaufbewahrung:</strong> Gibt an wie viele Tage Filter-Treffer und Aktionsprotokolle gespeichert werden. Ältere Einträge werden automatisch gelöscht."
+    },
+    "tenant_mods": {
+      "title": "Moderatoren",
+      "p1": "Hier verwaltest du TCB-Moderatoren für deinen Kanal. Das sind <strong>keine</strong> Twitch-Moderatoren, sondern Nutzer die Zugriff auf dieses Dashboard haben.",
+      "p2": "<strong>Viewer:</strong> Kann Statistiken und Banlisten einsehen, aber nichts ändern.",
+      "p3": "<strong>Editor:</strong> Kann Bans, Filter und Befehle verwalten.",
+      "p4": "Suche nach dem Twitch-Benutzernamen oder gib die Twitch-ID manuell ein."
+    },
+    "shared_bans": {
+      "title": "Geteilte Bans",
+      "p1": "Verbinde deinen Kanal mit anderen Streamern, um Bans automatisch zu synchronisieren.",
+      "p2": "<strong>Einladung senden:</strong> Gib den Kanalnamen eines anderen TCB-Nutzers ein und sende eine Einladung. Sobald diese angenommen wird, werden neue Bans beider Kanäle gegenseitig übertragen.",
+      "p3": "<strong>Rolle:</strong> Als <em>Quelle</em> gibst du Bans weiter, als <em>Ziel</em> empfängst du Bans vom Partnerkanal.",
+      "p4": "<strong>Status:</strong> <em>Ausstehend</em> = Einladung noch nicht angenommen · <em>Aktiv</em> = Synchronisierung läuft."
+    },
+    "ban_list": {
+      "title": "Ban-Liste: Erklärungen",
+      "p1": "<strong>Permanent vs. Timeout:</strong> Permanent = dauerhafter Ban aus dem Chat. Timeout = temporäre Stummschaltung für eine bestimmte Anzahl Sekunden (Standard: 600 = 10 Minuten).",
+      "p2": "<strong>Username vs. User-ID:</strong> Gib normalerweise den <em>Twitch-Benutzernamen</em> ein. Die Twitch-User-ID (numerisch) ist optional und im erweiterten Bereich verfügbar — sie ist nützlich wenn der Nutzer seinen Namen geändert hat.",
+      "p3": "<strong>Failover-Schutz (🛡):</strong> Das Schild-Symbol bedeutet, der Ban ist auch auf der Twitch-Plattform direkt hinterlegt und bleibt auch dann aktiv, wenn der Bot kurz offline war.",
+      "p4": "<strong>CSV-Export:</strong> Lädt die aktuelle Ban-Liste als CSV-Datei herunter. Geeignet für Backups oder Import in andere Tools.",
+      "p5": "<strong>Sammel-Entbann:</strong> Mehrere Einträge auswählen (Checkbox) und dann \"Ausgewählte entbannen\" drücken."
+    },
+    "name_scan": {
+      "title": "Namensscan",
+      "p1": "Der Namensscan erkennt verdächtige Twitch-Konten anhand ihrer Benutzernamen (z.B. bekannte Troll-Muster).",
+      "p2": "<strong>Opt-in:</strong> Wähle aus, welche Admin-definierten Filterregeln für deinen Kanal aktiv sein sollen. Nicht aktivierte Filter werden ignoriert.",
+      "p3": "<strong>Auto-Ban:</strong> Wenn aktiviert, werden Treffer automatisch gebannt, ohne manuelle Bestätigung.",
+      "p4": "<strong>Alle anwenden:</strong> Bannt rückwirkend alle bekannten Treffer dieses Filters in deinem Kanal."
+    },
+    "commands": {
+      "title": "Befehle: Erklärungen",
+      "p1": "<strong>Berechtigungsstufen</strong> (von niedrig nach hoch):",
+      "li1": "everyone — alle Zuschauer",
+      "li2": "subscriber — nur Abonnenten",
+      "li3": "vip — VIPs und höher",
+      "li4": "moderator — Mods und höher",
+      "li5": "broadcaster — nur der Streamer selbst",
+      "p2": "<strong>Cooldown (Global):</strong> Wie viele Sekunden nach dem letzten Aufruf <em>irgendjemandes</em> der Befehl wieder genutzt werden kann. Verhindert Spam.",
+      "p3": "<strong>Cooldown (User):</strong> Wie viele Sekunden ein einzelner Nutzer warten muss, bis er den Befehl wieder nutzen kann.",
+      "p4": "<strong>Response-Template:</strong> Verfügbare Platzhalter: {user} = Name des Aufrufers, {args} = mitgegebene Parameter.",
+      "p5": "<strong>Aktion-Typ:</strong> Was der Bot macht wenn der Befehl ausgeführt wird. Klicke auf das ⓘ-Symbol neben \"Aktion\" im Formular für Details zu jedem Typ."
+    }
   }
 }

@@ -90,7 +90,7 @@ export default function StatsPage() {
                 <XAxis dataKey="day" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip
-                  cursor={{ fill: 'rgba(139,92,246,0.08)' }}
+                  cursor={false}
                   allowEscapeViewBox={{ x: false, y: false }}
                   wrapperStyle={{ zIndex: 50 }}
                   contentStyle={isDark

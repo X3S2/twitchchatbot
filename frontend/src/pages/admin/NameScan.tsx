@@ -83,14 +83,14 @@ export default function NameScanPage() {
       {showHelp && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Namensscan-Filter (Admin)</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.admin_name_scan.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p>Hier definierst du plattformweite Namensmuster, die verdächtige Twitch-Konten identifizieren (z.B. Bot-Namen, bekannte Trollmuster).</p>
-            <p><strong>Filterregel erstellen:</strong> Gib Name, Beschreibung und die gewünschte Aktion bei einem Treffer an.</p>
-            <p><strong>Aktiv/Inaktiv:</strong> Inaktive Filter werden von keinem Tenant ausgeführt, auch wenn dieser eingeloggt ist.</p>
-            <p>Tenants können über die <em>Namensscan</em>-Seite ihres Dashboards einzeln entscheiden, welche Filter sie nutzen möchten.</p>
+            <p>{t('help.admin_name_scan.p1')}</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_name_scan.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_name_scan.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.admin_name_scan.p4') }} />
           </div>
         </div>
       )}

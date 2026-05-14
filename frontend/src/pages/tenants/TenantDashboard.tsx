@@ -70,7 +70,11 @@ export default function TenantDashboard() {
 
   const startPending = () => { setBotPending(true); botPendingRef.current = true }
   const endPending = () => {
-    setTimeout(() => { setBotPending(false); botPendingRef.current = false }, 3000)
+    setTimeout(() => {
+      setBotPending(false)
+      botPendingRef.current = false
+      qc.invalidateQueries({ queryKey: ['bot-status', id] })
+    }, 3000)
   }
 
   const { data: tenant } = useQuery({ queryKey: ['tenant', id], queryFn: () => fetchTenant(id!) })

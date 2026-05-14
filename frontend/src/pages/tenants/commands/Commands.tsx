@@ -113,22 +113,22 @@ export default function Commands() {
       {showHelp && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm space-y-2">
           <div className="flex justify-between items-start">
-            <span className="font-semibold text-blue-700 dark:text-blue-300">Befehle: Erklärungen</span>
+            <span className="font-semibold text-blue-700 dark:text-blue-300">{t('help.commands.title')}</span>
             <button onClick={() => setShowHelp(false)}><X className="w-4 h-4 text-gray-400" /></button>
           </div>
           <div className="space-y-1.5 text-gray-700 dark:text-gray-300">
-            <p><strong>Berechtigungsstufen</strong> (von niedrig nach hoch):</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.commands.p1') }} />
             <ul className="ml-3 space-y-0.5 font-mono text-xs">
-              <li>everyone — alle Zuschauer</li>
-              <li>subscriber — nur Abonnenten</li>
-              <li>vip — VIPs und höher</li>
-              <li>moderator — Mods und höher</li>
-              <li>broadcaster — nur der Streamer selbst</li>
+              <li>{t('help.commands.li1')}</li>
+              <li>{t('help.commands.li2')}</li>
+              <li>{t('help.commands.li3')}</li>
+              <li>{t('help.commands.li4')}</li>
+              <li>{t('help.commands.li5')}</li>
             </ul>
-            <p><strong>Cooldown (Global):</strong> Wie viele Sekunden nach dem letzten Aufruf <em>irgendjemandes</em> der Befehl wieder genutzt werden kann. Verhindert Spam.</p>
-            <p><strong>Cooldown (User):</strong> Wie viele Sekunden ein einzelner Nutzer warten muss, bis er den Befehl wieder nutzen kann.</p>
-            <p><strong>Response-Template:</strong> Verfügbare Platzhalter: <span className="font-mono">{'{user}'}</span> = Name des Aufrufers, <span className="font-mono">{'{args}'}</span> = mitgegebene Parameter.</p>
-            <p><strong>Aktion-Typ:</strong> Was der Bot macht wenn der Befehl ausgeführt wird. Klicke auf das ⓘ-Symbol neben „Aktion“ im Formular für Details zu jedem Typ.</p>
+            <p dangerouslySetInnerHTML={{ __html: t('help.commands.p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.commands.p3') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.commands.p4') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('help.commands.p5') }} />
           </div>
         </div>
       )}
