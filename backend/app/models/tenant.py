@@ -16,6 +16,7 @@ class Tenant(Base):
     own_client_id_enc: Mapped[str | None] = mapped_column(Text)
     own_client_secret_enc: Mapped[str | None] = mapped_column(Text)
     own_bot_token_enc: Mapped[str | None] = mapped_column(Text)
+    own_bot_refresh_token_enc: Mapped[str | None] = mapped_column(Text)
     own_bot_username: Mapped[str | None] = mapped_column(String(128))
     own_bot_user_id: Mapped[str | None] = mapped_column(String(64))
     stream_awareness: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

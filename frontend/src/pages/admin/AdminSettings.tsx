@@ -8,6 +8,7 @@ interface AppSettingsData {
   client_secret_set: boolean
   bot_username: string | null
   bot_token_set: boolean
+  bot_refresh_token_set: boolean
   global_retention_days: number
   maintenance_mode: boolean
   maintenance_message: string | null
@@ -18,6 +19,7 @@ interface AppSettingsForm {
   client_secret: string
   bot_username: string
   bot_token: string
+  bot_refresh_token: string
   global_retention_days: number
   maintenance_mode: boolean
   maintenance_message: string
@@ -47,6 +49,7 @@ async function saveSettings(data: AppSettingsForm) {
   if (data.client_secret) payload.client_secret = data.client_secret
   if (data.bot_username) payload.bot_username = data.bot_username
   if (data.bot_token) payload.bot_token = data.bot_token
+  if (data.bot_refresh_token) payload.bot_refresh_token = data.bot_refresh_token
   const res = await fetch('/api/admin/settings', {
     method: 'PATCH', credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -79,6 +82,7 @@ export default function AdminSettings() {
   const [formInit, setFormInit] = useState(false)
   const [showClientSecret, setShowClientSecret] = useState(false)
   const [showBotToken, setShowBotToken] = useState(false)
+  const [showBotRefreshToken, setShowBotRefreshToken] = useState(false)
   const [saved, setSaved] = useState(false)
   const [testResult, setTestResult] = useState<TestCredentialsResult | null>(null)
   const [testing, setTesting] = useState(false)
@@ -90,6 +94,7 @@ export default function AdminSettings() {
       client_secret: '',
       bot_username: data.bot_username || '',
       bot_token: '',
+      bot_refresh_token: '',
       global_retention_days: data.global_retention_days,
       maintenance_mode: data.maintenance_mode,
       maintenance_message: data.maintenance_message || '',
@@ -193,6 +198,19 @@ export default function AdminSettings() {
             </button>
           </div>
           {data.bot_token_set && !form.bot_token && (
+            <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
+          )}
+        </Field>
+        <Field label={t('admin.bot_refresh_token')}>
+          <div className="relative">
+            <input type={showBotRefreshToken ? 'text' : 'password'} value={form.bot_refresh_token} onChange={(e) => set('bot_refresh_token', e.target.value)}
+              placeholder={data.bot_refresh_token_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
+            <button type="button" onClick={() => setShowBotRefreshToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+              {showBotRefreshToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">{t('admin.bot_refresh_token_hint')}</p>
+          {data.bot_refresh_token_set && !form.bot_refresh_token && (
             <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
           )}
         </Field>

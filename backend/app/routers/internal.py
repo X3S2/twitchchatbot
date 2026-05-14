@@ -157,15 +157,21 @@ async def get_tenant_config(
     # Bot-Credentials bestimmen (own > shared)
     if tenant.bot_mode == "own_full" and tenant.own_bot_token_enc:
         bot_token = decrypt_value(tenant.own_bot_token_enc)
+        bot_refresh_token = decrypt_value(tenant.own_bot_refresh_token_enc) if tenant.own_bot_refresh_token_enc else None
         client_id = decrypt_value(tenant.own_client_id_enc) if tenant.own_client_id_enc else None
+        client_secret = decrypt_value(tenant.own_client_secret_enc) if tenant.own_client_secret_enc else None
         bot_username = tenant.own_bot_username
     elif tenant.bot_mode in ("own_bot", "own_full") and tenant.own_bot_token_enc:
         bot_token = decrypt_value(tenant.own_bot_token_enc)
+        bot_refresh_token = decrypt_value(tenant.own_bot_refresh_token_enc) if tenant.own_bot_refresh_token_enc else None
         client_id = decrypt_value(app_cfg.client_id_enc) if app_cfg and app_cfg.client_id_enc else None
+        client_secret = decrypt_value(app_cfg.client_secret_enc) if app_cfg and app_cfg.client_secret_enc else None
         bot_username = tenant.own_bot_username
     else:
         bot_token = decrypt_value(app_cfg.bot_token_enc) if app_cfg and app_cfg.bot_token_enc else None
+        bot_refresh_token = decrypt_value(app_cfg.bot_refresh_token_enc) if app_cfg and app_cfg.bot_refresh_token_enc else None
         client_id = decrypt_value(app_cfg.client_id_enc) if app_cfg and app_cfg.client_id_enc else None
+        client_secret = decrypt_value(app_cfg.client_secret_enc) if app_cfg and app_cfg.client_secret_enc else None
         bot_username = app_cfg.bot_username if app_cfg else None
 
     # Chat-Filter laden
@@ -207,8 +213,10 @@ async def get_tenant_config(
         "tenant_id": str(tenant.id),
         "channel_name": tenant.channel_name,
         "bot_token": bot_token,
+        "bot_refresh_token": bot_refresh_token,
         "bot_mode": tenant.bot_mode or "shared",
         "client_id": client_id,
+        "client_secret": client_secret,
         "bot_username": bot_username,
         "reconnect_mode": tenant.reconnect_mode,
         "reconnect_max_attempts": tenant.reconnect_max_attempts,
@@ -223,6 +231,44 @@ class UnbanNotificationRequest(BaseModel):
     twitch_user_id: str
     twitch_username: str | None = None
     reason: str | None = None  # Optional: "!unban command" | "twitch_unban"
+
+
+class TokenUpdateRequest(BaseModel):
+    tenant_id: str
+    access_token: str
+    refresh_token: str | None = None
+
+
+@router.post("/token-update")
+async def token_update(
+    data: TokenUpdateRequest,
+    _: None = Depends(_check_key),
+    db: AsyncSession = Depends(get_db),
+):
+    """Bot-Manager meldet neues Access-Token (nach automatischem Refresh) zurück."""
+    from ..models.settings import AppSettings
+    from ..core.security import encrypt_value, decrypt_value
+
+    result = await db.execute(select(Tenant).where(Tenant.id == data.tenant_id))
+    tenant = result.scalar_one_or_none()
+    if not tenant:
+        raise HTTPException(status_code=404)
+
+    cfg_result = await db.execute(select(AppSettings).where(AppSettings.id == 1))
+    app_cfg = cfg_result.scalar_one_or_none()
+
+    # Shared-Bot oder Own-Bot?
+    if tenant.bot_mode in ("own_bot", "own_full") and tenant.own_bot_token_enc:
+        tenant.own_bot_token_enc = encrypt_value(data.access_token)
+        if data.refresh_token:
+            tenant.own_bot_refresh_token_enc = encrypt_value(data.refresh_token)
+    elif app_cfg:
+        app_cfg.bot_token_enc = encrypt_value(data.access_token)
+        if data.refresh_token:
+            app_cfg.bot_refresh_token_enc = encrypt_value(data.refresh_token)
+
+    await db.commit()
+    return {"ok": True}
 
 
 @router.post("/unban-notification")

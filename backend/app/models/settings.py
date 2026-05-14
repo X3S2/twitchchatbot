@@ -13,6 +13,7 @@ class AppSettings(Base):
     client_secret_enc: Mapped[str | None] = mapped_column(Text)
     bot_username: Mapped[str | None] = mapped_column(String(128))
     bot_token_enc: Mapped[str | None] = mapped_column(Text)
+    bot_refresh_token_enc: Mapped[str | None] = mapped_column(Text)
     bot_user_id: Mapped[str | None] = mapped_column(String(64))
     global_retention_days: Mapped[int] = mapped_column(default=180)
     reconnect_mode_default: Mapped[str] = mapped_column(String(32), default="unlimited")

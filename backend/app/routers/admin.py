@@ -25,6 +25,7 @@ class AppSettingsUpdate(BaseModel):
     client_secret: str | None = None
     bot_username: str | None = None
     bot_token: str | None = None
+    bot_refresh_token: str | None = None
     global_retention_days: int | None = None
     maintenance_mode: bool | None = None
     maintenance_message: str | None = None
@@ -90,6 +91,7 @@ async def get_app_settings(
         "client_secret_set": bool(cfg.client_secret_enc),
         "bot_username": cfg.bot_username,
         "bot_token_set": bool(cfg.bot_token_enc),
+        "bot_refresh_token_set": bool(cfg.bot_refresh_token_enc),
         "bot_user_id": cfg.bot_user_id,
         "global_retention_days": cfg.global_retention_days,
         "maintenance_mode": cfg.maintenance_mode,
@@ -118,6 +120,8 @@ async def update_app_settings(
         cfg.bot_username = data.bot_username
     if data.bot_token is not None:
         cfg.bot_token_enc = encrypt_value(data.bot_token)
+    if data.bot_refresh_token is not None:
+        cfg.bot_refresh_token_enc = encrypt_value(data.bot_refresh_token)
     if data.global_retention_days is not None:
         cfg.global_retention_days = max(1, min(730, data.global_retention_days))
     if data.maintenance_mode is not None:

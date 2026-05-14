@@ -48,6 +48,7 @@ class TenantSettingsUpdate(BaseModel):
     bot_mode: str | None = None
     own_bot_username: str | None = None
     own_bot_token: str | None = None
+    own_bot_refresh_token: str | None = None
     own_client_id: str | None = None
     own_client_secret: str | None = None
     stream_awareness: bool | None = None
@@ -140,6 +141,7 @@ async def get_tenant_settings(
         "bot_mode": tenant.bot_mode,
         "own_bot_username": tenant.own_bot_username,
         "own_bot_token_set": bool(tenant.own_bot_token_enc),
+        "own_bot_refresh_token_set": bool(tenant.own_bot_refresh_token_enc),
         "own_client_id_set": bool(tenant.own_client_id_enc),
         "own_client_secret_set": bool(tenant.own_client_secret_enc),
         "stream_awareness": tenant.stream_awareness,
@@ -173,6 +175,8 @@ async def update_tenant_settings(
         tenant.own_bot_username = data.own_bot_username
     if data.own_bot_token is not None:
         tenant.own_bot_token_enc = encrypt_value(data.own_bot_token)
+    if data.own_bot_refresh_token is not None:
+        tenant.own_bot_refresh_token_enc = encrypt_value(data.own_bot_refresh_token)
     if data.own_client_id is not None:
         tenant.own_client_id_enc = encrypt_value(data.own_client_id)
     if data.own_client_secret is not None:
@@ -329,6 +333,8 @@ async def stop_bot(
 ):
     from ..core.config import get_settings
     import httpx
+    from ..models.tenant import BotInstance
+    from datetime import datetime, timezone
     tenant = await _get_tenant_or_403(tenant_id, current_user, db)
     s = get_settings()
     async with httpx.AsyncClient() as client:
@@ -338,6 +344,13 @@ async def stop_bot(
         )
     if resp.status_code not in (200, 404):
         raise HTTPException(status_code=500, detail="Bot-Manager Fehler")
+    # Direkt DB-Status auf offline setzen (Instanz könnte bereits weg sein)
+    result = await db.execute(select(BotInstance).where(BotInstance.tenant_id == tenant_id))
+    instance = result.scalar_one_or_none()
+    if instance and instance.status not in ("offline",):
+        instance.status = "offline"
+        instance.last_heartbeat = datetime.now(timezone.utc)
+        await db.commit()
     return {"ok": True}
 
 

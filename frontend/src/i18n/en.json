@@ -150,6 +150,7 @@
     "bot_credentials": "Bot Credentials",
     "own_bot_username": "Bot Username",
     "own_bot_token": "Bot OAuth Token",
+    "own_bot_refresh_token": "Bot Refresh Token",
     "own_client_id": "App Client ID",
     "own_client_secret": "App Client Secret",
     "reconnect": "Reconnection",
@@ -158,6 +159,7 @@
     "saved": "Saved!",
     "already_set": "Already set (leave blank to keep)",
     "token_placeholder": "Enter oauth:...",
+    "refresh_token_hint": "Refresh token from twitchtokengenerator.com — enables automatic token renewal",
     "new_mod_default_role": "Default role for new moderators"
   },
   "admin": {
@@ -202,6 +204,8 @@
     "maintenance_message": "Maintenance Message",
     "bot_username": "Bot Username",
     "bot_token": "Bot OAuth Token",
+    "bot_refresh_token": "Bot Refresh Token",
+    "bot_refresh_token_hint": "Refresh token from twitchtokengenerator.com — enables automatic token renewal",
     "credentials_hint": "Leave fields blank to keep existing values",
     "global_retention_days": "Global Data Retention (days)",
     "test_credentials": "Test Credentials",

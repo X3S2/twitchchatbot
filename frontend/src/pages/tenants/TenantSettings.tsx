@@ -9,6 +9,7 @@ interface TenantSettingsData {
   bot_mode: string
   own_bot_username: string | null
   own_bot_token_set: boolean
+  own_bot_refresh_token_set: boolean
   own_client_id_set: boolean
   own_client_secret_set: boolean
   stream_awareness: boolean
@@ -24,6 +25,7 @@ interface TenantSettingsForm {
   bot_mode: string
   own_bot_username: string
   own_bot_token: string
+  own_bot_refresh_token: string
   own_client_id: string
   own_client_secret: string
   stream_awareness: boolean
@@ -44,6 +46,7 @@ async function saveSettings(tenantId: string, data: Partial<TenantSettingsForm>)
   // Strip empty credential fields so backend keeps existing values
   const payload: Record<string, unknown> = { ...data }
   if (!payload.own_bot_token) delete payload.own_bot_token
+  if (!payload.own_bot_refresh_token) delete payload.own_bot_refresh_token
   if (!payload.own_client_id) delete payload.own_client_id
   if (!payload.own_client_secret) delete payload.own_client_secret
   const res = await fetch(`/api/tenants/${tenantId}/settings`, {
@@ -60,6 +63,7 @@ export default function TenantSettings() {
   const { t } = useTranslation()
   const qc = useQueryClient()
   const [showToken, setShowToken] = useState(false)
+  const [showRefreshToken, setShowRefreshToken] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
   const [saved, setSaved] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
@@ -74,6 +78,7 @@ export default function TenantSettings() {
       bot_mode: data.bot_mode,
       own_bot_username: data.own_bot_username || '',
       own_bot_token: '',
+      own_bot_refresh_token: '',
       own_client_id: '',
       own_client_secret: '',
       stream_awareness: data.stream_awareness,
@@ -180,6 +185,19 @@ export default function TenantSettings() {
               </button>
             </div>
             {data.own_bot_token_set && !form.own_bot_token && (
+              <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
+            )}
+          </Field>
+          <Field label={t('settings.own_bot_refresh_token')}>
+            <div className="relative">
+              <input type={showRefreshToken ? 'text' : 'password'} value={form.own_bot_refresh_token} onChange={(e) => set('own_bot_refresh_token', e.target.value)}
+                placeholder={data.own_bot_refresh_token_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
+              <button type="button" onClick={() => setShowRefreshToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                {showRefreshToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">{t('settings.refresh_token_hint')}</p>
+            {data.own_bot_refresh_token_set && !form.own_bot_refresh_token && (
               <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
             )}
           </Field>

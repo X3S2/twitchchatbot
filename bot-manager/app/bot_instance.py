@@ -59,6 +59,10 @@ class TwitchBotInstance(twitch_commands.Bot):
         self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
         self._config_refresh_task = asyncio.create_task(self._config_refresh_loop())
 
+    async def event_error(self, error: Exception, data: str | None = None) -> None:
+        logger.error("[%s] TwitchIO-Fehler: %s", self.channel_name, error)
+        await self._report_status("error", str(error)[:256])
+
     async def event_message(self, message: twitchio.Message) -> None:
         if message.echo:
             return
@@ -358,6 +362,7 @@ class BotInstance:
 
         self._bot = TwitchBotInstance(self.tenant_id, self.channel, self._config)
         self._task = asyncio.create_task(self._bot.start(), name=f"bot-{self.channel}")
+        self._task.add_done_callback(self._handle_task_done)
         logger.info("BotInstance gestartet: channel=%s", self.channel)
 
     async def stop(self) -> None:
@@ -398,6 +403,76 @@ class BotInstance:
                 await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
         except Exception as exc:
             logger.warning("Fehler-Status konnte nicht gemeldet werden: %s", exc)
+
+    def _handle_task_done(self, task: asyncio.Task) -> None:
+        """Callback wenn der Bot-Task beendet wird — erkennt Auth-Fehler."""
+        if task.cancelled():
+            return
+        try:
+            exc = task.exception()
+        except (asyncio.CancelledError, Exception):
+            return
+        if exc is None:
+            return
+        logger.error("[%s] Bot-Task fehlgeschlagen: %s", self.channel, exc)
+        error_str = str(exc).lower()
+        if "authentication" in error_str or "authenticationerror" in error_str or "login" in error_str:
+            asyncio.create_task(self._try_token_refresh())
+        else:
+            asyncio.create_task(self._report_start_error(f"Bot-Task fehlgeschlagen: {exc}"[:256]))
+
+    async def _try_token_refresh(self) -> None:
+        """Versucht das abgelaufene Token per Refresh-Token zu erneuern und den Bot neu zu starten."""
+        refresh_token = self._config.get("bot_refresh_token")
+        client_id = self._config.get("client_id")
+        client_secret = self._config.get("client_secret")
+
+        if not all([refresh_token, client_id, client_secret]):
+            logger.error("[%s] Token abgelaufen, aber kein Refresh-Token/Client-Secret konfiguriert", self.channel)
+            await self._report_start_error("Token abgelaufen — Refresh-Token oder Client-Secret fehlt. Bitte Token in den Einstellungen erneuern.")
+            return
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://id.twitch.tv/oauth2/token",
+                    data={
+                        "grant_type": "refresh_token",
+                        "refresh_token": refresh_token,
+                        "client_id": client_id,
+                        "client_secret": client_secret,
+                    },
+                    timeout=aiohttp.ClientTimeout(total=15),
+                ) as resp:
+                    if resp.status != 200:
+                        body = await resp.text()
+                        logger.error("[%s] Token-Refresh fehlgeschlagen: HTTP %s %s", self.channel, resp.status, body)
+                        await self._report_start_error(f"Token-Refresh fehlgeschlagen: HTTP {resp.status}")
+                        return
+                    data = await resp.json()
+                    new_access = data["access_token"]
+                    new_refresh = data.get("refresh_token", refresh_token)
+
+            # Config lokal aktualisieren
+            self._config["bot_token"] = new_access
+            self._config["bot_refresh_token"] = new_refresh
+
+            # Neue Tokens im Backend speichern
+            url = f"{settings.api_url}/api/internal/token-update"
+            headers = {"Authorization": f"Bearer {settings.internal_api_key}"}
+            payload = {"tenant_id": self.tenant_id, "access_token": new_access, "refresh_token": new_refresh}
+            async with aiohttp.ClientSession() as session:
+                await session.post(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=5))
+
+            logger.info("[%s] Token erfolgreich aktualisiert — starte Bot neu", self.channel)
+            await asyncio.sleep(3)
+            self._bot = None
+            self._task = None
+            await self.start()
+
+        except Exception as exc:
+            logger.error("[%s] Token-Refresh-Fehler: %s", self.channel, exc)
+            await self._report_start_error(f"Token-Refresh-Fehler: {str(exc)[:200]}")
 
     def status(self) -> dict[str, Any]:
         return {

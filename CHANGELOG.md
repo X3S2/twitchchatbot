@@ -7,6 +7,24 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.10] — 2026-05-14 — Twitch Refresh-Token, Auth-Fehlerbehandlung, Bot-Stop-DB-Fix, Docker-Build-Fix
+
+### Neu
+- **Twitch Refresh-Token-Unterstützung** — Neues DB-Feld `bot_refresh_token_enc` (AppSettings) und `own_bot_refresh_token_enc` (Tenant); neues Alembic-Migration 003; Admin-Einstellungen und Tenant-Einstellungen haben je ein „Refresh Token"-Feld; Bot-Manager nutzt den Refresh-Token automatisch wenn das Access-Token abläuft
+- **Automatische Token-Erneuerung im Bot** — Wenn der TwitchIO-Bot-Task mit einem Auth-Fehler endet, ruft `BotInstance._try_token_refresh()` die Twitch OAuth-API auf, speichert die neuen Tokens im Backend und startet den Bot neu; erfordert dass Client-Secret und Refresh-Token konfiguriert sind
+- **`event_error`-Handler im Bot** — `TwitchBotInstance.event_error()` fängt TwitchIO-interne Fehler ab und meldet `status=error` an den Backend-Heartbeat-Endpoint
+- **`POST /internal/token-update`-Endpoint** — Neuer interner API-Endpoint damit der Bot-Manager nach einem Token-Refresh die neuen Tokens verschlüsselt im Backend speichern kann
+- **Bot-Stop setzt DB-Status direkt** — `stop_bot()`-Endpoint setzt `BotInstance.status = "offline"` direkt in der DB (statt nur den Bot-Manager anzurufen und zu hoffen); behebt Problem dass Status nach Container-Neustart als "online" hängen blieb
+
+### Geändert
+- **Intern: Config-Response um `client_secret`, `bot_refresh_token`** — `GET /internal/tenant/{id}/config` liefert jetzt auch `client_secret` und `bot_refresh_token` damit der Bot-Manager Token-Refresh ohne extra DB-Zugriff durchführen kann
+- **Stats: Tooltip-Fix** — `left: 10` statt `left: 0` als Margin; `allowEscapeViewBox={{ x: true, y: true }}` damit der Tooltip nicht im SVG-Bereich gefangen ist
+
+### Hinweis
+- Alle Änderungen aus v0.22.9 (HelpModals, Template-Variablen-Hilfe, LegalEditor-Vorlagen, BotStop-Fehleranzeige) waren aufgrund eines Docker-Build-Cache-Problems nicht deployed; wurden mit diesem Release nachgezogen (Rebuild mit `--build`-Flag)
+
+---
+
 ## [0.22.9] — 2026-05-15 — BotStop-Fehleranzeige, HelpModals komplett, Template-Variablen-Hilfe, Stats-Tooltip-Fix, Legal-Vorlagen
 
 ### Geändert
