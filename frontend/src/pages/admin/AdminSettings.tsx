@@ -32,6 +32,7 @@ interface TestCredentialsResult {
   login?: string
   expires_in?: number
   scopes?: string[]
+  refreshed?: boolean
 }
 
 async function fetchSettings(): Promise<AppSettingsData> {
@@ -183,9 +184,11 @@ export default function AdminSettings() {
           <div className="relative">
             <input type={showClientSecret ? 'text' : 'password'} value={form.client_secret} onChange={(e) => set('client_secret', e.target.value)}
               placeholder={data.client_secret_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
-            <button type="button" onClick={() => setShowClientSecret((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
-              {showClientSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
+            {form.client_secret && (
+              <button type="button" onClick={() => setShowClientSecret((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                {showClientSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            )}
           </div>
           {data.client_secret_set && !form.client_secret && (
             <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
@@ -216,9 +219,11 @@ export default function AdminSettings() {
           <div className="relative">
             <input type={showBotToken ? 'text' : 'password'} value={form.bot_token} onChange={(e) => set('bot_token', e.target.value)}
               placeholder={data.bot_token_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
-            <button type="button" onClick={() => setShowBotToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
-              {showBotToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
+            {form.bot_token && (
+              <button type="button" onClick={() => setShowBotToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                {showBotToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            )}
           </div>
           {data.bot_token_set && !form.bot_token && (
             <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
@@ -228,9 +233,11 @@ export default function AdminSettings() {
           <div className="relative">
             <input type={showBotRefreshToken ? 'text' : 'password'} value={form.bot_refresh_token} onChange={(e) => set('bot_refresh_token', e.target.value)}
               placeholder={data.bot_refresh_token_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
-            <button type="button" onClick={() => setShowBotRefreshToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
-              {showBotRefreshToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
+            {form.bot_refresh_token && (
+              <button type="button" onClick={() => setShowBotRefreshToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                {showBotRefreshToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            )}
           </div>
           <p className="text-xs text-gray-500 mt-1">{t('admin.bot_refresh_token_hint')}</p>
           {data.bot_refresh_token_set && !form.bot_refresh_token && (
@@ -247,7 +254,7 @@ export default function AdminSettings() {
             {testBotResult && (
               <span className={`text-xs font-medium ${testBotResult.ok ? 'text-green-600' : 'text-red-500'}`}>
                 {testBotResult.ok
-                  ? `✓ @${testBotResult.login} (${formatExpiry(testBotResult.expires_in)})`
+                  ? `✓ @${testBotResult.login}${testBotResult.refreshed ? ' (automatisch erneuert)' : ''} (${formatExpiry(testBotResult.expires_in)})`
                   : `✗ ${testBotResult.error || t('admin.credentials_fail')}`}
               </span>
             )}

@@ -7,6 +7,14 @@ Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/F
 
 ---
 
+## [0.22.14] — 2026-05-21 — Auge-Icon-Fix, Token-Refresh-Fehlermeldungen
+
+### Behoben
+- **Auge-Icon in Passwortfeldern nicht klickbar** — Eye/EyeOff-Toggle-Button wird jetzt nur dann angezeigt wenn das Feld einen eingetippten Wert enthält; da das Backend gespeicherte Secrets nie im Klartext zurücksendet (nur `*_set: bool`), gibt es nichts zum Einblenden solange kein neuer Wert eingegeben wird; betrifft Client Secret, Bot-Token und Bot-Refresh-Token in AdminSettings sowie Own-Bot-Token, Refresh-Token und Client Secret in TenantSettings
+- **Token-Auto-Refresh: Fehlermeldungen unspezifisch** — Bei abgelaufenem Token wurde bisher „Token ungültig oder abgelaufen" ausgegeben ohne zu erklären warum der Auto-Refresh nicht klappte; jetzt gibt es spezifische Meldungen je nach Ursache: kein Refresh-Token gespeichert, fehlende App-Credentials (Client ID/Secret), oder Refresh-API-Fehler; außerdem zeigt der Erfolgsfall jetzt `(automatisch erneuert)` in der Bestätigungsmeldung und gibt `refreshed: true` in der API-Antwort zurück; gilt für Admin-`test-bot-token` und Tenant-`test-bot-token`
+
+---
+
 ## [0.22.13] — 2026-05-21 — i18n Help-Boxen, Bot-Status-Live-Update, Token-Auto-Refresh, Chart-Cursor-Fix
 
 ### Neu

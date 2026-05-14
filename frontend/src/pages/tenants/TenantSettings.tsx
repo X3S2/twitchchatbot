@@ -63,6 +63,7 @@ interface TestTokenResult {
   error?: string
   login?: string
   expires_in?: number
+  refreshed?: boolean
 }
 
 async function testOwnBotToken(tenantId: string): Promise<TestTokenResult> {
@@ -202,9 +203,11 @@ export default function TenantSettings() {
             <div className="relative">
               <input type={showToken ? 'text' : 'password'} value={form.own_bot_token} onChange={(e) => set('own_bot_token', e.target.value)}
                 placeholder={data.own_bot_token_set ? '••••••••••••••••' : t('settings.token_placeholder')} className={`${inputCls} pr-10`} />
-              <button type="button" onClick={() => setShowToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
-                {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+              {form.own_bot_token && (
+                <button type="button" onClick={() => setShowToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                  {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              )}
             </div>
             {data.own_bot_token_set && !form.own_bot_token && (
               <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>
@@ -214,9 +217,11 @@ export default function TenantSettings() {
             <div className="relative">
               <input type={showRefreshToken ? 'text' : 'password'} value={form.own_bot_refresh_token} onChange={(e) => set('own_bot_refresh_token', e.target.value)}
                 placeholder={data.own_bot_refresh_token_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
-              <button type="button" onClick={() => setShowRefreshToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
-                {showRefreshToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+              {form.own_bot_refresh_token && (
+                <button type="button" onClick={() => setShowRefreshToken((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                  {showRefreshToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              )}
             </div>
             <p className="text-xs text-gray-500 mt-1">{t('settings.refresh_token_hint')}</p>
             {data.own_bot_refresh_token_set && !form.own_bot_refresh_token && (
@@ -233,7 +238,7 @@ export default function TenantSettings() {
               {testTokenResult && (
                 <span className={`text-xs font-medium ${testTokenResult.ok ? 'text-green-600' : 'text-red-500'}`}>
                   {testTokenResult.ok
-                    ? `✓ @${testTokenResult.login} (${formatExpiry(testTokenResult.expires_in)})`
+                    ? `✓ @${testTokenResult.login}${testTokenResult.refreshed ? ' (automatisch erneuert)' : ''} (${formatExpiry(testTokenResult.expires_in)})`
                     : `✗ ${testTokenResult.error || t('admin.credentials_fail')}`}
                 </span>
               )}
@@ -252,9 +257,11 @@ export default function TenantSettings() {
                 <div className="relative">
                   <input type={showSecret ? 'text' : 'password'} value={form.own_client_secret} onChange={(e) => set('own_client_secret', e.target.value)}
                     placeholder={data.own_client_secret_set ? '••••••••••••••••' : ''} className={`${inputCls} pr-10`} />
-                  <button type="button" onClick={() => setShowSecret((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
-                    {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                  {form.own_client_secret && (
+                    <button type="button" onClick={() => setShowSecret((v) => !v)} className="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                      {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  )}
                 </div>
                 {data.own_client_secret_set && !form.own_client_secret && (
                   <p className="flex items-center gap-1 text-xs text-green-600 mt-1"><CheckCircle className="w-3 h-3" />{t('settings.already_set')}</p>

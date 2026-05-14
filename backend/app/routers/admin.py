@@ -334,9 +334,13 @@ async def test_bot_token(db: AsyncSession = Depends(get_db)):
     bot_token = decrypt_value(app_cfg.bot_token_enc)
     validated = await validate_token(bot_token)
 
+    token_refreshed = False
     # Token abgelaufen oder ungültig → Refresh versuchen
-    if (not validated or validated.get("expires_in", 1) == 0) and \
-            app_cfg.bot_refresh_token_enc and app_cfg.client_id_enc and app_cfg.client_secret_enc:
+    if not validated or validated.get("expires_in", 1) == 0:
+        if not app_cfg.bot_refresh_token_enc:
+            return {"ok": False, "error": "Token abgelaufen – kein Refresh-Token gespeichert. Bitte neuen Token generieren."}
+        if not app_cfg.client_id_enc or not app_cfg.client_secret_enc:
+            return {"ok": False, "error": "Token abgelaufen – keine App-Credentials (Client ID/Secret) gespeichert. Bitte zuerst die Twitch-App-Daten eintragen."}
         client_id = decrypt_value(app_cfg.client_id_enc)
         client_secret = decrypt_value(app_cfg.client_secret_enc)
         refresh_tok = decrypt_value(app_cfg.bot_refresh_token_enc)
@@ -347,9 +351,12 @@ async def test_bot_token(db: AsyncSession = Depends(get_db)):
                 app_cfg.bot_refresh_token_enc = encrypt_value(refreshed["refresh_token"])
             await db.commit()
             validated = await validate_token(refreshed["access_token"])
+            token_refreshed = True
+        else:
+            return {"ok": False, "error": "Token abgelaufen – automatischer Refresh fehlgeschlagen. Bitte neuen Token generieren."}
 
     if not validated:
-        return {"ok": False, "error": "Token ungültig oder abgelaufen – bitte neuen Token generieren"}
+        return {"ok": False, "error": "Token ungültig – bitte neuen Token generieren"}
     if validated.get("expires_in", 1) == 0:
         return {"ok": False, "error": "Token abgelaufen – bitte neuen Token generieren"}
 
@@ -358,4 +365,5 @@ async def test_bot_token(db: AsyncSession = Depends(get_db)):
         "login": validated.get("login"),
         "expires_in": validated.get("expires_in"),
         "scopes": validated.get("scopes", []),
+        "refreshed": token_refreshed,
     }

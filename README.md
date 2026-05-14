@@ -256,6 +256,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | Pending-Buttons, Impressum-Fix, Token-Test, NameScan-Create, Tooltip-Fix | `v0.22.11` | ✅ Fertig | Gelber Pending-Button beim Bot-Start/Stop (Dashboard + Admin); OAuth-Token-Test-Buttons; NameScan Filter erstellen/bearbeiten; Impressum HTML-Spacing; Recharts Tooltip-Clamping |
 | Pending-Mindestdauer, Stream-LED, Token-Ablauf, Chart-Cursor-Fix | `v0.22.12` | ✅ Fertig | Pending-Button mind. 3s sichtbar; Stream-LED im Admin-Panel; Token-Ablaufzeit lesbar; Chart-Cursor-Overflow behoben |
 | i18n Help-Boxen, Bot-Status-Live-Update, Token-Auto-Refresh, Chart-Cursor-Fix | `v0.22.13` | ✅ Fertig | Alle 12 Help-Boxen i18n-fähig (DE+EN); Bot-Status wird nach Pending sofort aktualisiert; Token-Refresh bei abgelaufenem Token; Chart-Hover-Cursor deaktiviert |
+| Auge-Icon-Fix, Token-Refresh-Fehlermeldungen | `v0.22.14` | ✅ Fertig | Eye-Toggle nur bei eingetipptem Wert sichtbar; spezifische Fehlermeldungen beim Token-Refresh (kein Refresh-Token, fehlende Credentials, API-Fehler) |
 
 ---
 
