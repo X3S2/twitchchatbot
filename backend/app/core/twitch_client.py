@@ -124,10 +124,12 @@ async def refresh_user_token(
     client_id: str,
     client_secret: str,
     refresh_token: str,
-) -> dict[str, Any] | None:
+) -> dict[str, Any]:
     """
     Erneuert einen User-Access-Token via Refresh-Token.
-    Gibt {access_token, refresh_token, expires_in, scope} zurück oder None bei Fehler.
+    Gibt immer ein Dict zurück:
+    - Erfolg: {access_token, refresh_token, expires_in, ...}
+    - Fehler:  {error: "Twitch-Fehlermeldung"}
     """
     try:
         async with httpx.AsyncClient(timeout=10) as client:
@@ -140,10 +142,12 @@ async def refresh_user_token(
                     "refresh_token": refresh_token,
                 },
             )
+            data = resp.json()
             if resp.status_code != 200:
-                logger.warning("Token-Refresh fehlgeschlagen: %d %s", resp.status_code, resp.text)
-                return None
-            return resp.json()
+                msg = data.get("message") or data.get("error_description") or resp.text
+                logger.warning("Token-Refresh fehlgeschlagen: %d %s", resp.status_code, msg)
+                return {"error": msg}
+            return data
     except Exception as exc:
         logger.warning("Token-Refresh fehlgeschlagen: %s", exc)
-        return None
+        return {"error": str(exc)}

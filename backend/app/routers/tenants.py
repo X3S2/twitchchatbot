@@ -392,7 +392,7 @@ async def test_own_bot_token(
             return {"ok": False, "error": "Token abgelaufen – keine App-Credentials verfügbar. Bitte Client ID und Secret eintragen."}
         refresh_tok = decrypt_value(tenant.own_bot_refresh_token_enc)
         refreshed = await refresh_user_token(client_id, client_secret, refresh_tok)
-        if refreshed and refreshed.get("access_token"):
+        if refreshed.get("access_token"):
             tenant.own_bot_token_enc = encrypt_value(refreshed["access_token"])
             if refreshed.get("refresh_token"):
                 tenant.own_bot_refresh_token_enc = encrypt_value(refreshed["refresh_token"])
@@ -400,7 +400,8 @@ async def test_own_bot_token(
             validated = await validate_token(refreshed["access_token"])
             token_refreshed = True
         else:
-            return {"ok": False, "error": "Token abgelaufen – automatischer Refresh fehlgeschlagen. Bitte neuen Token generieren."}
+            twitch_err = refreshed.get("error") or "unbekannter Fehler"
+            return {"ok": False, "error": f"Token-Refresh fehlgeschlagen: {twitch_err}. Bitte neuen Token generieren."}
 
     if not validated:
         return {"ok": False, "error": "Token ungültig – bitte neuen Token generieren"}

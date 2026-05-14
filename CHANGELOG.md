@@ -4,6 +4,20 @@ Alle wesentlichen Änderungen an diesem Projekt werden in dieser Datei dokumenti
 
 Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 Versionierung: `X.Y.Z` — X: nur auf Anweisung, Y: Major-Features, Z: Patches/Fixes
+Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
+
+---
+
+## [0.22.15] — 2026-05-22 — In-App Bot-Token OAuth-Generator
+
+### Neu
+- **Bot-Token in-App generieren** — Neuer Button „Bot-Token generieren" in AdminSettings startet einen Twitch OAuth-Flow direkt aus der App heraus; der Admin loggt sich als Bot-Account ein und die generierten Tokens (access + refresh) werden sofort in der Datenbank gespeichert; da die Tokens dabei mit den eigenen App-Credentials erzeugt werden, funktioniert der automatische Refresh zuverlässig — das bisherige Problem mit twitchtokengenerator.com-Tokens (die an fremde App-Credentials gebunden waren) ist damit behoben
+- **Twitchname automatisch befüllt** — Nach erfolgreichem OAuth wird der Bot-Accountname via Twitch-Validate-API ermittelt und im Feld `bot_username` gespeichert
+- **Bot-OAuth Callback** — `GET /auth/callback` erkennt Bot-OAuth-States (`bot_` prefix) und delegiert an den neuen `_handle_bot_token_callback()` Helper; der User-Login-Flow läuft unverändert weiter
+- **Erfolg/Fehler-Benachrichtigung** — Nach Rückkehr aus dem OAuth-Flow wird eine temporäre Benachrichtigung angezeigt (grün bei Erfolg, rot bei Fehler); die Seite aktualisiert sich automatisch
+
+### Geändert
+- **Token-Test-Button** — Zeigt jetzt auch bei nicht vorhandenem Token den OAuth-Button an; bei vorhandenem Token erscheinen Test- und OAuth-Button nebeneinander
 
 ---
 
