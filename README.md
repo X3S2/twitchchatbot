@@ -3,7 +3,7 @@
   <h1>TwitchChatBot (TCB)</h1>
   <p>Mandantenfähige Twitch-Chat-Moderationsplattform</p>
 
-  ![Version](https://img.shields.io/badge/version-0.22.20-blue)
+  ![Version](https://img.shields.io/badge/version-0.22.21-blue)
   ![License](https://img.shields.io/badge/license-private-red)
   ![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)
   ![Python](https://img.shields.io/badge/python-3.12-3776AB?logo=python)
@@ -272,6 +272,7 @@ APP_PUBLIC_URL=https://deine-domain.de
 | Admin-Rollenvergabe in Benutzerverwaltung | `v0.22.18` | ✅ Fertig | Admins können andere Nutzer zum Admin ernennen oder degradieren; Self-Demotion-Schutz; Mindestens-1-Admin-Schutz |
 | Streamer-Bot-OAuth, Live-Chat, Command-Save-Fix | `v0.22.19` | ✅ Fertig | Bot-Token für Streamer per Klick generieren/erneuern; Live-Chat im Tenant-Dashboard; Mapping-Bug bei Commands behoben (Speichern funktioniert wieder) |
 | Mod-Suche-Fix, Command-Toggle, Live-Chat-Verlauf | `v0.22.20` | ✅ Fertig | Twitch-User-Suche mit Twitch-Fallback; Commands aktiv/deaktivierbar; Chat-Verlauf (10–500, Default 100) bleibt nach Reload erhalten; Command-Ausführung robuster |
+| Tenant-Sichtbarkeit, Broadcaster-Command-Fix, Commands-UI | `v0.22.21` | ✅ Fertig | Streamer sehen jetzt auch Channels mit aktivem Mod-Zugang; Broadcaster-Commands triggern wieder Responses; Commands-Status als Filter-ähnlicher Schieberegler und Status-Spalte vor Name |
 
 </details>
 

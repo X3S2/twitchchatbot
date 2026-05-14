@@ -32,7 +32,7 @@ async def _check_access(tenant_id: str, user: User, db: AsyncSession) -> None:
         raise HTTPException(status_code=403)
 
 
-PERMISSION_LEVELS = ["everyone", "subscriber", "vip", "moderator", "editor", "owner", "admin"]
+PERMISSION_LEVELS = ["everyone", "subscriber", "vip", "moderator", "broadcaster", "editor", "owner", "admin"]
 ACTION_TYPES = [
     "respond", "ban", "timeout", "delete", "bot_stop", "bot_restart", "bot_start", "unban_user", "test_mode_toggle",
     # Legacy aliases

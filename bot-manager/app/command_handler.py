@@ -100,6 +100,8 @@ def _has_permission(
 ) -> bool:
     if is_admin or is_owner:
         return True
+    if required == "broadcaster":
+        required = "owner"
     if required == "admin":
         return is_admin
     if required == "owner":

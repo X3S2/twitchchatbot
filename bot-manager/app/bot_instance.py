@@ -159,6 +159,8 @@ class TwitchBotInstance(twitch_commands.Bot):
                 message_text=text, user_id=user_id, username=username,
                 user_roles=user_roles, commands_config=self.config.get("commands", []),
                 cooldown_store=cooldowns,
+                is_owner=is_owner,
+                is_admin=False,
             )
             if response:
                 await message.channel.send(response)

@@ -8,6 +8,19 @@ Datum: Immer das aktuelle Datum wird beim Eintrag eingefügt.
 
 ---
 
+## [0.22.21] — 2026-05-14 — Tenant-Sichtbarkeit, Broadcaster-Command-Fix, Commands-UI-Schieberegler
+
+### Behoben
+- **Tenant-Liste für Streamer/Mods** — Nicht-Admin-Users sehen jetzt neben eigenen Channels auch aktive Moderator-Zugänge in der Channel-Liste
+- **Broadcaster-Commands triggern wieder Response** — Owner-Status wird beim Command-Handling korrekt übergeben; Permission-Check mappt `broadcaster` auf Owner-Rechte
+- **Command-Permission-Level konsistent** — Backend akzeptiert `broadcaster` als gültiges Command-Permission-Level
+
+### Geändert
+- **Commands-Tabelle UX** — Status-Spalte steht jetzt vor dem Befehlsnamen
+- **Commands-Status als Schieberegler** — Aktiv/Deaktiviert nutzt jetzt den gleichen Toggle-Stil wie Chat-/Name-Filter (`p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded`)
+
+---
+
 ## [0.22.20] — 2026-05-14 — Mod-Suche-Fix, Command-Ausführung-Fix, Command-Toggle, Live-Chat-Verlauf
 
 ### Neu

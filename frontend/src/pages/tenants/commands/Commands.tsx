@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { Plus, Trash2, Pencil, Info, X, HelpCircle } from 'lucide-react'
+import { Plus, Trash2, Pencil, Info, X, HelpCircle, ToggleLeft, ToggleRight } from 'lucide-react'
 
 const ACTION_INFO: Record<string, string> = {
   respond: 'Sendet eine Chat-Nachricht als Antwort. Im Template können {user} (Aufrufer) und {args} (Parameter) genutzt werden.',
@@ -237,14 +237,17 @@ export default function Commands() {
               <input type="number" value={form.cooldown_user_seconds} onChange={(e) => setForm((f) => ({ ...f, cooldown_user_seconds: Number(e.target.value) }))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent text-sm" />
             </div>
             <div className="sm:col-span-2">
-              <label className="inline-flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.enabled}
-                  onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
-                  className="w-4 h-4 accent-purple-600"
-                />
-                Befehl aktiviert
+              <label className="inline-flex items-center gap-2 text-sm select-none">
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, enabled: !f.enabled }))}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                  aria-pressed={form.enabled}
+                  aria-label="Befehl aktivieren/deaktivieren"
+                >
+                  {form.enabled ? <ToggleRight className="w-5 h-5 text-green-500" /> : <ToggleLeft className="w-5 h-5 text-gray-400" />}
+                </button>
+                <span>{form.enabled ? 'Befehl aktiviert' : 'Befehl deaktiviert'}</span>
               </label>
             </div>
           </div>
@@ -264,10 +267,10 @@ export default function Commands() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500 uppercase">
+                <th className="px-4 py-2 text-left">Status</th>
                 <th className="px-4 py-2 text-left">{t('commands.name')}</th>
                 <th className="px-4 py-2 text-left">{t('commands.permission')}</th>
                 <th className="px-4 py-2 text-left">{t('commands.action')}</th>
-                <th className="px-4 py-2 text-left">Status</th>
                 <th className="px-4 py-2 text-left">{t('commands.cooldown_global')}</th>
                 <th className="px-4 py-2"></th>
               </tr>
@@ -275,17 +278,19 @@ export default function Commands() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {commands.map((cmd) => (
                 <tr key={cmd.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-4 py-3 font-mono font-medium">{cmd.name}</td>
-                  <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs ${permBadge(cmd.permission_level)}`}>{cmd.permission_level}</span></td>
-                  <td className="px-4 py-3 text-gray-500">{cmd.action_type}</td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => toggleEnabledMut.mutate(cmd)}
-                      className={`px-2 py-1 rounded text-xs border ${cmd.enabled ? 'border-green-300 text-green-700 bg-green-50' : 'border-gray-300 text-gray-500 bg-gray-50'}`}
+                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
+                      aria-pressed={cmd.enabled}
+                      aria-label="Befehl aktivieren/deaktivieren"
                     >
-                      {cmd.enabled ? 'Aktiv' : 'Deaktiviert'}
+                      {cmd.enabled ? <ToggleRight className="w-5 h-5 text-green-500" /> : <ToggleLeft className="w-5 h-5 text-gray-400" />}
                     </button>
                   </td>
+                  <td className="px-4 py-3 font-mono font-medium">{cmd.name}</td>
+                  <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs ${permBadge(cmd.permission_level)}`}>{cmd.permission_level}</span></td>
+                  <td className="px-4 py-3 text-gray-500">{cmd.action_type}</td>
                   <td className="px-4 py-3 text-gray-500">{cmd.cooldown_global_seconds}s</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">

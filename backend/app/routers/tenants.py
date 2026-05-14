@@ -67,9 +67,22 @@ async def list_tenants(
     if current_user.role == "admin":
         result = await db.execute(select(Tenant).order_by(desc(Tenant.created_at)))
     else:
-        # eigene Tenants + Moderator-Zugänge
+        # eigene Tenants + aktive Moderator-Zugänge
         own = await db.execute(select(Tenant).where(Tenant.user_id == current_user.id))
-        return [_tenant_dict(t) for t in own.scalars().all()]
+        mod = await db.execute(
+            select(Tenant)
+            .join(TenantModerator, TenantModerator.tenant_id == Tenant.id)
+            .where(
+                TenantModerator.twitch_user_id == current_user.twitch_id,
+                TenantModerator.revoked_at.is_(None),
+            )
+        )
+        combined: dict[str, Tenant] = {}
+        for t in own.scalars().all():
+            combined[str(t.id)] = t
+        for t in mod.scalars().all():
+            combined[str(t.id)] = t
+        return [_tenant_dict(t) for t in combined.values()]
     return [_tenant_dict(t) for t in result.scalars().all()]
 
 
